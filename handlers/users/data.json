@@ -1,0 +1,843 @@
+[
+    {
+        "direction_id": 2,
+        "direction_name_uz": "Buxgalteriya hisobi va audit",
+        "direction_name_ru": "Бухгалтерский учет и аудит",
+        "direction_name_en": "Accounting and auditing",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 2,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 2,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 18000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 18000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 20000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 20000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 2,
+                "education_type_name_en": "Part time",
+                "education_type_name_ru": "Заочное",
+                "education_type_name_uz": "Sirtqi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 3,
+        "direction_name_uz": "Boshlang‘ich ta’lim",
+        "direction_name_ru": "Начальное образование",
+        "direction_name_en": "Initial education",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 12000000,
+                "education_type_id": 2,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 12000000,
+                "education_type_id": 2,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 2,
+                "education_type_name_en": "Part time",
+                "education_type_name_ru": "Заочное",
+                "education_type_name_uz": "Sirtqi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 4,
+        "direction_name_uz": "Filologiya va tillarni o‘qitish: o‘zbek tili",
+        "direction_name_ru": "Филология и преподавание языков: узбекский язык",
+        "direction_name_en": "Phonology and teaching languages: Uzbek language",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 19000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 19000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 5,
+        "direction_name_uz": "Filologiya va tillarni o‘qitish: ingliz tili",
+        "direction_name_ru": "Филология и преподавание языков: английский",
+        "direction_name_en": "Philology and Teaching Languages: English Language",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 19000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 19000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 6,
+        "direction_name_uz": " Filologiya va tillarni o‘qitish: rus tili",
+        "direction_name_ru": "Филология и преподавание языков: русский язык",
+        "direction_name_en": "Philology and Language Teaching: Russian language",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 19000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 19000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 7,
+        "direction_name_uz": "Filologiya va tillarni o‘qitish: arab tili",
+        "direction_name_ru": "Филология и преподавание языков: арабский",
+        "direction_name_en": "Philology and Teaching Languages: Arabic Language",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 19000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 19000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 8,
+        "direction_name_uz": "Iqtisodiyot (tarmoqlar va sohalar bo‘yicha)",
+        "direction_name_ru": "Экономика (по отраслям и секторам)",
+        "direction_name_en": "Economy (by sectors and industries)",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 2,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 2,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 18000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 18000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 20000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 20000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 2,
+                "education_type_name_en": "Part time",
+                "education_type_name_ru": "Заочное",
+                "education_type_name_uz": "Sirtqi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 9,
+        "direction_name_uz": "Moliya va moliyaviy texnologiyalar",
+        "direction_name_ru": "Финансы и финансовые технологии",
+        "direction_name_en": "Finance and financial technologies",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 2,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 2,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 18000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 18000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 20000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 20000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 2,
+                "education_type_name_en": "Part time",
+                "education_type_name_ru": "Заочное",
+                "education_type_name_uz": "Sirtqi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 10,
+        "direction_name_uz": "Maktabgacha ta’lim",
+        "direction_name_ru": "Дошкольное образование",
+        "direction_name_en": "Secondary education",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 12000000,
+                "education_type_id": 2,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 12000000,
+                "education_type_id": 2,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 2,
+                "education_type_name_en": "Part time",
+                "education_type_name_ru": "Заочное",
+                "education_type_name_uz": "Sirtqi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 11,
+        "direction_name_uz": "Kompyuter ilmlari va dasturlash texnologiyalari (yo‘nalishlar bo‘yicha)",
+        "direction_name_ru": "Информатика и технологии программирования (по направлениям)",
+        "direction_name_en": "Computer Science and Programming Technologies (by specializations)",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 2,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 2,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 18000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 18000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 20000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 20000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 2,
+                "education_type_name_en": "Part time",
+                "education_type_name_ru": "Заочное",
+                "education_type_name_uz": "Sirtqi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    },
+    {
+        "direction_id": 12,
+        "direction_name_uz": "Psixologiya (Amaliy psixologiya)",
+        "direction_name_ru": "Психология (прикладная психология)",
+        "direction_name_en": "Psychology (Applied psychology)",
+        "degree_id": 1,
+        "degree_name_uz": "Bakalavr",
+        "degree_name_ru": "Степень бакалавра",
+        "degree_name_en": "Bachelor's degree",
+        "tuition_fees": [
+            {
+                "tuition_fee": 12000000,
+                "education_type_id": 2,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 12000000,
+                "education_type_id": 2,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 3,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 15000000,
+                "education_type_id": 3,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 1,
+                "education_language_id": 1,
+                "is_work_experience_required": false
+            },
+            {
+                "tuition_fee": 17000000,
+                "education_type_id": 1,
+                "education_language_id": 3,
+                "is_work_experience_required": false
+            }
+        ],
+        "education_languages": [
+            {
+                "education_language_id": 1,
+                "education_language_name_en": "Uzbek",
+                "education_language_name_ru": "Узбекский язык",
+                "education_language_name_uz": "O'zbek tili"
+            },
+            {
+                "education_language_id": 3,
+                "education_language_name_en": "Russian",
+                "education_language_name_ru": "Русский язык",
+                "education_language_name_uz": "Rus tili"
+            }
+        ],
+        "education_types": [
+            {
+                "education_type_id": 1,
+                "education_type_name_en": "Full time",
+                "education_type_name_ru": "Очное",
+                "education_type_name_uz": "Kunduzgi"
+            },
+            {
+                "education_type_id": 2,
+                "education_type_name_en": "Part time",
+                "education_type_name_ru": "Заочное",
+                "education_type_name_uz": "Sirtqi"
+            },
+            {
+                "education_type_id": 3,
+                "education_type_name_en": "Evening",
+                "education_type_name_ru": "Вечернее",
+                "education_type_name_uz": "Kechki"
+            }
+        ],
+        "exam_subjects": {}
+    }
+]

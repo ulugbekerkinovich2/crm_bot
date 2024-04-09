@@ -1,0 +1,982 @@
+from aiogram import types
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Command
+from utils import send_req
+from loader import dp
+from states.personalData import PersonalData, EducationData
+from aiogram.utils.exceptions import Throttled
+from data.config import throttling_time, domain_name
+from pprint import pprint
+from datetime import datetime
+from handlers.users import collect_data, upload
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton,ReplyKeyboardRemove
+import os
+import aiofiles.os
+from icecream import ic
+import json
+from keyboards.default.registerKeyBoardButton import yes_no
+saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
+
+
+@dp.message_handler(text="🇺🇿O'zbek tili")
+async def uz_lang(message: types.Message, state: FSMContext):
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+    keyboard.add(button_phone)
+    await message.answer("☎️ <b>Telefon raqamingizni yuboring</b>\n<i>Namuna: 998991234567</i>", 
+                         parse_mode="HTML",reply_markup=keyboard)
+    await PersonalData.phone.set()
+
+
+@dp.message_handler(state=PersonalData.phone, content_types=types.ContentTypes.CONTACT | types.ContentTypes.TEXT)
+async def phone_contact_received(message: types.Message, state: FSMContext):
+    # await message.answer(message.json())
+    # print(message)
+    # print(message.text)
+    try:
+        contact = message.contact
+        phone_num = contact.phone_number
+        print('auto:', phone_num)
+    except AttributeError:
+        phone_num = None
+        contact = None
+    print('next')
+    try:
+        custom_writened_phone = message.text
+        print(custom_writened_phone)
+    except AttributeError:
+        custom_writened_phone = None
+    ic("custom_writened_phone", custom_writened_phone)
+    if contact is not None and phone_num is not None:
+        custom_phone = f'+{phone_num}'
+        print(phone_num)
+        if len(phone_num) == 12:
+            ic(phone_num)
+            check_user = send_req.check_number(custom_phone)
+            ic('check_user', check_user.json(), check_user.text)
+            # ic(check_user)
+            if check_user.text == 'true':
+                ic(check_user.text)
+                await state.update_data(phone=phone_num)
+                user_login = send_req.user_login(custom_phone)
+                ic('user_login: ',user_login.json())
+                ic('user_login status: ',user_login.status_code)
+                if user_login.status_code == 200:
+                    ic('user_login status',user_login.status_code)
+                    remove_keyboard = types.ReplyKeyboardRemove()
+                    await message.answer("🟢 <b>Telefon raqamingiz qabul qilindi.</b> Telefon raqamingizga yuborilgan kodni kiriting",parse_mode='HTML', reply_markup=remove_keyboard)
+                    await PersonalData.secret_code.set()
+                else:
+                    await message.answer("severda xatolik 63")
+            # ic(check_user)
+            elif str(check_user.text) == 'false':
+                ic('check_user', check_user.text)
+                await state.update_data(phone_num)
+                user_register = send_req.user_register(custom_phone)
+                remove_keyboard = types.ReplyKeyboardRemove()
+                ic('user_register: ',user_register.status_code)
+                if user_register.status_code == 201:
+                    await message.answer("🟢Telefon raqamingiz qabul qilindi. Telefon raqamingizga yuborilgan kodni kiriting", reply_markup=remove_keyboard)
+                    await PersonalData.secret_code.set()
+
+    elif custom_writened_phone is not None:
+        custom_writened_phone = custom_writened_phone.strip()
+        print('custom_writened_phone: ',custom_writened_phone)
+        status_while = True
+        while status_while:
+            print('while ishladi')
+            phone_num = custom_writened_phone.strip()
+            if len(phone_num) != 12 or not phone_num.isdigit():
+                await message.answer("🔴Telefon raqam no\'to\'g\'ri kiritildi!")
+                response_msg = await dp.bot.send_message(message.chat.id, "Iltimos, to'g'ri formatda telefon raqamni kiriting.")
+                response = await dp.bot.wait_for("message")
+                custom_writened_phone = message.text.strip() if response.text else None
+                if custom_writened_phone:
+                    phone_num = custom_writened_phone
+                else:
+                    break
+
+            elif len(phone_num) == 12:
+                # print('keldi')
+                status_while = False
+                custom_phone = f'+{phone_num}'
+                check_user = send_req.check_number(custom_phone)
+                if str(check_user.json()) == 'True':
+                    await state.update_data(phone=phone_num)
+                    user_login = send_req.user_login(custom_phone)
+                    if user_login.status_code == 200:
+                        remove_keyboard_ = types.ReplyKeyboardRemove()
+                        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                        reset_pass_button = types.KeyboardButton(text='Kodni qayta yuborish')
+                        keyboard.add(reset_pass_button)
+                        await message.answer("🟢Telefon raqamingiz qabul qilindi.", reply_markup=remove_keyboard_)
+                        await message.answer(" Telefon raqamingizga yuborilgan kodni yuboring", reply_markup=reset_pass_button)
+                        await PersonalData.secret_code.set()
+                    else:
+                        await message.answer("severda xatolik 107")
+
+                if str(check_user.json()) == 'False':
+                    await state.update_data(phone=phone_num)
+                    user_register = send_req.user_register(custom_phone)
+                    # print('user_register', user_register.json())
+                    if user_register.status_code == 201:
+                        remove_keyboard_ = types.ReplyKeyboardRemove()
+                        # keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                        # reset_pass_button = types.KeyboardButton(text='reset_password')
+                        # keyboard.add(reset_pass_button)
+                        await message.answer("🟢Telefon raqamingiz qabul qilindi.", reply_markup=remove_keyboard_)
+                        await message.answer("Telefon raqamingizga yuborilgan kodni yuboring")
+                        await PersonalData.secret_code.set()
+                else:
+                    await message.answer("severda xatolik 120")
+
+
+@dp.message_handler(state=PersonalData.secret_code)
+async def secret_code(message: types.Message, state: FSMContext):
+    # print('secret_code', secret_code)
+    # data_user = await state.get_data()
+    # token = data_user.get('token')
+    status_while = True
+    while status_while:
+        secret_code = message.text
+        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        reset_pass_button = types.KeyboardButton(text='Kodni qayta yuborish')
+        keyboard.add(reset_pass_button)
+        # print(type(secret_code), 'secret code', secret_code)
+        if len(secret_code) == 6 and secret_code.isdigit():
+            data = await state.get_data()
+            phone_number = f"+{data.get('phone')}"
+            # print("phone->", phone_number)
+            response_ = send_req.user_verify(int(secret_code), phone_number)
+            # print('response', response_.json())
+            if response_.status_code == 200:
+                data_res = response_.json()
+                new_token = data_res.get('token')
+                # print("\ndata_res", data_res, '\n')
+                await state.update_data(token=data_res.get('token'))
+                await state.update_data(last_name=data_res.get('last_name'))
+                await state.update_data(first_name=data_res.get('first_name'))
+                await state.update_data(avatar=data_res.get('avatar'))
+                await state.update_data(haveApplicationForm=data_res.get('haveApplicationForm'))
+                await state.update_data(haveApplied=data_res.get('haveApplied'))
+                await state.update_data(haveEducation=data_res.get('haveEducation'))
+                status_while = False
+                # await state.update_data(**data_to_update)
+            
+            elif response_.status_code == 404 or response_.status_code == 400 or response_.status_code == 410:
+                # print('\nres',response_.json(), '\n')
+                await message.answer("🔴 Tasdiqlash kodi noto'g'ri kiritildi")
+                response_msg = await dp.bot.send_message(message.chat.id, "Tasdiqlash kodini qayta kiriting", reply_markup=reset_pass_button)
+                response = await dp.bot.wait_for("message")
+                break
+        else:
+            await message.answer("🔴Tasdiqlash kodi noto'g'ri kiritildi", reply_markup=reset_pass_button)
+            break
+        status_while = False
+        remove_keyboard_ = types.ReplyKeyboardRemove()
+        await state.update_data(secret_code=secret_code)
+        await message.answer("🟢<b>Kod qabul qilindi</b>", parse_mode='HTML')
+        enter_button = ReplyKeyboardMarkup(
+        keyboard= [
+            [
+                KeyboardButton(text='Davom etish'),
+            ]
+        ],
+        resize_keyboard=True)
+        await message.answer("Ma'lumotlar saqlandi", reply_markup=enter_button)
+    serial_number = 'serial_number'
+    extra_phone_number = 'extra_phone'
+    data = await state.get_data()
+    new_token_ = data.get('token')
+    extra_phone_res = collect_data.collect_me_data(token=new_token_, field_name=extra_phone_number)
+    serial_number_res = collect_data.collect_me_data(token=new_token_,field_name=serial_number)
+    data_me_ = send_req.application_forms_me(new_token_)
+    data_me = data_me_.json()
+    haveApplicationForm = str(data_me.get('haveApplicationForm'))
+    haveApplied = str(data_me.get('haveApplied'))
+    haveEducation = str(data_me.get('haveEducation'))
+    ic(data_me)
+
+    # if haveApplicationForm == 'false':
+    #     await PersonalData.document.set()
+    if data_me.get('statusCode') == 404:
+        await message.answer("Passport seriyangizni yuboring\nNamuna: AB1234567", reply_markup=remove_keyboard_)
+        await PersonalData.document.set()
+    elif haveApplicationForm == 'true' and haveEducation == 'false' and haveApplied == 'false':
+        await EducationData.education_id.set()
+    elif haveApplicationForm == 'true' and haveEducation == 'true' and haveApplied == 'false':
+        await EducationData.degree_id.set()
+    elif haveApplicationForm == 'true' and haveEducation == 'true' and haveApplied == 'true':
+        await EducationData.menu.set()
+    
+
+    # print('serial_number181: %s' % serial_number_res)
+    # if serial_number_res is None or serial_number_res is False or extra_phone_res is None or extra_phone_res is False:
+    # if 
+    #     # print('serial_number yoq ekan!!!')
+    #     await message.answer("Passport seriyangizni yuboring\nNamuna: AB1234567", reply_markup=remove_keyboard_)
+    #     await PersonalData.document.set()
+    # elif serial_number_res is not None and serial_number_res is not False and extra_phone_res is not None and extra_phone_res is not False:
+
+
+    #     if haveEducation == "true":
+    #         await EducationData.education_id.set()
+    #     else:
+    #         print('passport seriya Database da bor ekan')
+    #         await message.answer("Ta'lim ma'lumotlarini")
+    #         await EducationData.education_id.set()
+
+@dp.message_handler(state=PersonalData.document)
+async def document(message: types.Message, state: FSMContext):
+    # await message.answer('...')
+    # print('document')
+    # data_user = await state.get_data()
+    # token = data_user.get('token')
+    # serial_number = 'serial_number'
+    # pprint(collect_data.collect_me_data(token))
+    # serial_number_res = collect_data.collect_me_data(token=token,field_name=serial_number)
+    # print('serial_number topildi:', serial_number_res)
+    # if serial_number_res is None or serial_number_res == False:
+    document = message.text.strip()
+    document_serial = str(document[:2]).upper().strip()
+    document_number = document[2:]
+    status_while = True
+    while status_while:
+        if len(document_serial) == 2 and document_serial.isalpha() and len(document_number) == 7 and document_number.isdigit():
+            formatted_document = f'{document_serial}{document_number}'
+            await state.update_data(document=formatted_document)
+            status_while = False
+            await PersonalData.birth_date.set()
+
+        elif len(document_serial) == 2 and not document_serial.isalpha():
+            await message.answer("🔴Passport seriya noto'g'ri kiritildi")
+            response_msg = await dp.bot.send_message(message.chat.id, "Passport seriyasi 2 ta harfdan  va 7 raqamdan iborat bo'lishi kerak.\nQayta passport seriyangizni kiriting")
+            response = await dp.bot.wait_for("message")
+            custom_writened_passport_serial = message.text.strip() if response.text else None
+            if custom_writened_passport_serial:
+                document_serial = custom_writened_passport_serial
+            else:
+                break
+        elif len(document_number) == 7 and not document_number.isdigit():
+            await message.answer("🔴Passport seriya noto'g'ri kiritildi")
+            response_msg = await dp.bot.send_message(message.chat.id, "Passport seriyasi 2 ta harfdan va 7 raqamdan iborat bo'lishi kerak.\nQayta passport seriyangizni kiriting")
+            response = await dp.bot.wait_for("message")
+            custom_writened_document_number = message.text.strip() if response.text else None
+            if custom_writened_document_number:
+                document_number = custom_writened_document_number
+            else:
+                break
+        elif len(document_serial) == 2 and document_serial.isalpha() and len(document_number) != 7:
+            await message.answer("🔴Passport seriya noto'g'ri kiritildi")
+            reponse_msg = await dp.bot.send_message(message.chat.id,"Passport seriyasi 2 ta harfdan va 7 raqamdan iborat bo'lishi kerak.\nQayta passport seriyangizni kiriting")
+            response = await dp.bot.wait_for("message")
+            custom_writened_document_serial = message.text.strip() if response.text else None
+            if custom_writened_document_serial:
+                document_serial = custom_writened_document_serial
+            else:
+                break
+    await message.answer("🟢Passport seriyasi qabul qilindi")
+    await message.answer('Tug\'ilgan kuningingizni kiriting quidagi formatda\nKun.Oy.Yil\n\nNamuna: 01.03.2005')
+    await PersonalData.birth_date.set()
+
+
+@dp.message_handler(state=PersonalData.birth_date)
+async def birth_date(message: types.Message, state: FSMContext):
+    # await message.answer('....')
+    print('birth date')
+    # data_user = await state.get_data()
+    # token = data_user.get('token')
+    # birth_date = 'birth_date'
+    # birth_date_res = collect_data.collect_me_data(token=token,field_name=birth_date)
+    # print('birth_date_res topildi->', birth_date_res)
+    # if birth_date_res is None or birth_date_res == False:
+    birth_date = message.text.strip()
+    # Check if the birth date format is valid
+    birth_date_parts = birth_date.split('.') if birth_date else None
+    # print('birth_date', birth_date_parts)
+    if not birth_date_parts or len(birth_date_parts) != 3:
+        await message.answer("🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: Kun.Oy.Yil\nTug'ilgan kunni qayta kiriting")
+        return
+
+    check_day, check_month, check_year = birth_date_parts
+    if not (check_day.isdigit() and check_month.isdigit() and check_year.isdigit()):
+        await message.answer("🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: Kun.Oy.Yil\nTug'ilgan kunni qayta kiriting")
+        return
+
+    day, month, year = map(int, birth_date_parts)
+    # print(day, month, year)
+    if not (1 <= day <= 31 and 1 <= month <= 12 and 2024 > year > 1990):
+        await message.answer("🔴 Tug'ilgan kun noto'g'ri kiritildi. Kiritilgan sana tog'ri emas.\nTug'ilgan kunni qayta kiriting")
+        return
+
+    await state.update_data(birth_date=birth_date)
+    await message.answer('🟢Tu\'gilgan kuningiz qabul qilindi. Ma\'lumotlaringiz muvaffaqiyatli saqlandi.')
+    formatted_birth_date = f'{year}-{month}-{day}'
+    await state.update_data(formatted_birth_date=formatted_birth_date)
+    await message.answer('Siz bilan aloqaga chiqish uchun qo\'shimcha telefon raqam kiriting\n\nNamuna: +998991234567')
+    await PersonalData.info.set()
+
+    # else:
+    #     PersonalData.info.set()
+
+@dp.message_handler(state=PersonalData.info)
+async def info(message: types.Message, state: FSMContext):
+    
+    # await message.answer('Q\'shimcha nomeringiz qidirilmoqda')
+    # print('extra_phone searching...')
+    # data_user = await state.get_data()
+    # token = data_user.get('token')
+    # extra_phone = 'extra_phone'
+    # extra_phone_res = collect_data.collect_me_data(token=token,field_name=extra_phone)
+    # print('extra_phone_res->', extra_phone, extra_phone_res)
+
+    # if extra_phone_res is None or extra_phone_res == False:
+    extra_phone = message.text.strip()
+    # print('extra_phone', extra_phone)
+    data = await state.get_data()
+    # print('\nstate ga saqlanganlar-->\n', data)
+    formatted_birth_date = data.get('formatted_birth_date')
+    document = data.get('document')
+    token = data.get('token')
+    # first_name = data.get('first_name')
+    # last_name = data.get('last_name')
+    phone = data.get('phone')
+    print(formatted_birth_date)
+    date_obj = datetime.strptime(formatted_birth_date, "%Y-%m-%d")
+    formatted_date_str = date_obj.strftime("%Y-%m-%d")
+
+    print('-->',formatted_date_str,'\n\n',document,'\n\n')
+    response = send_req.application_form_info(formatted_date_str,document,token)
+    pprint(response.json())
+    data_res = response.json().get('passport', {})
+# Default values are used where data might not be present
+    first_name = data_res.get('first_name', '')
+    last_name = data_res.get('last_name', '')
+    application_id = data_res.get('applicant_id', '')  # Note the key is 'applicant_id' based on your response
+    third_name = data_res.get('third_name', '')
+    document = data_res.get('document') if isinstance(data_res.get('document'), dict) else {}
+
+
+    birth_country = data_res.get('birth_country', '')
+    birth_country_id = data_res.get('birth_country_id', 0)
+    birth_date = data_res.get('birth_date', '')
+    birth_place = data_res.get('birth_place', '')
+    citizenship = data_res.get('citizenship', '')
+    gender = data_res.get('gender', '')
+    photo = data_res.get('photo', '')
+    pin = data_res.get('pin', [None])[0]
+    # document_info = data_res.get('document') if isinstance(data_res.get('document'), dict) else {}
+    docgiveplace = document.get('docgiveplace', '')
+    docgiveplaceid = document.get('docgiveplaceid', 0)
+    datebegin = document.get('datebegin', '')
+    dateend = document.get('dateend', '')
+    passort_serial = document.get('document')
+    src = 'manually'
+    user_datas = {
+        "application_id": application_id,
+        "birth_country": birth_country,
+        "birth_country_id": birth_country_id,
+        "birth_date": birth_date,
+        "birth_place": birth_place,
+        "citizenship": citizenship,
+        "gender": gender,
+        "photo": photo,
+        "pin": pin,
+        "document": document,
+        "docgiveplace": docgiveplace,
+        "docgiveplaceid": docgiveplaceid,
+        "datebegin": datebegin,
+        "dateend": dateend,
+        "first_name": first_name,
+        "last_name": last_name,
+        "third_name": third_name,
+    }
+    pprint(user_datas)
+    await state.update_data(**user_datas)
+    print('shu doc info', passort_serial)
+    "def application_form(token, src, district_id, education_id, file_vs_format, institution_name, region_id):"
+    response_application_form = send_req.application_form(token,
+                                                        birth_date,
+                                                        birth_place,
+                                                        citizenship,
+                                                        extra_phone,
+                                                        first_name,
+                                                        gender,
+                                                        last_name,
+                                                        phone,
+                                                        photo,
+                                                        pin,
+                                                        passort_serial,
+                                                        src,
+                                                        third_name
+                                                        )
+    pprint(response_application_form.json())
+    print('keldi2022')
+    data_me = collect_data.collect_me_data(token, field_name=None)
+    print(data_me)
+    if response_application_form.status_code == 201:
+        print('keldi app formdan', response_application_form.status_code)
+        application_data_res = response_application_form.json()
+        application_id = application_data_res.get('applicant_id', '')
+        application_src = application_data_res.get('application_src', '')
+        user_education_src = application_data_res.get('user_education_src', '')
+        which_level_need = application_data_res.get('which_level_need', '')
+        country_id = application_data_res.get('country_id', '')
+        country_name_uz = application_data_res.get('country_name_uz', '')
+        country_name_ru = application_data_res.get('country_name_ru', '')
+        country_name_en = application_data_res.get('country_name_ru', '')
+        region_id = application_data_res.get('region_id', '')
+        region_name_uz = application_data_res.get('region_name_uz', '')
+        region_name_ru = application_data_res.get('region_name_ru', '')
+        region_name_en = application_data_res.get('region_name_en', '')
+        district_id = application_data_res.get('district_id', '')
+        district_name_uz = application_data_res.get('district_name_uz', '')
+        district_name_ru = application_data_res.get('district_name_ru', '')
+        district_name_en = application_data_res.get('district_name_en', '')
+        address = application_data_res.get('address','')
+        father_name = application_data_res.get('father_name', '')
+        father_phone = application_data_res.get('father_phone', '')
+        mother_name = application_data_res.get('mother_name', '')
+        pinfl_birth_country = application_data_res.get('pinfl_birth_country', '')
+        pinfl_birth_country_id = application_data_res.get('pinfl_birth_country_id', '')
+        created_at = application_data_res.get('created_at', '')
+        pinfl_user_education = application_data_res.get('pinfl_user_education', '')
+        user_education = application_data_res.get('user_education', '')
+        certifications = application_data_res.get('certifications', [])
+        data_obj_applications = {
+            'application_src': application_src,
+            'which_level_need': which_level_need,
+            'user_education_src': user_education_src,
+            'country_id': country_id,
+            'country_name_uz': country_name_uz,
+            'country_name_ru': country_name_ru,
+            'country_name_en': country_name_en,
+            'region_id': region_id,
+            'region_name_uz': region_name_uz,
+            'region_name_ru': region_name_ru,
+            'region_name_en': region_name_en,
+            'district_id': district_id,
+            'district_name_uz': district_name_uz,
+            'district_name_ru': district_name_ru,
+            'district_name_en': district_name_en,
+            'address': address,
+            'father_name': father_name,
+            'father_phone': father_phone,
+            'mother_name': mother_name,
+            'pinfl_birth_country': pinfl_birth_country,
+            'pinfl_birth_country_id': pinfl_birth_country_id,
+            'created_at': created_at,
+            'pinfl_user_education': pinfl_user_education,
+            'user_education': user_education,
+            'certifications': certifications,
+        }
+        await state.update_data(**data_obj_applications)
+        # await message.answer("Ta'lim malumotlarini kiriting")
+        enter_button = ReplyKeyboardMarkup(
+        keyboard= [
+            [
+                KeyboardButton(text='Davom etish'),
+            ]
+        ],
+        resize_keyboard=True)
+        await message.answer("Universitetga hujjat topshirishni istasangiz davom etish tugmasini bosing,\n"
+                             "avvalo ta'lim ma'lumotingizni kiritishingiz talab etiladi", reply_markup=enter_button)
+        
+        await EducationData.education_id.set()
+    await EducationData.education_id.set()
+    
+
+
+
+@dp.message_handler(state=EducationData.education_id)
+async def education_id_handler(message: types.Message, state: FSMContext):
+    ic('education ga keldi')
+    data = await state.get_data()
+    token = data['token']  # Use direct indexing for required data
+    
+    educations_response = send_req.educations(token)  # Ensure it's awaited
+    educations = educations_response.json()  # Async call should be awaited
+    
+    buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"edu_{item['id']}")] for item in educations]
+    educationMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    await message.answer("<b>Universitetga hujjat topshrish uchun ta'lim ma'lumotlaringizni kiritishingiz zarur.</b>")
+    await message.answer("<b>Bitirgan yoki tahsil olayotgan ta'lim dargohi turini tanlang:</b>", parse_mode='HTML',reply_markup=educationMenu)
+
+
+@dp.callback_query_handler(lambda c: c.data.startswith('edu_'), state=EducationData.education_id)
+async def education_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    from aiogram import Bot, Dispatcher, types
+    from data.config import BOT_TOKEN  # Import your bot token
+
+    #Create a bot instance globally using the imported BOT_TOKEN
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
+    # from loader import dp
+    education_id = callback_query.data.split('edu_')[1]
+    await state.update_data(education_id=education_id)
+    await callback_query.answer()
+    await EducationData.region_id.set()  # Correctly transition to the next state
+    
+    
+    enter_button = ReplyKeyboardMarkup(
+    keyboard= [
+        [
+            KeyboardButton(text='Davom etish'),
+        ]
+    ],
+    resize_keyboard=True)
+    # await message.answer("Ma'lumot saqlandi", reply_markup=enter_button)
+    await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=enter_button, parse_mode="HTML")
+
+
+@dp.message_handler(state=EducationData.region_id)
+async def select_region_id_handler(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    token = data['token']  # Corrected data access
+    region_response = send_req.regions(token)  # Ensure it's awaited
+    regions = region_response.json()  # Async call should be awaited
+    
+    buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"reg_{item['id']}")] for item in regions]
+    regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    await message.answer("Ta'lim dargohi joylashgan shahar yoki viloyatni tanlang:", reply_markup=regionMenu)
+    
+    # await message.answer("Ma'lumot saqlandi", reply_markup=ReplyKeyboardRemove)
+
+@dp.callback_query_handler(lambda c: c.data.startswith('reg_'), state=EducationData.region_id)
+async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    region_id = callback_query.data.split('reg_')[1]
+    await state.update_data(region_id=region_id)
+    await callback_query.answer()
+    await EducationData.district_id.set()  # Proceed to the next state
+    
+    await callback_query.message.answer(saved_message, parse_mode="HTML")
+
+
+@dp.message_handler(state=EducationData.district_id)
+async def education_id_handler(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    token = data['token']  # Use direct indexing for required data
+    region_id = data['region_id']
+    district_id_response = send_req.districts(token, int(region_id))  # Ensure it's awaited
+    districts = district_id_response.json()  # Async call should be awaited
+    # pprint(districts)
+    buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"dist_{item['id']}")] for item in districts]
+    districtsMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    
+    await message.answer("Tumanni tanlang:", reply_markup=districtsMenu)
+
+@dp.callback_query_handler(lambda c: c.data.startswith('dist_'), state=EducationData.district_id)
+async def district_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    district_id = callback_query.data.split('dist_')[1]
+    await state.update_data(district_id=district_id)
+    await callback_query.answer()
+    await EducationData.institution_name.set()  # Prepare for the next step
+    from aiogram import Bot, Dispatcher, types
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
+    # await callback_query.message.answer("Ta'lim dargohi nomini kiriting:")
+    await bot.send_message(callback_query.from_user.id, "Ta'lim dargohi nomini kiriting:")
+
+@dp.message_handler(state=EducationData.institution_name)
+async def type_institution_name_handler(message: types.Message, state: FSMContext):
+    institution_name = message.text.strip()
+
+    if institution_name.lower() != 'davom etish':
+        await state.update_data(institution_name=institution_name)
+        await message.answer('Ma\'lumotlar muvaffaqiyatli qabul qilindi.', reply_markup=ReplyKeyboardRemove())
+        # Proceed to conclude the process or transition to the next state here
+        # Example to conclude:
+        data = await state.get_data()
+        # education_id = data.get('education_id', 'Not specified')
+        # region_id = data.get('region_id', 'Not specified')
+        # district_id = data.get('district_id', 'Not specified')
+        institution_name = data.get('institution_name', 'Not specified')
+        await message.answer("✅ *Diplom, shahodatnoma yoki ma’lumotnoma nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_", parse_mode="Markdown")
+        # Pretty print or process the data as needed
+        # await message.answer(f"Collected data: {data}")  # Simplified example of using the collected data
+        await EducationData.file_diploma.set()  # Optionally finish the state if the flow is done
+    else:
+        # If the user sends 'Davom etish', prompt them again for the institution name.
+        await message.answer('Talim dargoh nomini kiriting, bu majburiy.', reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Davom etish')))
+
+@dp.message_handler(content_types=['document'], state=EducationData.file_diploma)
+async def upload_file(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher, types
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
+
+    data = await state.get_data()
+    token_ = data['token'] if data['token'] else None
+
+    document = message.document
+    file_path = await bot.get_file(document.file_id)
+    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+    # print(file_url)
+    # await message.answer(file_url)
+    download_dir = 'diploma_files'
+    await aiofiles.os.makedirs(download_dir, exist_ok=True)
+
+    local_file_path = os.path.join(download_dir, document.file_name)
+    # print(local_file_path)
+    await send_req.download_file(file_url, local_file_path)
+    await message.answer("<b>Kuting, fayl yuklanmoqda.</b>", parse_mode='HTML')
+    # ic(local_file_path)
+
+    res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+    # if file_size != 'File not found':
+    try:
+        file_size = os.path.getsize(local_file_path)
+        file_size_kb = file_size / 1024
+        file_size_mb = file_size_kb / 1024
+        # print(f'size: {file_size_mb:.2f}')
+    except: 
+        return 'File not found'
+    await state.update_data(file_size=file_size)
+    await message.answer("Fayl yuklandi.")
+    
+    # ic(all_state)
+    # print(res_file.status_code)
+    # print(res_file)
+    try:
+        data1 = res_file.json()
+        ic(data1['path'])
+        await state.update_data(file_diploma=data1['path'])
+    except Exception as e:
+        return e
+    
+
+    src_ = 'src' 
+    src_res = collect_data.collect_me_data(token=token_, field_name=src_)
+    if src_res is not None or src_res is not False:
+        await state.update_data(src=src_res)
+    
+
+
+    all_state = await state.get_data()
+    ic(all_state)
+    # print(data1['path'])
+    district_id = int(all_state['district_id']) if all_state['district_id'] else 0
+    education_id = int(all_state['education_id']) if all_state['education_id'] else 0
+    file_ = all_state['file_diploma'] if all_state['file_diploma'] else None
+    institution_name = all_state['institution_name'] if all_state['institution_name'] else None
+    region_id = int(all_state['region_id']) if all_state['region_id'] else None
+    src = all_state['src'] if all_state['src'] else 'manually'
+
+    res_data_app_forms_for_edu = send_req.application_forms_for_edu(token_,
+                                                    
+                                                    district_id,
+                                                    education_id,
+                                                    file_,
+                                                    institution_name,
+                                                    region_id,
+                                                    src
+                                                    )
+    await state.update_data(me_data=res_data_app_forms_for_edu.json())
+    await message.answer("<b>Sizda chet tili sertifikati mavjudmi?</b>", parse_mode='HTML', reply_markup=yes_no)
+    ic(res_data_app_forms_for_edu.json())
+
+    await EducationData.has_sertificate.set()
+
+@dp.message_handler(state=EducationData.has_sertificate)
+async def has_sertificate(message: types.Message, state: FSMContext):
+    enter_button = ReplyKeyboardMarkup(
+        keyboard= [
+            [
+                KeyboardButton(text='Davom etish'),
+            ]
+        ],
+        resize_keyboard=True)
+    text = message.text
+    if text == "Ha, mavjud":
+
+        await message.answer("✅ *Chet tili sertifikat nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_", parse_mode="Markdown", reply_markup=enter_button)
+        
+        await EducationData.get_certificate.set()
+
+    elif text == "Yo'q, mavjud emas":
+        await message.answer("Davom etishni istasangiz davom etish tugmasini bosing", reply_markup=enter_button)
+
+        await EducationData.degree_id.set()
+
+@dp.message_handler(content_types=['document'], state=EducationData.get_certificate)
+async def get_sertificate(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
+
+    data = await state.get_data()
+    token_ = data['token'] if data['token'] else None
+
+    document = message.document
+    file_path = await bot.get_file(document.file_id)
+    ic(file_path)
+    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+    download_dir = 'sertificate_files'
+    # await message.answer(file_url)
+    await aiofiles.os.makedirs(download_dir, exist_ok=True)
+
+    local_file_path = os.path.join(download_dir, document.file_name)
+    ic(local_file_path)
+    await send_req.download_file(file_url, local_file_path)
+    await message.answer("<b>Kuting, fayl yuklanmoqda.</b>", parse_mode='HTML')
+    # ic(local_file_path)
+
+    res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
+    
+    try:
+        file_size = os.path.getsize(local_file_path)
+        file_size_kb = file_size / 1024
+        file_size_mb = file_size_kb / 1024
+        print(f'size: {file_size_mb:.2f}')
+    except: 
+        return 'File not found'
+    await state.update_data(file_size_sertificate=file_size)
+    # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
+    # await EducationData.has_application.set()
+    # ic(all_state)
+    print(res_file.status_code)
+    print(res_file)
+    try:
+        data1 = res_file.json()
+        await state.update_data(file_sertificate=data1['path'])
+    except Exception as e:
+        await message.answer(f"Xatolik: {e}")
+        return
+    enter_button = ReplyKeyboardMarkup(
+    keyboard= [
+        [
+            KeyboardButton(text='Davom etish'),
+        ]
+    ],
+    resize_keyboard=True)
+    await message.answer("Fayl yuklandi.", reply_markup=enter_button)
+    ic('boshlandi1')
+    await EducationData.degree_id.set()
+    ic('yakunlandi')
+
+@dp.message_handler(state=EducationData.degree_id)
+async def has_application_start(message: types.Message, state: FSMContext):
+    await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
+    ic('started')
+    my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
+    data = await state.get_data()
+    token = data['token']
+    directions_response = send_req.directions(token)
+    directions = directions_response.json()
+    unique_degrees = []
+    ic('ok')
+    for obj in directions:
+        degree_id = obj['degree_id']
+        if not any(d['id'] == degree_id for d in unique_degrees):
+            unique_degrees.append({
+                'id': degree_id,
+                'type_degree': my_degree[degree_id]})
+    ic(unique_degrees)
+    buttons = [[InlineKeyboardButton(text=item['type_degree'], callback_data=f"degree_{item['id']}") for item in unique_degrees]]
+    degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    ic('keldi')
+    await message.answer("<b>*Daraja tanlang:</b>", parse_mode='HTML', reply_markup=degreeMenu)
+    
+
+
+
+@dp.callback_query_handler(lambda c: c.data.startswith('degree_'), state=EducationData.degree_id)
+async def has_application(callback_query: types.CallbackQuery, state: FSMContext):
+    from aiogram import Bot
+    from data.config import BOT_TOKEN 
+
+    bot = Bot(token=BOT_TOKEN)
+    degree_id = callback_query.data.split('degree_')[1]
+    ic(degree_id)
+    await state.update_data(degree_id=degree_id)
+    await callback_query.answer()
+    await EducationData.direction_id.set()
+    enter_button = ReplyKeyboardMarkup(
+    keyboard= [
+        [
+            KeyboardButton(text='Davom etish'),
+        ]
+    ],
+    resize_keyboard=True)
+    await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=enter_button,
+                           parse_mode="HTML")
+
+
+@dp.message_handler(state=EducationData.direction_id)
+async def direction_id_select(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    token = data['token']  
+    region_response = send_req.directions(token) 
+    regions = region_response.json()  
+    selected_degree_id = data['degree_id']
+    ic(selected_degree_id)
+    buttons = [[InlineKeyboardButton(text=item['direction_name_uz'], callback_data=f"direc_{item['direction_id']}")] for item in regions if item['degree_id'] == int(selected_degree_id)]
+    regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    await message.answer("Yo'nalish yoki mutaxassislikni tanlang:", reply_markup=regionMenu)
+    
+
+@dp.callback_query_handler(lambda c: c.data.startswith('direc_'), state=EducationData.direction_id)
+async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    direction_id = callback_query.data.split('direc_')[1]
+    await state.update_data(direction_id=direction_id)
+    await callback_query.answer()
+    await EducationData.education_type.set()  # Proceed to the next state
+    
+    await callback_query.message.answer(saved_message, parse_mode="HTML")
+
+
+
+@dp.message_handler(state=EducationData.education_type)
+async def direction_id_select(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    token = data['token']
+    selected_degree_id = int(data['degree_id'])
+    selected_direction_id = int(data['direction_id'])
+    ic(selected_degree_id)
+    ic(selected_direction_id)
+    edu_type_response = send_req.directions(token)
+    edu_types = edu_type_response.json()
+    
+
+    def return_edu_type_name_uz(edu_type_id):
+        for edu in edu_types:
+            direction_id = edu['direction_id']
+            degree_id = edu['degree_id']
+            education_types = edu['education_types']
+            if edu['direction_id'] == direction_id and edu['degree_id'] == degree_id:
+                for k in education_types:
+                    if k['education_type_id'] == edu_type_id:
+                        return k['education_type_name_uz']
+        return None
+
+    uniq_edu_types = []
+    for obj in edu_types:
+        direction_id = obj['direction_id']
+        degree_id = obj['degree_id']
+        if selected_degree_id == degree_id and direction_id == selected_direction_id:
+            
+            tuition_fees = obj['tuition_fees']
+            for k in tuition_fees:
+                education_type_id = k['education_type_id']
+                edu_type_name = return_edu_type_name_uz(education_type_id)
+                if edu_type_name:
+                    obj = {
+                            'id': education_type_id,
+                            'name': edu_type_name
+                        }
+                    ic(obj)
+                    if obj not in uniq_edu_types:
+                        uniq_edu_types.append(obj)
+    
+    buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"edu_type_{item['id']}")] for item in uniq_edu_types]
+    eduTypesMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await message.answer("Ta'lim shaklini tanglang:", reply_markup=eduTypesMenu)
+  
+
+@dp.callback_query_handler(lambda c: c.data.startswith('edu_type_'), state=EducationData.education_type)
+async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    edu_type_id_ = callback_query.data.split('edu_type_')[1]
+    await state.update_data(education_type=edu_type_id_)
+    await callback_query.answer()
+    await EducationData.education_lang_id.set() 
+    await callback_query.message.answer(saved_message, parse_mode="HTML")
+
+
+
+
+@dp.message_handler(state=EducationData.education_lang_id)
+async def lang_id_select(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    token = data['token']  
+    education_type_id_selected = int(data['education_type'])
+    direction_id_selected = int(data['direction_id'])
+    degree_id_selected = int(data['degree_id'])
+    edu_lang_response = send_req.directions(token)  
+    edu_languages = edu_lang_response.json()
+    
+    edu_langs = []
+
+    def return_language_name(language_id):
+        for obj in edu_languages:
+            education_languages = obj['education_languages']
+            for lang in education_languages:
+                education_language_id = int(lang['education_language_id'])
+                if language_id == education_language_id:
+                    return lang['education_language_name_uz']
+        return None
+            
+    for obj in edu_languages:
+        direction_id = int(obj['direction_id'])
+        degree_id = int(obj['degree_id'])
+        if direction_id == direction_id_selected and degree_id == degree_id_selected:
+            tuition_fees = obj['tuition_fees']
+            for t in tuition_fees:
+                education_language_id = int(t['education_language_id'])
+                education_type_id = int(t['education_type_id'])
+                if education_type_id == education_type_id_selected:
+                    get_lang_name = return_language_name(education_language_id)
+                    if get_lang_name:
+                        lang_obj = {
+                            'name': get_lang_name,
+                            'id': education_language_id,
+                            'tuition_fee': t['tuition_fee']
+                        }
+                        if lang_obj not in edu_langs:
+                            ic(lang_obj)
+                            edu_langs.append(lang_obj)
+
+    buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
+    regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await message.answer("Ta'lim tilini tanlang:", reply_markup=regionMenu)
+
+@dp.callback_query_handler(lambda c: c.data.startswith('_'), state=EducationData.education_lang_id)
+async def after_select_lang(callback_query: types.CallbackQuery, state: FSMContext):
+    ic(callback_query.data)
+    
+    parts = callback_query.data[1:].split('_')
+
+    if len(parts) < 2:
+        await callback_query.message.answer("Invalid callback data format.")
+        return
+
+    education_lang_id, eduaction_tuition_fee = parts
+
+    await state.update_data(education_lang_id=education_lang_id, tuition_fee=eduaction_tuition_fee)
+
+    all_state_data = await state.get_data()
+    await callback_query.answer()
+    await EducationData.menu.set()
+    await callback_query.message.answer(saved_message, parse_mode="HTML")
+    await callback_query.message.answer(
+        f"✅ <b>Tanlangan Yo'nalish Narxi</b>\n"
+        f"--------------------------------\n"
+        f"💵 <i>Narxi:</i> <b>{all_state_data['tuition_fee']}</b> so'm\n",
+        parse_mode='HTML'
+    )
+
+    ic(all_state_data.get('degree_id'), all_state_data.get('direction_id'), all_state_data.get('education_language_id'), all_state_data.get('education_type_id'))
+    degree_id = int(all_state_data.get('degree_id'))
+    direction_id = int(all_state_data.get('direction_id'))
+    education_language_id = int(all_state_data.get('education_lang_id'))
+    education_type_id = int(all_state_data.get('education_type'))
+    token_ = all_state_data.get('token')
+
+    applicant = send_req.applicants(token_, degree_id, direction_id, education_language_id, education_type_id)
+    ic(applicant.json())
+    if applicant.status_code == 201:
+        await callback_query.message.answer(f"Ariza muvaffaqiyatli topshirildi{applicant.status_code}")
+    elif applicant.status_code != 201:
+        await callback_query.message.answer("Xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring")
+        
+    # except Exception as e:
+    #     await callback_query.message.answer("Xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring")
+
+@dp.message_handler(state=EducationData.menu)
+async def lang_id_select(message: types.Message, state: FSMContext):
+    await message.answer('ok tugadi')
