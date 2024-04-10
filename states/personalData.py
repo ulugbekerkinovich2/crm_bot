@@ -6,6 +6,7 @@ class PersonalData(StatesGroup):
     document = State()
     birth_date = State()
     token = State()
+    new_token = State()
     first_name = State()
     last_name = State()
     avatar = State()
@@ -75,3 +76,5 @@ class EducationData(StatesGroup):
     tuition_fee = State()
     menu = State()
     
+class Account(StatesGroup):
+    delete_account = State()

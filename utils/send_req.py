@@ -6,7 +6,7 @@ from icecream import ic
 import aiofiles
 # from data.config import domain_name, origin
 import aiohttp
-domain_name = 'crmapi.mentalaba.uz'
+host = 'crmapi.mentalaba.uz'
 origin = 'admission.tiiu.uz'
 
 default_header = {
@@ -15,106 +15,102 @@ default_header = {
         'Origin': f'{origin}', 
 }
 
-def check_number(phone):
-    url = f'https://{domain_name}/v1/auth/check'
-    data = {
-        "phone": phone
-    }
+async def check_number(phone):
+    url = f'https://{host}/v1/auth/check'
+    data = {"phone": phone}
 
-    response = requests.post(url, headers=default_header, json=data)  # Include the headers here
-    return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=default_header, json=data) as response:
-    #         # Проверка на успешный статус ответа
-    #         if response.status == 201:
-    #             # Проверка Content-Type ответа перед попыткой декодирования JSON
-    #             if 'application/json' in response.headers['Content-Type']:
-    #                 data = await response.json()
-    #                 return data
-    #             else:
-    #                 # Обработка случая, когда ответ не JSON
-    #                 return {'error': f'Unexpected mimetype: {response.headers["Content-Type"]}'}
-    #         else:
-    #             # Возвращение ошибки с кодом состояния, если ответ не успешный
-    #             return {'error': f'Failed to check number, status_code: {response.status}'}
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=default_header, json=data) as response:
+            if response.status == 201:
+                json_data = await response.text()
+                return json_data
+            else:
+                error_message = await response.json()
+                return {'error': f'Failed to check number, status_code: {response.status}, details: {error_message}'}
+
+            
 # print(check_number('+998998359015').json())
 
 
-def user_register(number):
-    url = f"https://{domain_name}/v1/auth/register"
+async def user_register(number):
+    url = f"https://{host}/v1/auth/register"
     body = {
         "phone": number
     }
-    response = requests.post(url, json=body, headers=default_header)
-    return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, body=body, headers=default_header) as response:
-    #         if response.status == 201:
-    #             data = await response
-    #             return data
-    #         else:
-    #             return {'error': 'Failed to register', 'status_code': response.status}
+    # response = requests.post(url, json=body, headers=default_header)
+    # return response
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=body, headers=default_header) as response:
+            ic(response.status)
+            if response.status == 201:
+                json_data = await response.json()
+                return json_data
+            else:
+                error_message = await response.json()
+                return {'error': f'Failed to user register, status_code: {response.status}, details: {error_message}'}
 
 # user_login('+998998359015')
 
-def user_verify(secret_code, phone):
-    url = f"https://{domain_name}/v1/auth/verify"
+async def user_verify(secret_code, phone):
+    url = f"https://{host}/v1/auth/verify"
     body = {
-        'phone' : phone,
+        'phone': phone,
         "code": secret_code
     }
-    response = requests.post(url, json=body, headers=default_header)
-    return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, json=body, headers=default_header) as response:
-    #         if response.status == 201:
-    #             data = await response
-    #             return data
-    #         else:
-    #             return {'error': "Failed to verify", 'status_code': response.status}
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=body, headers=default_header) as response:
+            if response.status == 200:
+                json_data = await response.json()  # This should be a dictionary
+                return {'data': json_data, 'status_code': response.status}  # Return a dictionary
+            else:
+                return {'error': "Failed to verify", 'status_code': response.status}
+
+
     
 # user_verify(175654, '+998998359015')
 
-def user_login(phone):
-    url = f"https://{domain_name}/v1/auth/login"
+async def user_login(phone):
+    url = f"https://{host}/v1/auth/login"
     body = {
         'phone': phone
     }
-    response = requests.post(url, json=body, headers=default_header)
+    # response = requests.post(url, json=body, headers=default_header)
     # print(response.json())
-    return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=default_header, json=body) as response:
-    #         if response.status == 201:
-    #             print(response.json())
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
+    # return response
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=default_header, json=body) as response:
+            if response.status == 200:
+                json_data = await response.json() 
+                return {'data': json_data, 'status_code': response.status} 
+            else:
+                return {'error': "Failed to verify", 'status_code': response.status}
+            
 # user_login('+998998359015')
 
-def application_form_info(birth_date, document, token):
-    url = f'https://{domain_name}/v1/application-forms/info'
+async def application_form_info(birth_date, document, token):
+    url = f'https://{host}/v1/application-forms/info'
     default_header['Authorization'] = f'Bearer {token}'
     body = {
         'birth_date': str(birth_date),
         'document': str(document)
     }
-    response = requests.post(url, json=body, headers=default_header)
+    # response = requests.post(url, json=body, headers=default_header)
     # pprint(response.json())
-    return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=default_header, json=body) as response:
-    #         if response.status == 201:
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
+    # return response
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=default_header, json=body) as response:
+            if response.status == 200:
+                json_data = await response.json() 
+                return {'data': json_data, 'status_code': response.status} 
+            else:
+                json_data = await response.json() 
+                return {'error': "Failed to verify", 'status_code': response.status, 'data': json_data}
+            
+
 
 def application_form(token,birth_date,birth_place,citizenship,extra_phone,first_name,gender,last_name,phone,photo,pin,serial_number,src,third_name):
-    url = f"https://{domain_name}/v1/application-forms"
+    url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f'Bearer {token}'
     body = {
         'birth_date': birth_date,
@@ -143,22 +139,22 @@ def application_form(token,birth_date,birth_place,citizenship,extra_phone,first_
     #             # Handling errors by returning a simple error message or dict
     #             return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-def directions(token):
-    url = f'https://{domain_name}/v1/directions'
+async def directions(token):
+    url = f'https://{host}/v1/directions'
     default_header['Authorization'] = f'Bearer {token}'
-    response = requests.get(url, headers=default_header)
-    return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.get(url, headers=default_header) as response:
-    #         if response.status == 200:
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
+    # response = requests.get(url, headers=default_header)
+    # return response
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=default_header) as response:
+            if response.status == 200:
+                data = await response.json()  # Read and parse the JSON response
+                return data
+            else:
+                # Handling errors by returning a simple error message or dict
+                return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 def applicants(token, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None):
-    url = f"https://{domain_name}/v1/applicants"
+    url = f"https://{host}/v1/applicants"
     default_header['Authorization'] = f'Bearer {token}'
     body = {
         'degree_id': degree_id,
@@ -179,7 +175,7 @@ def applicants(token, degree_id, direction_id, education_language_id, education_
     #             return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 def update_applicant(token, degree_id, direction_id, education_language_id, education_type_id, applicant_id):
-    url = f"https://{domain_name}/v1/applicants/{applicant_id}"  # Assuming you need to specify which applicant to update
+    url = f"https://{host}/v1/applicants/{applicant_id}"  # Assuming you need to specify which applicant to update
     headers = {
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json'
@@ -201,7 +197,7 @@ def update_applicant(token, degree_id, direction_id, education_language_id, educ
     #             return {'error': 'Failed to update applicant', 'status_code': response.status}
 
 def my_applications(token):
-    url = f"https://{domain_name}/v1/applicants/my-application"
+    url = f"https://{host}/v1/applicants/my-application"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     return response
@@ -215,7 +211,7 @@ def my_applications(token):
     #             return {'error': 'Failed to fetch data', 'status_code': response.status}    
 
 def reset_password(phone, token):
-    url = f"https://{domain_name}/v1/auth/resend-verify-code"
+    url = f"https://{host}/v1/auth/resend-verify-code"
     default_header['Authorization'] = f'Bearer {token}'
     body = {
         'phone': phone
@@ -232,7 +228,7 @@ def reset_password(phone, token):
     #             return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 def educations(token):
-    url = f"https://{domain_name}/v1/application-forms/educations/"
+    url = f"https://{host}/v1/application-forms/educations/"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     return response
@@ -257,7 +253,7 @@ def educations(token):
 """
 
 def regions(token):
-    url = f"https://{domain_name}/v1/application-forms/regions"
+    url = f"https://{host}/v1/application-forms/regions"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     return response
@@ -272,7 +268,7 @@ def regions(token):
 
 
 def districts(token, district_id):
-    url = f"https://{domain_name}/v1/application-forms/districts/{district_id}"
+    url = f"https://{host}/v1/application-forms/districts/{district_id}"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     return response
@@ -289,7 +285,7 @@ def districts(token, district_id):
 
 def upload_file(token, file_name, associated_with, usage):
     print('uuuu', file_name)
-    url = f"https://{domain_name}/v1/files/upload"
+    url = f"https://{host}/v1/files/upload"
     script_directory_path = os.path.dirname(os.path.abspath(__file__))
     project_directory_path = os.path.abspath(os.path.join(script_directory_path, '..', '..'))
     # ic(project_directory_path)
@@ -337,7 +333,7 @@ def upload_file(token, file_name, associated_with, usage):
 
 def application_forms(token,birth_date,birth_place,citizenship,extra_phone,
                       first_name,last_name, gender,phone,photo,pin,serial_number,src,third_name):
-    url = f"https://{domain_name}/v1/application-forms"
+    url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f'Bearer {token}'
     body = {
         'birth_date': birth_date,
@@ -366,7 +362,7 @@ def application_forms(token,birth_date,birth_place,citizenship,extra_phone,
 
 
 def application_forms_me(token):
-    url = f"https://{domain_name}/v1/application-forms/me"
+    url = f"https://{host}/v1/application-forms/me"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
 
@@ -383,8 +379,20 @@ def application_forms_me(token):
 # a =application_forms_me('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQ5LCJmaXJzdF9uYW1lIjoiVUxVR-KAmEJFSyIsImxhc3RfbmFtZSI6IkVSS0lOT1YiLCJiaXJ0aF9kYXRlIjpudWxsLCJwaG9uZSI6Iis5OTg5OTgzNTkwMTUiLCJyb2xlIjoidXNlciIsImF2YXRhciI6ImF2YXRhci9lM2Q0OWJmNi0zNGExLTRhNzktYjZlNS04MWU1OTg3MDRkNWIuanBnIiwiZW1haWwiOm51bGwsImlzX3ZlcmlmeSI6dHJ1ZSwiY3JlYXRlZF9hdCI6IjIwMjQtMDMtMTlUMDQ6NDA6NTMuMzkxWiIsInVwZGF0ZWRfYXQiOiIyMDI0LTAzLTE5VDA0OjQwOjUzLjM5MVoiLCJ1bml2ZXJzaXR5SWQiOjIsImlhdCI6MTcxMjA0OTY5OCwiZXhwIjoxNzEyMDcxMjk4fQ.TnhaeCx0OPYgMLwaonkFDWOt_cqZlkzpPieJWN5tL3g')
 # pprint(a.json())
 
+
+async def delete_profile(token):
+    url = f"https://{host}/v1/application-forms/delete-profile"
+    default_header['Authorization'] = f'Bearer {token}'
+    async with aiohttp.ClientSession() as session:
+        async with session.delete(url, headers=default_header) as response:
+            if response.status == 200:
+                data = await response.json()
+                return data
+            else:
+                return {'error': 'Failed to delete profile', 'status_code': response.status}
+
 def refresh(refreshToken):
-    url = f"https://{domain_name}/v1/auth/refresh"
+    url = f"https://{host}/v1/auth/refresh"
     body = {
         'refreshToken': refreshToken,
     }
@@ -399,7 +407,7 @@ def refresh(refreshToken):
     #             return {'error': 'Failed to refresh token', 'status_code': response.status}
 
 def application_forms_for_edu(token,  district_id, education_id, file_, institution_name, region_id,src='manually'):
-    url = f"https://{domain_name}/v1/application-forms"
+    url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f"Bearer {token}"
     body = {
         'src': src,

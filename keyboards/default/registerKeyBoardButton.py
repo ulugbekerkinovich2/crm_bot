@@ -34,20 +34,16 @@ menu = ReplyKeyboardMarkup(
     keyboard = [
         [
             KeyboardButton(text="ℹ️Shaxsiy ma'lumotlar"),
-        ],
-        [
             KeyboardButton(text="📚Ta'lim ma'lumotlari"),
         ],
         [
             KeyboardButton(text="📃Chet tili sertifikat qo'shish"),
-        ],
-        [
             KeyboardButton(text="🗂Yo'nalish tanlash"),
         ],
         [
             KeyboardButton(text="🈸Arizalar"),
-        ]
-        
+            KeyboardButton(text="🗑Accountni o'chirish"),
+        ],
     ],
     resize_keyboard=True
 )
@@ -108,3 +104,13 @@ yes_no = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+ask_delete_account = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Ha, akkauntni o'chirish"),
+            KeyboardButton(text="Bekor qilish"),
+        ]
+    ]
+)
+

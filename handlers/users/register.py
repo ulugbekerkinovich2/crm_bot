@@ -15,7 +15,9 @@ import aiofiles.os
 from icecream import ic
 import json
 from keyboards.default.registerKeyBoardButton import yes_no
+from keyboards.default.registerKeyBoardButton import enter_button, menu
 saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
+
 
 
 @dp.message_handler(text="🇺🇿O'zbek tili")
@@ -31,38 +33,41 @@ async def uz_lang(message: types.Message, state: FSMContext):
 @dp.message_handler(state=PersonalData.phone, content_types=types.ContentTypes.CONTACT | types.ContentTypes.TEXT)
 async def phone_contact_received(message: types.Message, state: FSMContext):
     # await message.answer(message.json())
-    # print(message)
-    # print(message.text)
+    # ic(message)
+    # ic(message.text)
     try:
         contact = message.contact
         phone_num = contact.phone_number
-        print('auto:', phone_num)
+        ic('auto:', phone_num)
     except AttributeError:
         phone_num = None
         contact = None
-    print('next')
+    ic('next')
     try:
         custom_writened_phone = message.text
-        print(custom_writened_phone)
+        ic(custom_writened_phone)
     except AttributeError:
         custom_writened_phone = None
     ic("custom_writened_phone", custom_writened_phone)
     if contact is not None and phone_num is not None:
         custom_phone = f'+{phone_num}'
-        print(phone_num)
+        ic(phone_num)
         if len(phone_num) == 12:
             ic(phone_num)
-            check_user = send_req.check_number(custom_phone)
-            ic('check_user', check_user.json(), check_user.text)
-            # ic(check_user)
-            if check_user.text == 'true':
-                ic(check_user.text)
+            check_user = await send_req.check_number(custom_phone)
+            ic('check_user', check_user)
+            # ic(check_user.content)
+            if check_user == 'true':
+                ic(check_user)
                 await state.update_data(phone=phone_num)
-                user_login = send_req.user_login(custom_phone)
-                ic('user_login: ',user_login.json())
-                ic('user_login status: ',user_login.status_code)
-                if user_login.status_code == 200:
-                    ic('user_login status',user_login.status_code)
+                user_login = await send_req.user_login(custom_phone)
+                
+                ic('user_login: ',user_login)
+                ic('user_login status: ',user_login.get('status_code'))
+                user_login_status = user_login.get('status_code')
+
+                if user_login_status == 200:
+                    ic('user_login status',user_login_status)
                     remove_keyboard = types.ReplyKeyboardRemove()
                     await message.answer("🟢 <b>Telefon raqamingiz qabul qilindi.</b> Telefon raqamingizga yuborilgan kodni kiriting",parse_mode='HTML', reply_markup=remove_keyboard)
                     await PersonalData.secret_code.set()
@@ -72,7 +77,7 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
             elif str(check_user.text) == 'false':
                 ic('check_user', check_user.text)
                 await state.update_data(phone_num)
-                user_register = send_req.user_register(custom_phone)
+                user_register = await send_req.user_register(custom_phone)
                 remove_keyboard = types.ReplyKeyboardRemove()
                 ic('user_register: ',user_register.status_code)
                 if user_register.status_code == 201:
@@ -81,10 +86,10 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
 
     elif custom_writened_phone is not None:
         custom_writened_phone = custom_writened_phone.strip()
-        print('custom_writened_phone: ',custom_writened_phone)
+        ic('custom_writened_phone: ',custom_writened_phone)
         status_while = True
         while status_while:
-            print('while ishladi')
+            ic('while ishladi')
             phone_num = custom_writened_phone.strip()
             if len(phone_num) != 12 or not phone_num.isdigit():
                 await message.answer("🔴Telefon raqam no\'to\'g\'ri kiritildi!")
@@ -97,34 +102,35 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                     break
 
             elif len(phone_num) == 12:
-                # print('keldi')
+                # ic('keldi')
                 status_while = False
                 custom_phone = f'+{phone_num}'
-                check_user = send_req.check_number(custom_phone)
-                if str(check_user.json()) == 'True':
+                check_user = await send_req.check_number(custom_phone)
+                ic('check_user', check_user)
+                if str(check_user) == 'true':
                     await state.update_data(phone=phone_num)
-                    user_login = send_req.user_login(custom_phone)
-                    if user_login.status_code == 200:
-                        remove_keyboard_ = types.ReplyKeyboardRemove()
+                    user_login = await send_req.user_login(custom_phone)
+                    ic('user_login', user_login)
+                    if user_login.get('status_code') == 200:
                         keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
                         reset_pass_button = types.KeyboardButton(text='Kodni qayta yuborish')
                         keyboard.add(reset_pass_button)
-                        await message.answer("🟢Telefon raqamingiz qabul qilindi.", reply_markup=remove_keyboard_)
+                        await message.answer("🟢Telefon raqamingiz qabul qilindi.", reply_markup=ReplyKeyboardRemove())
                         await message.answer(" Telefon raqamingizga yuborilgan kodni yuboring", reply_markup=reset_pass_button)
                         await PersonalData.secret_code.set()
                     else:
                         await message.answer("severda xatolik 107")
 
-                if str(check_user.json()) == 'False':
+                elif str(check_user) == 'false':
                     await state.update_data(phone=phone_num)
-                    user_register = send_req.user_register(custom_phone)
-                    # print('user_register', user_register.json())
-                    if user_register.status_code == 201:
-                        remove_keyboard_ = types.ReplyKeyboardRemove()
+                    user_register = await send_req.user_register(custom_phone)
+                    ic('user_register', user_register)
+                    if user_register.get('status') == 200:
+                        # remove_keyboard_ = types.ReplyKeyboardRemove()
                         # keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
                         # reset_pass_button = types.KeyboardButton(text='reset_password')
                         # keyboard.add(reset_pass_button)
-                        await message.answer("🟢Telefon raqamingiz qabul qilindi.", reply_markup=remove_keyboard_)
+                        await message.answer("🟢Telefon raqamingiz qabul qilindi.", reply_markup=ReplyKeyboardRemove())
                         await message.answer("Telefon raqamingizga yuborilgan kodni yuboring")
                         await PersonalData.secret_code.set()
                 else:
@@ -133,110 +139,78 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=PersonalData.secret_code)
 async def secret_code(message: types.Message, state: FSMContext):
-    # print('secret_code', secret_code)
-    # data_user = await state.get_data()
-    # token = data_user.get('token')
-    status_while = True
-    while status_while:
-        secret_code = message.text
-        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        reset_pass_button = types.KeyboardButton(text='Kodni qayta yuborish')
-        keyboard.add(reset_pass_button)
-        # print(type(secret_code), 'secret code', secret_code)
-        if len(secret_code) == 6 and secret_code.isdigit():
+    secret_code = message.text
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    if len(secret_code) == 6 and secret_code.isdigit():
+        data = await state.get_data()
+        phone_number = f"+{data.get('phone')}"
+        # ic("phone->", phone_number)
+        response_ = await send_req.user_verify(int(secret_code), phone_number)
+        res_status_code = response_.get('status_code')
+        # ic('response1111', response_)
+        if response_.get('status_code') == 200:
+            ic('kirdik333')
+            # data_res = response_
+            await state.update_data(token=response_.get('token'))
             data = await state.get_data()
-            phone_number = f"+{data.get('phone')}"
-            # print("phone->", phone_number)
-            response_ = send_req.user_verify(int(secret_code), phone_number)
-            # print('response', response_.json())
-            if response_.status_code == 200:
-                data_res = response_.json()
-                new_token = data_res.get('token')
-                # print("\ndata_res", data_res, '\n')
-                await state.update_data(token=data_res.get('token'))
-                await state.update_data(last_name=data_res.get('last_name'))
-                await state.update_data(first_name=data_res.get('first_name'))
-                await state.update_data(avatar=data_res.get('avatar'))
-                await state.update_data(haveApplicationForm=data_res.get('haveApplicationForm'))
-                await state.update_data(haveApplied=data_res.get('haveApplied'))
-                await state.update_data(haveEducation=data_res.get('haveEducation'))
-                status_while = False
-                # await state.update_data(**data_to_update)
+            new_token_ = data.get('token')
+            in_data = response_['data']
+            # data_me_ = send_req.application_forms_me(new_token_)
+            # data_me = data_me_.json()
+            haveApplicationForm = in_data.get('haveApplicationForm')
+            haveApplied = in_data.get('haveApplied')
+            haveEducation = in_data.get('haveEducation')
+            # ic(in_data)
+            ic(haveApplicationForm)
+            ic(haveApplied)
+            ic(haveEducation)
+            ic(response_)
+            ic(response_.get('status_code'))
+
+            get_token = in_data.get('token')
             
-            elif response_.status_code == 404 or response_.status_code == 400 or response_.status_code == 410:
-                # print('\nres',response_.json(), '\n')
-                await message.answer("🔴 Tasdiqlash kodi noto'g'ri kiritildi")
-                response_msg = await dp.bot.send_message(message.chat.id, "Tasdiqlash kodini qayta kiriting", reply_markup=reset_pass_button)
-                response = await dp.bot.wait_for("message")
-                break
-        else:
-            await message.answer("🔴Tasdiqlash kodi noto'g'ri kiritildi", reply_markup=reset_pass_button)
-            break
-        status_while = False
-        remove_keyboard_ = types.ReplyKeyboardRemove()
-        await state.update_data(secret_code=secret_code)
-        await message.answer("🟢<b>Kod qabul qilindi</b>", parse_mode='HTML')
-        enter_button = ReplyKeyboardMarkup(
-        keyboard= [
-            [
-                KeyboardButton(text='Davom etish'),
-            ]
-        ],
-        resize_keyboard=True)
-        await message.answer("Ma'lumotlar saqlandi", reply_markup=enter_button)
-    serial_number = 'serial_number'
-    extra_phone_number = 'extra_phone'
-    data = await state.get_data()
-    new_token_ = data.get('token')
-    extra_phone_res = collect_data.collect_me_data(token=new_token_, field_name=extra_phone_number)
-    serial_number_res = collect_data.collect_me_data(token=new_token_,field_name=serial_number)
-    data_me_ = send_req.application_forms_me(new_token_)
-    data_me = data_me_.json()
-    haveApplicationForm = str(data_me.get('haveApplicationForm'))
-    haveApplied = str(data_me.get('haveApplied'))
-    haveEducation = str(data_me.get('haveEducation'))
-    ic(data_me)
+            ic(get_token)
+            await state.update_data(token=get_token)
 
-    # if haveApplicationForm == 'false':
-    #     await PersonalData.document.set()
-    if data_me.get('statusCode') == 404:
-        await message.answer("Passport seriyangizni yuboring\nNamuna: AB1234567", reply_markup=remove_keyboard_)
-        await PersonalData.document.set()
-    elif haveApplicationForm == 'true' and haveEducation == 'false' and haveApplied == 'false':
-        await EducationData.education_id.set()
-    elif haveApplicationForm == 'true' and haveEducation == 'true' and haveApplied == 'false':
-        await EducationData.degree_id.set()
-    elif haveApplicationForm == 'true' and haveEducation == 'true' and haveApplied == 'true':
-        await EducationData.menu.set()
-    
+            # if res_status_code == 404 or res_status_code == 200:
+            #     await message.answer("Passport seriyangizni yuboring\nNamuna: AB1234567", reply_markup=ReplyKeyboardRemove())
+            #     await PersonalData.document.set()
 
-    # print('serial_number181: %s' % serial_number_res)
-    # if serial_number_res is None or serial_number_res is False or extra_phone_res is None or extra_phone_res is False:
-    # if 
-    #     # print('serial_number yoq ekan!!!')
-    #     await message.answer("Passport seriyangizni yuboring\nNamuna: AB1234567", reply_markup=remove_keyboard_)
-    #     await PersonalData.document.set()
-    # elif serial_number_res is not None and serial_number_res is not False and extra_phone_res is not None and extra_phone_res is not False:
+            if haveApplicationForm is False and haveEducation is False and haveApplied is False:
+                await message.answer("Passport seriyangizni yuboring\nNamuna: AB1234567", reply_markup=ReplyKeyboardRemove())
+                await PersonalData.document.set()
 
+            elif haveApplicationForm is True and haveEducation is False and haveApplied is False:
+                await message.answer("<i>Siz ro'yhatdan o'tgansiz ta'lim ma'lumotlarini to'ldirishingiz kerak</i>", reply_markup=enter_button)
+                ic('002')
+                await EducationData.education_id.set()
+                
+            
+            elif haveApplicationForm is True and haveEducation is True and haveApplied is False:
+                await message.answer("<i>Siz ro'yhatdan o'tkansiz, ta'lim ma'lumotlaringiz ham to'ldirilgan, universitetda ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
+                ic('keldi 003')
 
-    #     if haveEducation == "true":
-    #         await EducationData.education_id.set()
-    #     else:
-    #         print('passport seriya Database da bor ekan')
-    #         await message.answer("Ta'lim ma'lumotlarini")
-    #         await EducationData.education_id.set()
+                await EducationData.degree_id.set()
+            elif haveApplicationForm is True and haveEducation is True and haveApplied is True:
+                await message.answer("<i>- Siz ro'yhatdan o'tkansiz\n-Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n- Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
+                ic('keldi 004')
+
+                await EducationData.menu.set()
+
+        
+        elif res_status_code == 404 or res_status_code == 400 or res_status_code == 410:
+            # ic('\nres',response_.status(), '\n')
+            await message.answer("🔴 Tasdiqlash kodi noto'g'ri kiritildi")
+            response_msg = await dp.bot.send_message(message.chat.id, "Tasdiqlash kodini qayta kiriting")
+            response = await dp.bot.wait_for("message")
+    else:
+        await message.answer("🔴Tasdiqlash kodi noto'g'ri kiritildi")
+        
+    # remove_keyboard_ = types.ReplyKeyboardRemove()
+    await state.update_data(secret_code=secret_code)
 
 @dp.message_handler(state=PersonalData.document)
 async def document(message: types.Message, state: FSMContext):
-    # await message.answer('...')
-    # print('document')
-    # data_user = await state.get_data()
-    # token = data_user.get('token')
-    # serial_number = 'serial_number'
-    # pprint(collect_data.collect_me_data(token))
-    # serial_number_res = collect_data.collect_me_data(token=token,field_name=serial_number)
-    # print('serial_number topildi:', serial_number_res)
-    # if serial_number_res is None or serial_number_res == False:
     document = message.text.strip()
     document_serial = str(document[:2]).upper().strip()
     document_number = document[2:]
@@ -276,80 +250,86 @@ async def document(message: types.Message, state: FSMContext):
             else:
                 break
     await message.answer("🟢Passport seriyasi qabul qilindi")
-    await message.answer('Tug\'ilgan kuningingizni kiriting quidagi formatda\nKun.Oy.Yil\n\nNamuna: 01.03.2005')
+    await message.answer('Tug\'ilgan kuningingizni kiriting quidagi formatda\nyil.oy.kun\n\nNamuna: 2005-03-01')
     await PersonalData.birth_date.set()
 
 
 @dp.message_handler(state=PersonalData.birth_date)
 async def birth_date(message: types.Message, state: FSMContext):
-    # await message.answer('....')
-    print('birth date')
-    # data_user = await state.get_data()
-    # token = data_user.get('token')
-    # birth_date = 'birth_date'
-    # birth_date_res = collect_data.collect_me_data(token=token,field_name=birth_date)
-    # print('birth_date_res topildi->', birth_date_res)
-    # if birth_date_res is None or birth_date_res == False:
+    ic('birth date')
     birth_date = message.text.strip()
     # Check if the birth date format is valid
-    birth_date_parts = birth_date.split('.') if birth_date else None
+    birth_date_parts = birth_date.split('-') if birth_date else None
     # print('birth_date', birth_date_parts)
     if not birth_date_parts or len(birth_date_parts) != 3:
-        await message.answer("🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: Kun.Oy.Yil\nTug'ilgan kunni qayta kiriting")
+        await message.answer("🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: yil.oy.kun\nTug'ilgan kunni qayta kiriting")
         return
 
-    check_day, check_month, check_year = birth_date_parts
+    check_year, check_month, check_day = birth_date_parts
     if not (check_day.isdigit() and check_month.isdigit() and check_year.isdigit()):
-        await message.answer("🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: Kun.Oy.Yil\nTug'ilgan kunni qayta kiriting")
+        await message.answer("🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: yil.oy.kun\nTug'ilgan kunni qayta kiriting")
         return
 
-    day, month, year = map(int, birth_date_parts)
+    year, month, day = map(int, birth_date_parts)
     # print(day, month, year)
     if not (1 <= day <= 31 and 1 <= month <= 12 and 2024 > year > 1990):
         await message.answer("🔴 Tug'ilgan kun noto'g'ri kiritildi. Kiritilgan sana tog'ri emas.\nTug'ilgan kunni qayta kiriting")
         return
+    
 
-    await state.update_data(birth_date=birth_date)
-    await message.answer('🟢Tu\'gilgan kuningiz qabul qilindi. Ma\'lumotlaringiz muvaffaqiyatli saqlandi.')
-    formatted_birth_date = f'{year}-{month}-{day}'
-    await state.update_data(formatted_birth_date=formatted_birth_date)
-    await message.answer('Siz bilan aloqaga chiqish uchun qo\'shimcha telefon raqam kiriting\n\nNamuna: +998991234567')
-    await PersonalData.info.set()
+    data_state = await state.get_data()
+    token = data_state.get('token')
+    document = data_state.get('document')
+    ic('birth_date', birth_date)
+    ic("document", document)
+
+    check_is_not_duplicate = await send_req.application_form_info(birth_date, document, token)
+    data_res = check_is_not_duplicate['data']
+    ic(check_is_not_duplicate)
+    if check_is_not_duplicate.get('status_code') == 409:
+        error_mes = data_res.get('message')
+        await message.answer(f"🔴 {error_mes}")
+        await state.finish()
+    elif check_is_not_duplicate.get('status_code') == 200:
+        await state.update_data(birth_date=birth_date)
+        await message.answer('🟢Tu\'gilgan kuningiz qabul qilindi. Ma\'lumotlaringiz muvaffaqiyatli saqlandi.')
+        formatted_birth_date = f'{year}-{month}-{day}'
+        await state.update_data(formatted_birth_date=formatted_birth_date)
+        await message.answer('Siz bilan aloqaga chiqish uchun qo\'shimcha telefon raqam kiriting\n\nNamuna: +998991234567')
+        await PersonalData.info.set()
 
     # else:
     #     PersonalData.info.set()
 
+
 @dp.message_handler(state=PersonalData.info)
 async def info(message: types.Message, state: FSMContext):
-    
-    # await message.answer('Q\'shimcha nomeringiz qidirilmoqda')
-    # print('extra_phone searching...')
-    # data_user = await state.get_data()
-    # token = data_user.get('token')
-    # extra_phone = 'extra_phone'
-    # extra_phone_res = collect_data.collect_me_data(token=token,field_name=extra_phone)
-    # print('extra_phone_res->', extra_phone, extra_phone_res)
-
-    # if extra_phone_res is None or extra_phone_res == False:
     extra_phone = message.text.strip()
-    # print('extra_phone', extra_phone)
+    # ic('extra_phone', extra_phone)
     data = await state.get_data()
-    # print('\nstate ga saqlanganlar-->\n', data)
+    ic('state ga saqlanganlar-->', data)
     formatted_birth_date = data.get('formatted_birth_date')
     document = data.get('document')
+    new_token = data.get('new_token')
     token = data.get('token')
+    ic('new_token', new_token)
+    ic('token', token)
     # first_name = data.get('first_name')
     # last_name = data.get('last_name')
     phone = data.get('phone')
-    print(formatted_birth_date)
+    ic(formatted_birth_date)
     date_obj = datetime.strptime(formatted_birth_date, "%Y-%m-%d")
     formatted_date_str = date_obj.strftime("%Y-%m-%d")
 
-    print('-->',formatted_date_str,'\n\n',document,'\n\n')
-    response = send_req.application_form_info(formatted_date_str,document,token)
-    pprint(response.json())
-    data_res = response.json().get('passport', {})
-# Default values are used where data might not be present
+    ic('-->',formatted_date_str,document)
+    response = await send_req.application_form_info(formatted_date_str,document,token)
+    data = response['data']
+    ic(response)
+    # if response.get('status_code') == 409:
+    #     await message.answer(response.get('message'))
+    #     await state.finish()
+    # else:
+    data_res = data.get('passport', {})
     first_name = data_res.get('first_name', '')
     last_name = data_res.get('last_name', '')
     application_id = data_res.get('applicant_id', '')  # Note the key is 'applicant_id' based on your response
@@ -365,7 +345,7 @@ async def info(message: types.Message, state: FSMContext):
     gender = data_res.get('gender', '')
     photo = data_res.get('photo', '')
     pin = data_res.get('pin', [None])[0]
-    # document_info = data_res.get('document') if isinstance(data_res.get('document'), dict) else {}
+    
     docgiveplace = document.get('docgiveplace', '')
     docgiveplaceid = document.get('docgiveplaceid', 0)
     datebegin = document.get('datebegin', '')
@@ -391,10 +371,12 @@ async def info(message: types.Message, state: FSMContext):
         "last_name": last_name,
         "third_name": third_name,
     }
-    pprint(user_datas)
+    ic(user_datas)
     await state.update_data(**user_datas)
+
     print('shu doc info', passort_serial)
     "def application_form(token, src, district_id, education_id, file_vs_format, institution_name, region_id):"
+
     response_application_form = send_req.application_form(token,
                                                         birth_date,
                                                         birth_place,
@@ -410,12 +392,12 @@ async def info(message: types.Message, state: FSMContext):
                                                         src,
                                                         third_name
                                                         )
-    pprint(response_application_form.json())
-    print('keldi2022')
+    ic(response_application_form.json())
+    ic('keldi2022')
     data_me = collect_data.collect_me_data(token, field_name=None)
-    print(data_me)
+    ic(data_me)
     if response_application_form.status_code == 201:
-        print('keldi app formdan', response_application_form.status_code)
+        ic('keldi app formdan', response_application_form.status_code)
         application_data_res = response_application_form.json()
         application_id = application_data_res.get('applicant_id', '')
         application_src = application_data_res.get('application_src', '')
@@ -472,15 +454,9 @@ async def info(message: types.Message, state: FSMContext):
         }
         await state.update_data(**data_obj_applications)
         # await message.answer("Ta'lim malumotlarini kiriting")
-        enter_button = ReplyKeyboardMarkup(
-        keyboard= [
-            [
-                KeyboardButton(text='Davom etish'),
-            ]
-        ],
-        resize_keyboard=True)
+
         await message.answer("Universitetga hujjat topshirishni istasangiz davom etish tugmasini bosing,\n"
-                             "avvalo ta'lim ma'lumotingizni kiritishingiz talab etiladi", reply_markup=enter_button)
+                            "avvalo ta'lim ma'lumotingizni kiritishingiz talab etiladi", reply_markup=enter_button)
         
         await EducationData.education_id.set()
     await EducationData.education_id.set()
@@ -516,17 +492,7 @@ async def education_selection_handler(callback_query: types.CallbackQuery, state
     education_id = callback_query.data.split('edu_')[1]
     await state.update_data(education_id=education_id)
     await callback_query.answer()
-    await EducationData.region_id.set()  # Correctly transition to the next state
-    
-    
-    enter_button = ReplyKeyboardMarkup(
-    keyboard= [
-        [
-            KeyboardButton(text='Davom etish'),
-        ]
-    ],
-    resize_keyboard=True)
-    # await message.answer("Ma'lumot saqlandi", reply_markup=enter_button)
+    await EducationData.region_id.set() 
     await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=enter_button, parse_mode="HTML")
 
 
@@ -615,7 +581,7 @@ async def upload_file(message: types.Message, state: FSMContext):
     document = message.document
     file_path = await bot.get_file(document.file_id)
     file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
-    # print(file_url)
+    # ic(file_url)
     # await message.answer(file_url)
     download_dir = 'diploma_files'
     await aiofiles.os.makedirs(download_dir, exist_ok=True)
@@ -683,13 +649,7 @@ async def upload_file(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=EducationData.has_sertificate)
 async def has_sertificate(message: types.Message, state: FSMContext):
-    enter_button = ReplyKeyboardMarkup(
-        keyboard= [
-            [
-                KeyboardButton(text='Davom etish'),
-            ]
-        ],
-        resize_keyboard=True)
+
     text = message.text
     if text == "Ha, mavjud":
 
@@ -732,28 +692,22 @@ async def get_sertificate(message: types.Message, state: FSMContext):
         file_size = os.path.getsize(local_file_path)
         file_size_kb = file_size / 1024
         file_size_mb = file_size_kb / 1024
-        print(f'size: {file_size_mb:.2f}')
+        ic(f'size: {file_size_mb:.2f}')
     except: 
         return 'File not found'
     await state.update_data(file_size_sertificate=file_size)
     # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
     # await EducationData.has_application.set()
     # ic(all_state)
-    print(res_file.status_code)
-    print(res_file)
+    ic(res_file.status_code)
+    ic(res_file)
     try:
         data1 = res_file.json()
         await state.update_data(file_sertificate=data1['path'])
     except Exception as e:
         await message.answer(f"Xatolik: {e}")
         return
-    enter_button = ReplyKeyboardMarkup(
-    keyboard= [
-        [
-            KeyboardButton(text='Davom etish'),
-        ]
-    ],
-    resize_keyboard=True)
+
     await message.answer("Fayl yuklandi.", reply_markup=enter_button)
     ic('boshlandi1')
     await EducationData.degree_id.set()
@@ -766,7 +720,7 @@ async def has_application_start(message: types.Message, state: FSMContext):
     my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
     data = await state.get_data()
     token = data['token']
-    directions_response = send_req.directions(token)
+    directions_response = await send_req.directions(token)
     directions = directions_response.json()
     unique_degrees = []
     ic('ok')
@@ -796,13 +750,7 @@ async def has_application(callback_query: types.CallbackQuery, state: FSMContext
     await state.update_data(degree_id=degree_id)
     await callback_query.answer()
     await EducationData.direction_id.set()
-    enter_button = ReplyKeyboardMarkup(
-    keyboard= [
-        [
-            KeyboardButton(text='Davom etish'),
-        ]
-    ],
-    resize_keyboard=True)
+ 
     await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=enter_button,
                            parse_mode="HTML")
 
@@ -970,13 +918,14 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     applicant = send_req.applicants(token_, degree_id, direction_id, education_language_id, education_type_id)
     ic(applicant.json())
     if applicant.status_code == 201:
-        await callback_query.message.answer(f"Ariza muvaffaqiyatli topshirildi{applicant.status_code}")
+        await callback_query.message.answer(f"Ariza muvaffaqiyatli topshirildi")
+        await EducationData.menu.set()
     elif applicant.status_code != 201:
         await callback_query.message.answer("Xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring")
         
-    # except Exception as e:
-    #     await callback_query.message.answer("Xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring")
+ 
 
-@dp.message_handler(state=EducationData.menu)
-async def lang_id_select(message: types.Message, state: FSMContext):
-    await message.answer('ok tugadi')
+# @dp.message_handler(state=EducationData.menu)
+# async def lang_id_select(message: types.Message, state: FSMContext):
+    # await message.answer('ok tugadi')
+    # await message.answer("Akkauntga hush kelibsiz", reply_markup=menu)
