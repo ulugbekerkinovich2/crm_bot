@@ -721,7 +721,7 @@ async def has_application_start(message: types.Message, state: FSMContext):
     data = await state.get_data()
     token = data['token']
     directions_response = await send_req.directions(token)
-    directions = directions_response.json()
+    directions = directions_response
     unique_degrees = []
     ic('ok')
     for obj in directions:
@@ -759,8 +759,8 @@ async def has_application(callback_query: types.CallbackQuery, state: FSMContext
 async def direction_id_select(message: types.Message, state: FSMContext):
     data = await state.get_data()
     token = data['token']  
-    region_response = send_req.directions(token) 
-    regions = region_response.json()  
+    region_response =await send_req.directions(token) 
+    regions = region_response
     selected_degree_id = data['degree_id']
     ic(selected_degree_id)
     buttons = [[InlineKeyboardButton(text=item['direction_name_uz'], callback_data=f"direc_{item['direction_id']}")] for item in regions if item['degree_id'] == int(selected_degree_id)]
@@ -788,8 +788,8 @@ async def direction_id_select(message: types.Message, state: FSMContext):
     selected_direction_id = int(data['direction_id'])
     ic(selected_degree_id)
     ic(selected_direction_id)
-    edu_type_response = send_req.directions(token)
-    edu_types = edu_type_response.json()
+    edu_type_response =await send_req.directions(token)
+    edu_types = edu_type_response
     
 
     def return_edu_type_name_uz(edu_type_id):
@@ -845,8 +845,8 @@ async def lang_id_select(message: types.Message, state: FSMContext):
     education_type_id_selected = int(data['education_type'])
     direction_id_selected = int(data['direction_id'])
     degree_id_selected = int(data['degree_id'])
-    edu_lang_response = send_req.directions(token)  
-    edu_languages = edu_lang_response.json()
+    edu_lang_response = await send_req.directions(token)  
+    edu_languages = edu_lang_response
     
     edu_langs = []
 
