@@ -1,11 +1,14 @@
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
 class PersonalData(StatesGroup):
+    id_user = State()
+    chat_id_user = State()
     phone = State()
     secret_code = State()
     document = State()
     birth_date = State()
     token = State()
+    refreshToken = State()
     new_token = State()
     first_name = State()
     last_name = State()
@@ -62,6 +65,7 @@ class EducationData(StatesGroup):
     type_certification = State()
     has_sertificate = State()
     get_certificate = State()
+    certificate_type = State()
     file_size_sertificate = State()
     file_sertificate = State()
     has_application = State()
@@ -78,3 +82,27 @@ class EducationData(StatesGroup):
     
 class Account(StatesGroup):
     delete_account = State()
+
+class ManualPersonalInfo(StatesGroup):
+    personal_info = State()
+    image = State()
+    lastname = State()
+    firstname = State()
+    thirdname = State()
+    document = State()
+    birthdate = State()
+    pin = State()
+    gender = State()
+    birthplace = State()
+    extranumber = State()
+    email = State()
+
+class ManualEducationInfo(StatesGroup):
+    education_type = State()
+    region_id = State()
+    district_id = State()
+    institution_name = State()
+    diploma = State()
+    sertificate = State()
+    type_certification = State()
+

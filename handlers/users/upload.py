@@ -95,3 +95,6 @@ def upload_new_file_sertificate(token, filename):
         return response
     except FileNotFoundError:
         print("Ошибка: файл не найден по пути:", full_image_path)
+
+
+

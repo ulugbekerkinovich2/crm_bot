@@ -42,8 +42,11 @@ menu = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="🈸Arizalar"),
-            KeyboardButton(text="🗑Accountni o'chirish"),
+            KeyboardButton(text="🗑Akkauntni o'chirish"),
         ],
+        [
+            KeyboardButton(text="Akkauntdan chiqish"),
+        ]
     ],
     resize_keyboard=True
 )
@@ -111,6 +114,16 @@ ask_delete_account = ReplyKeyboardMarkup(
             KeyboardButton(text="Ha, akkauntni o'chirish"),
             KeyboardButton(text="Bekor qilish"),
         ]
-    ]
+    ],
+    resize_keyboard=True
 )
 
+exit_from_account = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Ha, Akkauntdan chiqish"),
+            KeyboardButton(text="Bekor qilish"),
+        ]
+    ],
+    resize_keyboard=True
+)

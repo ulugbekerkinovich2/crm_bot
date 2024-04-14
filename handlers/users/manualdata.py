@@ -1,0 +1,285 @@
+from aiogram import types
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Command, Text
+from utils import send_req
+from loader import dp
+from states.personalData import PersonalData, EducationData, ManualPersonalInfo
+from aiogram.utils.exceptions import Throttled
+from data.config import throttling_time, domain_name
+from pprint import pprint
+from datetime import datetime
+from handlers.users import collect_data, upload
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton,ReplyKeyboardRemove
+import os
+import aiofiles.os
+from icecream import ic
+import json
+import re
+from keyboards.default.registerKeyBoardButton import yes_no
+from keyboards.default.registerKeyBoardButton import enter_button, menu
+from handlers.users.register import error_message_birthday, error_date,error_document,accepted_document,error_pin, error_number,error_birthplace,wait_file_is_loading
+
+
+
+# @dp.message_handler(Text(equals="ok"), state=None)
+@dp.message_handler(state=ManualPersonalInfo.personal_info)
+async def send_welcome(message: types.Message, state: FSMContext):
+    await message.reply("PNFL orqali ma'lumotlarni olishni imkoni bo'lmadi", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Rasmingizni yuboring 3x4 formatda. jpg, png")
+    await ManualPersonalInfo.image.set()
+
+@dp.message_handler(state=ManualPersonalInfo.image, content_types=types.ContentType.PHOTO)
+async def get_image(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot)
+
+    data = await state.get_data()
+    token_ = data.get('token', None)  # Safer access with default None if 'token' doesn't exist
+    ic(token_)
+    if message.photo:
+        largest_photo = message.photo[-1]  # Get the largest resolution of the photo
+        ic(largest_photo)
+        file_id = largest_photo.file_id
+        file_info = await bot.get_file(file_id)
+        file_path = file_info.file_path
+        ic(file_path)
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+        # await message.answer(file_url)
+        download_dir = 'downloaded_images'
+        # await aiofiles.os.mkdir(download_dir, exist_ok=True)
+        local_file_path = os.path.join(download_dir, file_path)  # Use file_id as filename to avoid duplicates
+
+        # Download file from Telegram servers
+        await bot.download_file(file_path, local_file_path)
+        # await message.answer("File has been downloaded and saved.")
+
+        # Assume function upload_new_file() exists and correctly handles the upload process
+        try:
+            res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+            data1 = res_file.json()
+            ic(data1)
+            await state.update_data(image=data1['path'])
+        except Exception as e:
+            ic(e)
+            await message.reply(f"Error processing file: {str(e)}")
+        
+        await message.reply("Rasm qabul qilindi")
+        await message.answer("Familiyangizni kiriting\nNamuna: Abdullayev")
+        await ManualPersonalInfo.lastname.set()
+    else:
+        await message.reply("Iltimos, rasm yuboring. Rasmlar 3x4 formatda bo'lishi kerak.")
+
+@dp.message_handler(state=ManualPersonalInfo.lastname)
+async def get_lastname(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['lastname'] = message.text.strip()
+        last_name = data['lastname']
+        await state.update_data(lastname=last_name)
+    await message.answer("Ismingizni kiriting\nNamuna: Alisher")
+    await ManualPersonalInfo.firstname.set()
+
+@dp.message_handler(state=ManualPersonalInfo.firstname)
+async def get_firstname(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['firstname'] = message.text.strip()
+        first_name = data['firstname']
+        await state.update_data(firstname=first_name)
+    await message.answer("Otangizni ismi ismini kiriting\nNamuna: Najmiddin")
+    await ManualPersonalInfo.thirdname.set()
+
+@dp.message_handler(state=ManualPersonalInfo.thirdname)
+async def get_thirdname(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['thirdname'] = message.text.strip()
+        third_name = data['thirdname']
+        await state.update_data(thirdname=third_name)
+    await message.answer("Passport seriyasini kiriting\nNamuna: AB1234567")
+    await ManualPersonalInfo.document.set()
+
+@dp.message_handler(state=ManualPersonalInfo.document)
+async def get_document(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['document'] = message.text.strip()
+        document = data['document'].upper()
+        document_serial = document[:2]
+        document_number = document[2:]
+
+        while True:
+            # Check if the serial and number parts are valid
+            if len(document_serial) == 2 and document_serial.isalpha() and len(document_number) == 7 and document_number.isdigit():
+                formatted_document = f'{document_serial}{document_number}'
+                await state.update_data(document=formatted_document)
+                break  # Exit loop if the document is valid
+            
+            # Handle invalid input
+            await message.answer(error_document)
+            
+            # Wait for a new user message as a response
+            new_document = await message.answer("Iltimos, passport seriyasini namunadagidek kiriting:")
+            new_document = await dp.bot.wait_for("message", lambda msg: msg.chat.id == message.chat.id)
+            document = new_document.text.strip().upper()
+            document_serial = document[:2]
+            document_number = document[2:]
+
+        # After validation loop
+        await message.answer(accepted_document)
+    await message.answer("Tug'ilgan sanasini kiriting\nNamuna: yyyy-oo-kk,\t2002-03-21")
+    await ManualPersonalInfo.birthdate.set()
+
+@dp.message_handler(state=ManualPersonalInfo.birthdate)
+async def get_birthdate(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['birthdate'] = message.text.strip()
+        birth_date = data['birthdate']
+        birth_date_parts = birth_date.split('-') if birth_date else None
+        # print('birth_date', birth_date_parts)
+        if not birth_date_parts or len(birth_date_parts) != 3:
+            await message.answer(error_message_birthday)
+            return
+
+        check_year, check_month, check_day = birth_date_parts
+        if not (check_day.isdigit() and check_month.isdigit() and check_year.isdigit()):
+            await message.answer(error_message_birthday)
+            return
+
+        year, month, day = map(int, birth_date_parts)
+        # print(day, month, year)
+        if not (1 <= day <= 31 and 1 <= month <= 12 and 2024 > year > 1990):
+            await message.answer(error_date)
+            return
+        await state.update_data(birthdate=birth_date)
+        await message.answer("JSHSHR ni kiriting\nNamuna: 12345678901234")
+        await ManualPersonalInfo.pin.set()
+
+@dp.message_handler(state=ManualPersonalInfo.pin)
+async def get_pin(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['pin'] = message.text.strip()
+        pinfl = data['pin']
+        ic(pinfl)
+        if len(pinfl) != 14 or not pinfl.isdigit():
+            await message.answer(error_pin)
+            return
+    await state.update_data(pin=pinfl)
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add(KeyboardButton("Erkak"), KeyboardButton("Ayol"))
+    await message.answer("Jinsni tanlang", reply_markup=keyboard)
+    await ManualPersonalInfo.gender.set()
+
+@dp.message_handler(lambda message: message.text not in ["Erkak", "Ayol"], state=ManualPersonalInfo.gender)
+async def gender_invalid(message: types.Message):
+    await message.reply("Iltimos, jinsni 'Erkak' yoki 'Ayol' dan birini tanlang.")
+
+@dp.message_handler(lambda message: message.text in ["Erkak", "Ayol"], state=ManualPersonalInfo.gender)
+async def get_gender(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        ic(data)
+        data['gender'] = message.text
+        gender = data['gender']
+        if gender == "Erkak":
+            await state.update_data(gender="male")
+        else:
+            await state.update_data(gender="female")
+    await message.answer("Tug'ilgan joyini kiriting\nNamuna: Toshkent shahri", reply_markup=ReplyKeyboardRemove())
+    await ManualPersonalInfo.birthplace.set()
+
+@dp.message_handler(state=ManualPersonalInfo.birthplace)
+async def get_birthplace(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        ic(data)
+        data['birthplace'] = message.text.strip()
+        birth_place = data['birthplace']
+        if not birth_place:
+            await message.answer(error_birthplace)
+            return
+    await state.update_data(birthplace=birth_place)
+    await message.answer("Qo'shimcha telefon raqamingizni kiriting\nNamuna: 901234567")
+    await ManualPersonalInfo.extranumber.set()
+
+@dp.message_handler(state=ManualPersonalInfo.extranumber)
+async def get_extranumber(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['extranumber'] = message.text.strip()
+        
+        extra_num = data['extranumber']
+        if not extra_num.isdigit() and len(extra_num) != 9:
+            await message.answer(error_number)
+            return
+    extra_num = f"+998{data['extranumber']}"
+    await state.update_data(extranumber=extra_num)
+    await message.answer("Emailingizni kiriting\nNamuna: alisher@gmail.com")
+    await ManualPersonalInfo.email.set()
+
+@dp.message_handler(state=ManualPersonalInfo.email)
+async def get_email(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['email'] = message.text.strip()
+        # pattern = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+        email = data['email']
+        # if re.match(pattern, email):
+        #     async with state.proxy() as data:
+        #         data['email'] = email
+
+        #     # await message.answer("Ma'lumotlaringiz saqlandi")
+            
+        # else:
+        #     # If the email is invalid
+        #     await message.answer("Yaroqsiz email manzili kiritildi. Iltimos, haqiqiy email manzilini kiriting.")
+        #     return
+        # Optionally, you can set the state again to wait for another input
+        await state.update_data(email=email)
+        data_obj = await state.get_data()
+        token = data_obj.get('token')
+        lastname = data_obj.get('lastname')
+        firstname = data_obj.get('firstname')
+        thirdname = data_obj.get('thirdname')
+        document = data_obj.get('document')
+        birthdate = data_obj.get('birthdate')
+        pinfl = data_obj.get('pin')
+        gender = data_obj.get('gender')
+        if gender == "Erkak":
+            gender = "male"
+        else:
+            gender = "female"
+        birthplace = data_obj.get('birthplace')
+        extranumber = data_obj.get('extranumber')
+        email_ = data_obj.get('email')
+        image = data_obj.get('image')
+        phone = data_obj.get('phone')
+        src_ = "manually"
+        get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
+        chat_id_user = get_current_user['chat_id_user']
+        id_user = get_current_user['id']
+        await state.update_data(chat_id_user=chat_id_user, id_user=id_user)
+        data = await state.get_data()
+        phone = data['phone']
+        ic('django')
+        ic(id_user, phone, chat_id_user,firstname, lastname)
+        try: 
+            update_user_profile_response = send_req.update_user_profile(id=message.chat.id, chat_id=chat_id_user, phone=phone, first_name=firstname, last_name=lastname, pin=pinfl)
+            ic(update_user_profile_response)
+        except Exception as e:
+            ic(490,'my_dj_error', e)
+        ic(gender, birthdate, birthplace, extranumber)
+        res_app_forms = send_req.application_form_manual(token, birthdate,birthplace,email_,extranumber,firstname,
+                                            gender,lastname,phone,image,pinfl,document,
+                                            src_,thirdname)
+        ic(res_app_forms)
+        if res_app_forms.get('status_code') == 201:
+            await message.answer("Ma'lumotlaringiz saqlandi",reply_markup=enter_button)
+        else:
+            await message.answer("Ma'lumotlaringiz saqlanmadi")
+            await message.answer(res_app_forms)
+            return
+        # await message.answer("Universitetga hujjat topshirishni istasangiz davom etish tugmasini bosing,\n"
+        #                         "avvalo ta'lim ma'lumotingizni kiritishingiz talab etiladi", reply_markup=enter_button)
+    res_me = await send_req.application_forms_me_new(token)
+    ic(res_me)
+    if res_me['data'].get('status_code') == 200:
+        user_education_src = res_me['data'].get('user_education_src', None)
+        if user_education_src is None:
+            await state.EducationData.education_id.set()
+        elif user_education_src is not None:
+            await EducationData.degree_id.set()

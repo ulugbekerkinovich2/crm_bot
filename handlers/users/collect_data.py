@@ -1,28 +1,28 @@
 from utils import send_req
 from pprint import pprint
 
-def collect_me_data(token, field_name=None):
+async def collect_me_data(token, field_name=None):
     # print('token->', token)
     # print('keldi serial_number: ', field_name)
 
-    response = send_req.application_forms_me(token)
+    response = await send_req.application_forms_me(token)
     # print('response->keldi21', response)
-    if response.status_code == 404:
+    if response.get('status_code') == 404:
         return False
-    data = response.json()
+    # data = response.json()
     # print(response.json())
     
     # If field_name is not specified, return all data
     if field_name is None:
-        return data
+        return response
     
     # Search for the specified field_name
     try:
-        if data[field_name] is not None:
-            print('bor ekan', data[field_name])
-            return data[field_name]
+        if response[field_name] is not None:
+            print('bor ekan', response[field_name])
+            return response[field_name]
         elif field_name == 'src':
-            return data['user_education']['src']
+            return response['user_education']['src']
     except KeyError:
         print('topilmadi', field_name)
         return False
