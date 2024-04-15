@@ -41,7 +41,7 @@ menu = ReplyKeyboardMarkup(
             # KeyboardButton(text="🗂Yo'nalish tanlash"),
         # ],
         [
-            KeyboardButton(text="🈸Arizalar"),
+            KeyboardButton(text="📁Arizalar"),
             KeyboardButton(text="🗑Akkauntni o'chirish"),
         ],
         [

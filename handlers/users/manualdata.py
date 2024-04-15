@@ -272,7 +272,7 @@ async def get_email(message: types.Message, state: FSMContext):
     ic(res_app_forms.get('status_code'))
     if res_app_forms.get('status_code') == 201:
         ic(res_app_forms.get('status_code'))
-        await message.answer("Ma'lumotlaringiz saqlandi")
+        await message.answer("Ma'lumotlaringiz saqlandi", reply_markup=enter_button)
         res_me = await send_req.application_forms_me_new(token)
         ic(res_me)
         res_me.get('status_code')

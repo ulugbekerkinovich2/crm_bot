@@ -42,7 +42,7 @@ async def delete_account(message: types.Message, state: FSMContext):
 async def ask_exit_menu(message: Message, state: FSMContext):
     await message.answer("Akkauntdan chiqishni istaysizmi?", reply_markup=exit_from_account)
 
-@dp.message_handler(Text(equals="Ha, Akkauntdan chiqish"), state=EducationData.menu)
+@dp.message_handler(Text(equals="Ha, Akkauntdan chiqish"), state="*")
 async def exit_menu(message: Message, state: FSMContext):
     await state.update_data(token=None)
 
@@ -155,7 +155,7 @@ async def education_menu(message: Message, state: FSMContext):
     else:
         # Handle the case where the token is None or invalid
         await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, qayta urinib ko'ring.")
-@dp.message_handler(Text(equals="🈸Arizalar"), state=EducationData.menu)
+@dp.message_handler(Text(equals="📁Arizalar"), state=EducationData.menu)
 async def my_application(message: Message, state: FSMContext):
     data = await state.get_data()
     token = data.get('token')
