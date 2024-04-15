@@ -100,10 +100,10 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
         if len(phone_num) == 12:
             ic(phone_num)
             check_user = await send_req.check_number(custom_phone)
-            ic('check_user', check_user)
+            ic('check_user_new', check_user)
             # ic(check_user.content)
             if check_user == 'true':
-                ic(check_user)
+                ic('check_user_for_true',check_user)
                 await state.update_data(phone=phone_num)
 
 
@@ -121,8 +121,8 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                 else:
                     await message.answer("severda xatolik 63")
             # ic(check_user)
-            elif str(check_user.text) == 'false':
-                ic('check_user', check_user.text)
+            elif check_user == 'false':
+                ic('check_user_for_false', check_user)
                 await state.update_data(phone_num)
                 user_register = await send_req.user_register(custom_phone)
                 remove_keyboard = types.ReplyKeyboardRemove()
