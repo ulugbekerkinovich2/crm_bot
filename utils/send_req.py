@@ -159,12 +159,13 @@ def application_form_manual(token,birth_date,birth_place,email,extra_phone,first
         'src': src,
         'third_name': third_name
     }
-    # print(body)
+    (162, body)
     response = requests.post(url, headers=default_header, json=body)
     if response.status_code == 201:
         data = response.json()  # Read and parse the JSON response
         return {'data': data, 'status_code': response.status_code}  # Return the data
     else:
+        data = response.json() 
         # Handling errors by returning a simple error message or dict
         return {'data': data, 'error': 'Failed to fetch data', 'status_code': response.status_code}
     # async with aiohttp.ClientSession() as session:

@@ -36,10 +36,10 @@ menu = ReplyKeyboardMarkup(
             KeyboardButton(text="ℹ️Shaxsiy ma'lumotlar"),
             KeyboardButton(text="📚Ta'lim ma'lumotlari"),
         ],
-        [
-            KeyboardButton(text="📃Chet tili sertifikat qo'shish"),
-            KeyboardButton(text="🗂Yo'nalish tanlash"),
-        ],
+        # [
+            # KeyboardButton(text="📃Chet tili sertifikat qo'shish"),
+            # KeyboardButton(text="🗂Yo'nalish tanlash"),
+        # ],
         [
             KeyboardButton(text="🈸Arizalar"),
             KeyboardButton(text="🗑Akkauntni o'chirish"),

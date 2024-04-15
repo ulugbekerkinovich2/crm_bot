@@ -214,72 +214,76 @@ async def get_extranumber(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=ManualPersonalInfo.email)
 async def get_email(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['email'] = message.text.strip()
-        # pattern = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-        email = data['email']
-        # if re.match(pattern, email):
-        #     async with state.proxy() as data:
-        #         data['email'] = email
+    email = message.text.strip()
+    ic(218, email)
+    # Debug prints can be removed or handled via logging
+    # Logging example: logger.debug(f"Received email: {email}")
+    
+    if not re.match(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', email, re.IGNORECASE):
+        await message.answer("Invalid email format. Please enter a valid email address.")
+        return  # Ask for the email again or handle differently
+    
 
-        #     # await message.answer("Ma'lumotlaringiz saqlandi")
-            
-        # else:
-        #     # If the email is invalid
-        #     await message.answer("Yaroqsiz email manzili kiritildi. Iltimos, haqiqiy email manzilini kiriting.")
-        #     return
-        # Optionally, you can set the state again to wait for another input
-        await state.update_data(email=email)
-        data_obj = await state.get_data()
-        token = data_obj.get('token')
-        lastname = data_obj.get('lastname')
-        firstname = data_obj.get('firstname')
-        thirdname = data_obj.get('thirdname')
-        document = data_obj.get('document')
-        birthdate = data_obj.get('birthdate')
-        pinfl = data_obj.get('pin')
-        gender = data_obj.get('gender')
-        if gender == "Erkak":
-            gender = "male"
-        else:
-            gender = "female"
-        birthplace = data_obj.get('birthplace')
-        extranumber = data_obj.get('extranumber')
-        email_ = data_obj.get('email')
-        image = data_obj.get('image')
-        phone = data_obj.get('phone')
-        src_ = "manually"
-        get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
-        chat_id_user = get_current_user['chat_id_user']
-        id_user = get_current_user['id']
-        await state.update_data(chat_id_user=chat_id_user, id_user=id_user)
-        data = await state.get_data()
-        phone = data['phone']
-        ic('django')
-        ic(id_user, phone, chat_id_user,firstname, lastname)
-        try: 
-            update_user_profile_response = send_req.update_user_profile(id=message.chat.id, chat_id=chat_id_user, phone=phone, first_name=firstname, last_name=lastname, pin=pinfl)
-            ic(update_user_profile_response)
-        except Exception as e:
-            ic(490,'my_dj_error', e)
+    await state.update_data(email=email)
+    data_obj = await state.get_data()
+    token = data_obj.get('token')
+    lastname = data_obj.get('lastname')
+    firstname = data_obj.get('firstname')
+    thirdname = data_obj.get('thirdname')
+    document = data_obj.get('document')
+    birthdate = data_obj.get('birthdate')
+    pinfl = data_obj.get('pin')
+    gender = data_obj.get('gender')
+
+    if gender == "Erkak":
+        gender = "male"
+    else:
+        gender = "female"
+
+    birthplace = data_obj.get('birthplace')
+    extranumber = data_obj.get('extranumber')
+    email_ = data_obj.get('email')
+    image = data_obj.get('image')
+    phone = data_obj.get('phone')
+    src_ = "manually"
+
+    get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
+    chat_id_user = get_current_user['chat_id_user']
+    id_user = get_current_user['id']
+
+    await state.update_data(chat_id_user=chat_id_user, id_user=id_user)
+    data = await state.get_data()
+    phone = data['phone']
+    ic('django')
+    ic(id_user, email, chat_id_user,firstname, lastname)
+    # try: 
+    update_user_profile_response = send_req.update_user_profile(id=message.chat.id, chat_id=chat_id_user, phone=phone, first_name=firstname, last_name=lastname, pin=pinfl)
+    ic(update_user_profile_response)
+    # except Exception as e:
+    #     ic(490,'my_dj_error', e)
+    try:
         ic(gender, birthdate, birthplace, extranumber)
         res_app_forms = send_req.application_form_manual(token, birthdate,birthplace,email_,extranumber,firstname,
                                             gender,lastname,phone,image,pinfl,document,
-                                            src_,thirdname)
+                                        src_,thirdname)
         ic(res_app_forms)
-        if res_app_forms.get('status_code') == 201:
-            await message.answer("Ma'lumotlaringiz saqlandi",reply_markup=enter_button)
-        else:
-            await message.answer("Ma'lumotlaringiz saqlanmadi")
-            await message.answer(res_app_forms)
-            return
-        # await message.answer("Universitetga hujjat topshirishni istasangiz davom etish tugmasini bosing,\n"
-        #                         "avvalo ta'lim ma'lumotingizni kiritishingiz talab etiladi", reply_markup=enter_button)
-    res_me = await send_req.application_forms_me_new(token)
-    ic(res_me)
-    if res_me['data'].get('status_code') == 200:
-        user_education_src = res_me['data'].get('user_education_src', None)
-        if user_education_src is None:
-            await state.EducationData.education_id.set()
-        elif user_education_src is not None:
-            await EducationData.degree_id.set()
+    except Exception as e:
+        return await message.answer(e, res_app_forms)
+    ic(res_app_forms.get('status_code'))
+    if res_app_forms.get('status_code') == 201:
+        ic(res_app_forms.get('status_code'))
+        await message.answer("Ma'lumotlaringiz saqlandi")
+        res_me = await send_req.application_forms_me_new(token)
+        ic(res_me)
+        res_me.get('status_code')
+        if res_me.get('status_code') == 200:
+            user_education_src = res_me['data'].get('user_education_src', None)
+            if user_education_src is None:
+                await EducationData.education_id.set()
+            elif user_education_src is not None:
+                await EducationData.degree_id.set()
+    else:
+        await message.answer("Ma'lumotlaringiz saqlanmadi")
+        await message.answer(res_app_forms)
+        # return
+
