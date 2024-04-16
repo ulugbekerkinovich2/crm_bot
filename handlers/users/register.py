@@ -314,7 +314,7 @@ async def birth_date(message: types.Message, state: FSMContext):
         await ManualPersonalInfo.personal_info.set()
     data_res = check_is_not_duplicate['data']
     ic(check_is_not_duplicate)
-    if check_is_not_duplicate.get('status_code') == 409:
+    if check_is_not_duplicate.get('status_code') == 409 or check_is_not_duplicate.get('status_code') == 401:
         error_mes = data_res.get('message')
         await message.answer(f"🔴 {error_mes}")
         await state.finish()
