@@ -107,11 +107,12 @@ async def application_form_info(birth_date, document, token):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             ic(response.status, 'info')
+            json_data = await response.json() 
             if response.status == 200:
-                json_data = await response.json() 
+                
                 return {'data': json_data, 'status_code': response.status} 
             else:
-                json_data = await response.json() 
+                # json_data = await response.json() 
                 return {'error': "Failed to verify", 'status_code': response.status, 'data': json_data}
             
 # a = application_form_info('2002-04-28', 'AB9666486', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQ5LCJmaXJzdF9uYW1lIjoiVUxVR-KAmEJFSyIsImxhc3RfbmFtZSI6IkVSS0lOT1YiLCJiaXJ0aF9kYXRlIjpudWxsLCJwaG9uZSI6Iis5OTg5OTgzNTkwMTUiLCJyb2xlIjoidXNlciIsImF2YXRhciI6ImF2YXRhci9jNjg5MmQ0OC1mZjQ2LTQ1MjctYmVkMi05MTgzMGJkZDk1ZDcuanBnIiwiZW1haWwiOm51bGwsImlzX3ZlcmlmeSI6dHJ1ZSwiY3JlYXRlZF9hdCI6IjIwMjQtMDMtMTlUMDQ6NDA6NTMuMzkxWiIsInVwZGF0ZWRfYXQiOiIyMDI0LTAzLTE5VDA0OjQwOjUzLjM5MVoiLCJ1bml2ZXJzaXR5SWQiOjIsImlhdCI6MTcxMzA4NTcxMiwiZXhwIjoxNzEzMTA3MzEyfQ.lM2EPgio7D9WnDIWZh-HgJa1J0cu6iyk5gNed3x3puM')
