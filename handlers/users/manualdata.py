@@ -28,7 +28,7 @@ async def send_welcome(message: types.Message, state: FSMContext):
     await message.answer("Rasmingizni yuboring 3x4 formatda. jpg, png")
     await ManualPersonalInfo.image.set()
 
-@dp.message_handler(state=ManualPersonalInfo.image, content_types=types.ContentType.PHOTO)
+@dp.message_handler(state=ManualPersonalInfo.image, content_types=types.ContentType.PHOTO,content_types=['document'])
 async def get_image(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
@@ -38,6 +38,8 @@ async def get_image(message: types.Message, state: FSMContext):
     data = await state.get_data()
     token_ = data.get('token', None)  # Safer access with default None if 'token' doesn't exist
     ic(token_)
+    ic(message)
+    download_dir = 'profile_images'
     if message.photo:
         largest_photo = message.photo[-1]  # Get the largest resolution of the photo
         ic(largest_photo)
@@ -47,15 +49,9 @@ async def get_image(message: types.Message, state: FSMContext):
         ic(file_path)
         file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
         # await message.answer(file_url)
-        download_dir = 'downloaded_images'
-        # await aiofiles.os.mkdir(download_dir, exist_ok=True)
-        local_file_path = os.path.join(download_dir, file_path)  # Use file_id as filename to avoid duplicates
-
-        # Download file from Telegram servers
+        
+        local_file_path = os.path.join(download_dir, file_path) 
         await bot.download_file(file_path, local_file_path)
-        # await message.answer("File has been downloaded and saved.")
-
-        # Assume function upload_new_file() exists and correctly handles the upload process
         try:
             res_file = upload.upload_new_file(token=token_, filename=local_file_path)
             data1 = res_file.json()
@@ -70,6 +66,18 @@ async def get_image(message: types.Message, state: FSMContext):
         await ManualPersonalInfo.lastname.set()
     else:
         await message.reply("Iltimos, rasm yuboring. Rasmlar 3x4 formatda bo'lishi kerak.")
+    if not message.photo:
+        if message.document:
+            document = message.document
+            file_path = await bot.get_file(document.file_id)
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+
+            await aiofiles.os.makedirs(download_dir, exist_ok=True)
+            local_file_path = os.path.join(download_dir, document.file_name)
+            ic(local_file_path)
+            await send_req.download_file(file_url, local_file_path)
+            await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
 
 @dp.message_handler(state=ManualPersonalInfo.lastname)
 async def get_lastname(message: types.Message, state: FSMContext):
@@ -77,7 +85,7 @@ async def get_lastname(message: types.Message, state: FSMContext):
         data['lastname'] = message.text.strip()
         last_name = data['lastname']
         await state.update_data(lastname=last_name)
-    await message.answer("Ismingizni kiriting\nNamuna: Alisher")
+    await message.answer("Ismingizni kiriting Namuna: Alisher")
     await ManualPersonalInfo.firstname.set()
 
 @dp.message_handler(state=ManualPersonalInfo.firstname)
@@ -125,7 +133,7 @@ async def get_document(message: types.Message, state: FSMContext):
 
         # After validation loop
         await message.answer(accepted_document)
-    await message.answer("Tug'ilgan sanasini kiriting\nNamuna: yyyy-oo-kk,\t2002-03-21")
+    await message.answer("Tug'ilgan sanasini kiriting\nNamuna: yyyy-oo-kk, 2002-03-21")
     await ManualPersonalInfo.birthdate.set()
 
 @dp.message_handler(state=ManualPersonalInfo.birthdate)

@@ -19,7 +19,7 @@ async def bot_start(message: types.Message, state: FSMContext):
 
     await state.update_data(start_count=start_count)
 
-    if start_count > 1 and start_count < 3 or start_count > 8:
+    if (start_count > 1 and start_count < 3) or start_count > 8:
         
         username = message.from_user.username or message.from_user.full_name  # Use username if available, otherwise full name
         await message.answer(f"@{username} start tugmasini qayta qayta bosish shart emas😅")

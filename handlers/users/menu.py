@@ -45,7 +45,7 @@ async def ask_exit_menu(message: Message, state: FSMContext):
 @dp.message_handler(Text(equals="Ha, Akkauntdan chiqish"), state="*")
 async def exit_menu(message: Message, state: FSMContext):
     await state.update_data(token=None)
-
+    await state.update_data(start_count=0)
     await message.answer('Siz akkauntdan chiqdingiz\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
 @dp.message_handler(Text(equals="Bekor qilish"), state=EducationData.menu)
@@ -58,6 +58,7 @@ async def my_menu(message: Message, state: FSMContext):
     token = data.get('token')
     if token:
         personal_info = await send_req.application_forms_me(token)
+        ic(personal_info)
         photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
         ic(photo)
         
@@ -101,7 +102,7 @@ async def education_menu(message: Message, state: FSMContext):
         user_education = education_info.get('user_education', {})
         certifications = education_info.get('certifications', [])
         pinfl_user_education = education_info.get('pinfl_user_education', {})
-
+        ic(education_info)
         ic(certifications)
         ic(pinfl_user_education)
         # Constructing the education message

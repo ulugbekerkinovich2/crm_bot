@@ -35,7 +35,7 @@ accepted_document = "🟢Passport seriyasi qabul qilindi"
 example_document = "Passport seriyangizni yuboring\nNamuna: AB1234567"
 error_document = "🔴Passport seriya noto'g'ri kiritildi"
 error_secret_code = "🔴Tasdiqlash kodi noto'g'ri kiritildi"
-error_type_edu_name = 'Talim dargoh nomini kiriting, bu majburiy.'
+error_type_edu_name = 'Talim dargoh nomini kiriting, bu majburiy.\nNamuna: 12-maktab'
 error_document = "Passport seriyasi 2 ta harfdan  va 7 raqamdan iborat bo'lishi kerak.\nQayta passport seriyangizni kiriting"
 select_region = "Ta'lim dargohi joylashgan shahar yoki viloyatni tanlang:"
 select_degree = "<b>*Daraja tanlang:</b>"
@@ -43,7 +43,7 @@ select_direction = "Yo'nalish yoki mutaxassislikni tanlang:"
 select_edu_type = "Ta'lim shaklini tanglang:"
 select_edu_language = "Ta'lim tilini tanlang:"
 select_type_certificate = "Sertifikat turini tanlang:"
-type_your_edu_name = "Ta'lim dargohi nomini kiriting:"
+type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: 12-maktab"
 wait_file_is_loading = "<b>Kuting, fayl yuklanmoqda.</b>"
 retype_secret_code = "Tasdiqlash kodini qayta kiriting"
 application_submited = 'Ariza muvaffaqiyatli topshirildi'
@@ -307,17 +307,18 @@ async def birth_date(message: types.Message, state: FSMContext):
     document = data_state.get('document')
     ic('birth_date', birth_date)
     ic("document", document)
-
+    
     check_is_not_duplicate = await send_req.application_form_info(birth_date, document, token)
-    if check_is_not_duplicate.get('status_code') == 500:
+    ic(check_is_not_duplicate)
+    if check_is_not_duplicate.get('status_code') in [500,404,409,400]:
         await message.answer(server_error, reply_markup=enter_button)
         await ManualPersonalInfo.personal_info.set()
-    data_res = check_is_not_duplicate['data']
-    ic(check_is_not_duplicate)
-    if check_is_not_duplicate.get('status_code') == 409 or check_is_not_duplicate.get('status_code') == 401:
-        error_mes = data_res.get('message')
-        await message.answer(f"🔴 {error_mes}")
-        await state.finish()
+    # data_res = check_is_not_duplicate['data']
+    # ic(check_is_not_duplicate)
+    # if check_is_not_duplicate.get('status_code') == 409 or check_is_not_duplicate.get('status_code') == 401 or check_is_not_duplicate.get('status_code') == 400:
+    #     # error_mes = data_res.get('message')
+    #     await message.answer(f"🔴 {error_mes}")
+    #     await state.finish()
     elif check_is_not_duplicate.get('status_code') == 200:
         await state.update_data(birth_date=birth_date)
         await message.answer(accepted_birthday_saved_data)
