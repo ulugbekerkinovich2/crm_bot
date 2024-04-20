@@ -58,7 +58,7 @@ async def my_menu(message: Message, state: FSMContext):
     token = data.get('token')
     if token:
         personal_info = await send_req.application_forms_me(token)
-        ic(personal_info)
+        
         photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
         ic(photo)
         

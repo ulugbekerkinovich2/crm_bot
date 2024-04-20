@@ -24,11 +24,11 @@ from handlers.users.register import error_message_birthday, error_date,error_doc
 # @dp.message_handler(Text(equals="ok"), state=None)
 @dp.message_handler(state=ManualPersonalInfo.personal_info)
 async def send_welcome(message: types.Message, state: FSMContext):
-    await message.reply("PNFL orqali ma'lumotlarni olishni imkoni bo'lmadi", reply_markup=ReplyKeyboardRemove())
-    await message.answer("Rasmingizni yuboring 3x4 formatda. jpg, png")
+    # await message.reply("PNFL orqali ma'lumotlarni olishni imkoni bo'lmadi", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Rasmingizni yuboring 3x4 formatda. jpg, png formatda",reply_markup=ReplyKeyboardRemove())
     await ManualPersonalInfo.image.set()
 
-@dp.message_handler(state=ManualPersonalInfo.image, content_types=types.ContentType.PHOTO,content_types=['document'])
+@dp.message_handler(state=ManualPersonalInfo.image, content_types=[types.ContentType.PHOTO, types.ContentType.DOCUMENT])
 async def get_image(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
@@ -41,43 +41,59 @@ async def get_image(message: types.Message, state: FSMContext):
     ic(message)
     download_dir = 'profile_images'
     if message.photo:
-        largest_photo = message.photo[-1]  # Get the largest resolution of the photo
-        ic(largest_photo)
-        file_id = largest_photo.file_id
-        file_info = await bot.get_file(file_id)
-        file_path = file_info.file_path
-        ic(file_path)
-        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
-        # await message.answer(file_url)
-        
-        local_file_path = os.path.join(download_dir, file_path) 
-        await bot.download_file(file_path, local_file_path)
         try:
-            res_file = upload.upload_new_file(token=token_, filename=local_file_path)
-            data1 = res_file.json()
-            ic(data1)
-            await state.update_data(image=data1['path'])
-        except Exception as e:
-            ic(e)
-            await message.reply(f"Error processing file: {str(e)}")
-        
-        await message.reply("Rasm qabul qilindi")
-        await message.answer("Familiyangizni kiriting\nNamuna: Abdullayev")
-        await ManualPersonalInfo.lastname.set()
-    else:
-        await message.reply("Iltimos, rasm yuboring. Rasmlar 3x4 formatda bo'lishi kerak.")
-    if not message.photo:
-        if message.document:
-            document = message.document
-            file_path = await bot.get_file(document.file_id)
+            largest_photo = message.photo[-1]  # Get the largest resolution of the photo
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
             ic(file_path)
-            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(data1)
+                await state.update_data(image=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Error processing file: {str(e)}")
+            await message.reply("Rasm qabul qilindi")
+            await message.answer("Familiyangizni kiriting\nNamuna: Abdullayev")
+            await ManualPersonalInfo.lastname.set()
+        except Exception as e:
+            await message.reply("Iltimos, rasm yuboring. Rasmlar 3x4 formatda bo'lishi kerak.")
 
-            await aiofiles.os.makedirs(download_dir, exist_ok=True)
-            local_file_path = os.path.join(download_dir, document.file_name)
-            ic(local_file_path)
-            await send_req.download_file(file_url, local_file_path)
-            await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
+    # elif not message.photo:
+    #     if message.document:
+    #         try:
+    #             document = message.document
+    #             file_path = await bot.get_file(document.file_id)
+    #             ic(file_path)
+    #             file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+
+    #             await aiofiles.os.makedirs(download_dir, exist_ok=True)
+    #             local_file_path = os.path.join(download_dir, document.file_name)
+    #             ic(local_file_path)
+    #             await send_req.download_file(file_url, local_file_path)
+    #             await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
+    #             try:
+    #                 res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+    #                 data1 = res_file.json()
+    #                 ic(data1)
+    #                 await state.update_data(image=data1['path'])
+    #             except Exception as e:
+    #                 ic(e)
+    #                 await message.reply(f"Error processing file: {str(e)}")
+    #         except Exception as e:
+    #             ic(e)
+    #             await message.reply("Iltimos, rasm yuboring. Rasmlar 3x4 formatda bo'lishi kerak.\nSiz yuborilgan fayl qabul qilinmadi")
+    #         await message.reply("Rasm qabul qilindi")
+    #         await message.answer("Familiyangizni kiriting\nNamuna: Abdullayev")
+    #         await ManualPersonalInfo.lastname.set()
 
 @dp.message_handler(state=ManualPersonalInfo.lastname)
 async def get_lastname(message: types.Message, state: FSMContext):

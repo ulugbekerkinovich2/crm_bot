@@ -47,7 +47,7 @@ type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: 12-maktab"
 wait_file_is_loading = "<b>Kuting, fayl yuklanmoqda.</b>"
 retype_secret_code = "Tasdiqlash kodini qayta kiriting"
 application_submited = 'Ariza muvaffaqiyatli topshirildi'
-server_error = 'Xatolik yuz berdi. Iltimos qayta urunib ko\'ring.Ma\'lumotlaringizni markaziy ma\'lumotlar omboridan topilmadi'
+server_error = '🔴Ma\'lumotlaringizni markaziy ma\'lumotlar omboridan topolmadim\nMa\'lumotlaringizni kiritishingiz mumkin.'
 error_pin = "🔴 JSHSHR 14 raqamdan iborat bolishi kerak"
 error_number = "🔴 Telefon nomer 9ta raqamdan iborat bo'lishi kerak, Iltimos namunadagidek raqam kiriting"
 error_birthplace = "🔴 Tug'ilgan joy noto'g'ri kiritildi"
@@ -770,7 +770,7 @@ async def get_sertificate(message: types.Message, state: FSMContext):
         file_size_kb = file_size / 1024
         file_size_mb = file_size_kb / 1024
         ic(f'size: {file_size_mb:.2f}')
-    except: 
+    except:
         return 'File not found'
     await state.update_data(file_size_sertificate=file_size)
     # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
