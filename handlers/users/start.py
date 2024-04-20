@@ -31,8 +31,11 @@ async def bot_start(message: types.Message, state: FSMContext):
     if start_count >= 7 and start_count < 8:
         username_display = f"@{message.from_user.username}" if message.from_user.username else message.from_user.full_name
         await message.answer(f"{username_display} zerikkan bo'lsangiz\n\nhttps://mentalaba.uz saytini ko'rishni tavsiya qilaman.")
-
-    if token:
+    data_in_state = await state.get_data()
+    haveApplicationForm = data_in_state.get('haveApplicationForm', False)
+    haveApplied = data_in_state.get('haveApplied', False)
+    haveEducation = data_in_state.get('haveEducation', False)
+    if token and haveApplicationForm and haveApplied and haveEducation:
         # If there's a token, show the main menu
         await message.answer("🏠Asosiy sahifa", reply_markup=registerKeyBoardButton.menu)
     else:

@@ -63,10 +63,14 @@ async def user_verify(secret_code, phone):
         'phone': phone,
         "code": secret_code
     }
+    ic(body)
     
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=body, headers=default_header) as response:
+            data = await response.json()
+            ic(data)
             if response.status == 200:
+                
                 json_data = await response.json()  # This should be a dictionary
                 return {'data': json_data, 'status_code': response.status}  # Return a dictionary
             else:
@@ -81,6 +85,7 @@ async def user_login(phone):
     body = {
         'phone': phone
     }
+    ic(body)
     # response = requests.post(url, json=body, headers=default_header)
     # print(response.json())
     # return response

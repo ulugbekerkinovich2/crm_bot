@@ -94,17 +94,62 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
     except AttributeError:
         custom_writened_phone = None
     ic("custom_writened_phone", custom_writened_phone)
-    if contact is not None and phone_num is not None:
-        custom_phone = f'+{phone_num}'
-        ic(phone_num)
-        if len(phone_num) == 12:
-            ic(phone_num)
+    # if contact is not None and phone_num is not None:
+    ic(phone_num)
+    ic('nomer keldi')
+    if phone_num is not None:
+
+        ic(phone_num, 100)
+        ic(len(phone_num), 101)
+
+        if str(phone_num)[0] != '+':
+            phone_num = f"+{phone_num}"
+            ic('plus qoshdi')
+            if len(phone_num) == 13:
+                custom_phone = phone_num
+                ic(custom_phone, 102)
+                check_user = await send_req.check_number(custom_phone)
+                ic('check_user_new', check_user)
+                ic(check_user)
+                if check_user == 'true':
+                    ic('check_user_for_true',check_user)
+                    await state.update_data(phone=custom_phone)
+
+
+                    user_login = await send_req.user_login(custom_phone)
+                    
+                    ic('user_login: ',user_login)
+                    ic('user_login status: ',user_login.get('status_code'))
+                    user_login_status = user_login.get('status_code')
+
+                    if user_login_status == 200:
+                        ic('user_login status',user_login_status)
+                        remove_keyboard = types.ReplyKeyboardRemove()
+                        await message.answer(accepted_phone, parse_mode='HTML', reply_markup=remove_keyboard)
+                        await PersonalData.secret_code.set()
+                    else:
+                        await message.answer("severda xatolik 63")
+                # ic(check_user)
+                elif check_user == 'false':
+                    ic('check_user_for_false', check_user)
+                    await state.update_data(phone=custom_phone)
+                    user_register = await send_req.user_register(custom_phone)
+                    remove_keyboard = types.ReplyKeyboardRemove()
+                    ic('user_register: ',user_register.status_code)
+                    if user_register.status_code == 201:
+                        await message.answer(accepted_phone, reply_markup=remove_keyboard)
+                        await PersonalData.secret_code.set()
+
+        elif len(phone_num) == 13:
+            ic('plus bilan keldi')
+            custom_phone = phone_num
+            ic(custom_phone, 140)
             check_user = await send_req.check_number(custom_phone)
             ic('check_user_new', check_user)
-            # ic(check_user.content)
+            ic(check_user)
             if check_user == 'true':
                 ic('check_user_for_true',check_user)
-                await state.update_data(phone=phone_num)
+                await state.update_data(phone=custom_phone)
 
 
                 user_login = await send_req.user_login(custom_phone)
@@ -123,7 +168,7 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
             # ic(check_user)
             elif check_user == 'false':
                 ic('check_user_for_false', check_user)
-                await state.update_data(phone_num)
+                await state.update_data(phone=custom_phone)
                 user_register = await send_req.user_register(custom_phone)
                 remove_keyboard = types.ReplyKeyboardRemove()
                 ic('user_register: ',user_register.status_code)
@@ -149,13 +194,13 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                     break
 
             elif len(phone_num) == 12:
-                # ic('keldi')
+                ic('phone_num: 12talik',phone_num)
                 status_while = False
                 custom_phone = f'+{phone_num}'
                 check_user = await send_req.check_number(custom_phone)
                 ic('check_user', check_user)
                 if str(check_user) == 'true':
-                    await state.update_data(phone=phone_num)
+                    await state.update_data(phone=custom_phone)
                     user_login = await send_req.user_login(custom_phone)
                     ic('user_login', user_login)
                     if user_login.get('status_code') == 200:
@@ -166,10 +211,11 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                         await message.answer(" Telefon raqamingizga yuborilgan kodni yuboring", reply_markup=reset_pass_button)
                         await PersonalData.secret_code.set()
                     else:
-                        await message.answer("severda xatolik 107")
+                        await message.answer("935920479","severda xatolik 107")
+                        await message.answer("Siz Ro'yhatdan o'tishingiz kerak")
 
                 elif str(check_user) == 'false':
-                    await state.update_data(phone=phone_num)
+                    await state.update_data(phone=custom_phone)
                     user_register = await send_req.user_register(custom_phone)
                     ic('user_register', user_register)
                     if user_register.get('status') == 200:
@@ -177,7 +223,7 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                         # await message.answer("Telefon raqamingizga yuborilgan kodni yuboring")
                         await PersonalData.secret_code.set()
                 else:
-                    await message.answer("severda xatolik 120")
+                    await message.answer("severda xatolik yuz berdi 120")
 
 
 @dp.message_handler(state=PersonalData.secret_code)
@@ -186,11 +232,11 @@ async def secret_code(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if len(secret_code) == 6 and secret_code.isdigit():
         data = await state.get_data()
-        phone_number = f"+{data.get('phone')}"
+        phone_number = f"{data.get('phone')}"
         # ic("phone->", phone_number)
         response_ = await send_req.user_verify(int(secret_code), phone_number)
         res_status_code = response_.get('status_code')
-        # ic('response1111', response_)
+        ic('response1111', response_)
         if response_.get('status_code') == 200:
             ic('kirdik333')
             # data_res = response_
@@ -218,10 +264,12 @@ async def secret_code(message: types.Message, state: FSMContext):
 
             if haveApplicationForm is False and haveEducation is False and haveApplied is False:
                 await message.answer(example_document, reply_markup=ReplyKeyboardRemove())
+                await state.update_data(haveApplicationForm=False,haveEducation=False,haveApplied=False)
                 await PersonalData.document.set()
 
             elif haveApplicationForm is True and haveEducation is False and haveApplied is False:
                 await message.answer("<i>Siz ro'yhatdan o'tgansiz ta'lim ma'lumotlarini to'ldirishingiz kerak</i>", reply_markup=enter_button)
+                await state.update_data(haveApplicationForm=True,haveEducation=False,haveApplied=False)
                 ic('002')
                 await EducationData.education_id.set()
                 
@@ -229,11 +277,13 @@ async def secret_code(message: types.Message, state: FSMContext):
             elif haveApplicationForm is True and haveEducation is True and haveApplied is False:
                 await message.answer("<i>Siz ro'yhatdan o'tkansiz, ta'lim ma'lumotlaringiz ham to'ldirilgan, universitetda ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
                 ic('keldi 003')
+                await state.update_data(haveApplicationForm=True,haveEducation=True,haveApplied=False)
 
                 await EducationData.degree_id.set()
             elif haveApplicationForm is True and haveEducation is True and haveApplied is True:
                 await message.answer("<i>- Siz ro'yhatdan o'tkansiz\n-Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n- Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
                 ic('keldi 004')
+                await state.update_data(haveApplicationForm=True,haveEducation=True,haveApplied=True)
 
                 await EducationData.menu.set()
 
@@ -245,7 +295,7 @@ async def secret_code(message: types.Message, state: FSMContext):
             response = await dp.bot.wait_for("message")
     else:
         await message.answer(error_secret_code)
-        
+
     # remove_keyboard_ = types.ReplyKeyboardRemove()
     await state.update_data(secret_code=secret_code)
 
