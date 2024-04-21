@@ -278,6 +278,7 @@ async def secret_code(message: types.Message, state: FSMContext):
                 await message.answer("<i>Siz ro'yhatdan o'tkansiz, ta'lim ma'lumotlaringiz ham to'ldirilgan, universitetda ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
                 ic('keldi 003')
                 await state.update_data(haveApplicationForm=True,haveEducation=True,haveApplied=False)
+                
 
                 await EducationData.degree_id.set()
             elif haveApplicationForm is True and haveEducation is True and haveApplied is True:
@@ -537,7 +538,7 @@ async def info(message: types.Message, state: FSMContext):
 
         await message.answer("Universitetga hujjat topshirishni istasangiz davom etish tugmasini bosing,\n"
                             "avvalo ta'lim ma'lumotingizni kiritishingiz talab etiladi", reply_markup=enter_button)
-        
+        ic('davom etish bolsi', 540)
         get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
         chat_id_user = get_current_user['chat_id_user']
         id_user = get_current_user['id']
@@ -586,11 +587,7 @@ async def education_selection_handler(callback_query: types.CallbackQuery, state
     await state.update_data(education_id=education_id)
     await callback_query.answer()
     await EducationData.region_id.set() 
-    await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=enter_button, parse_mode="HTML")
-
-
-@dp.message_handler(state=EducationData.region_id)
-async def select_region_id_handler(message: types.Message, state: FSMContext):
+    await bot.send_message(callback_query.from_user.id, saved_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
     data = await state.get_data()
     token = data['token']  # Corrected data access
     region_response = send_req.regions(token)  # Ensure it's awaited
@@ -599,7 +596,26 @@ async def select_region_id_handler(message: types.Message, state: FSMContext):
     buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"reg_{item['id']}")] for item in regions]
     regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
 
-    await message.answer(select_region, reply_markup=regionMenu)
+    await bot.send_message(callback_query.from_user.id,select_region, reply_markup=regionMenu)
+    # await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=enter_button, parse_mode="HTML")
+
+
+# @dp.message_handler(state=EducationData.region_id)
+# async def select_region_id_handler(message: types.Message, state: FSMContext):
+#     data = await state.get_data()
+#     token = data['token']  # Corrected data access
+#     region_response = send_req.regions(token)  # Ensure it's awaited
+#     regions = region_response.json()  # Async call should be awaited
+    
+#     buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"reg_{item['id']}")] for item in regions]
+#     regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+#     await message.answer(select_region, reply_markup=regionMenu)
+
+
+
+    
+
     
     # await message.answer("Ma'lumot saqlandi", reply_markup=ReplyKeyboardRemove)
 
@@ -610,11 +626,8 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     await callback_query.answer()
     await EducationData.district_id.set()  # Proceed to the next state
     
-    await callback_query.message.answer(saved_message, parse_mode="HTML")
+    await callback_query.message.answer(saved_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
-
-@dp.message_handler(state=EducationData.district_id)
-async def education_id_handler(message: types.Message, state: FSMContext):
     data = await state.get_data()
     token = data['token']  # Use direct indexing for required data
     region_id = data['region_id']
@@ -624,7 +637,21 @@ async def education_id_handler(message: types.Message, state: FSMContext):
     buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"dist_{item['id']}")] for item in districts]
     districtsMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
     
-    await message.answer("Tumanni tanlang:", reply_markup=districtsMenu)
+    await callback_query.message.answer("Tumanni tanlang:", reply_markup=districtsMenu)
+
+
+# @dp.message_handler(state=EducationData.district_id)
+# async def education_id_handler(message: types.Message, state: FSMContext):
+#     data = await state.get_data()
+#     token = data['token']  # Use direct indexing for required data
+#     region_id = data['region_id']
+#     district_id_response = send_req.districts(token, int(region_id))  # Ensure it's awaited
+#     districts = district_id_response.json()  # Async call should be awaited
+#     # pprint(districts)
+#     buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"dist_{item['id']}")] for item in districts]
+#     districtsMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    
+#     await message.answer("Tumanni tanlang:", reply_markup=districtsMenu)
 
 @dp.callback_query_handler(lambda c: c.data.startswith('dist_'), state=EducationData.district_id)
 async def district_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
@@ -750,18 +777,16 @@ async def has_sertificate(message: types.Message, state: FSMContext):
         buttons = [[InlineKeyboardButton(text=item['type'], 
                                         callback_data=f"type_{item['id']}") for item in cert_types]]
         certTypeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+
         await message.answer(select_type_certificate, reply_markup=certTypeMenu)
-        # await message.delete()
-        # await message.answer(select_type_certificate, parse_mode="Markdown")
-        # await message.answer(example_certification_message)
-        # await EducationData.get_certificate.set()
         await EducationData.certificate_type.set()
 
 
     elif text == "Yo'q, mavjud emas":
-        await message.answer("Davom etishni istasangiz davom etish tugmasini bosing", reply_markup=enter_button)
+        await message.answer("Ta'lim ma'lumotlarini to'ldirishni istasangiz davom etish tugmasini bosing", reply_markup=enter_button)
 
         await EducationData.degree_id.set()
+        
     
 
 @dp.callback_query_handler(lambda c: c.data.startswith('type_'), state=EducationData.certificate_type)
@@ -786,8 +811,8 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     await EducationData.get_certificate.set()  # Proceed to the next state
     # await message.answer(c)
     await callback_query.message.answer(saved_message, parse_mode="HTML")
-    await callback_query.message.answer(example_certification_message, parse_mode="HTML"
-                                        , reply_markup=enter_button)
+    await callback_query.message.answer(example_certification_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
+
 # await message.answer(example_certification_message) 
 @dp.message_handler(content_types=['document'], state=EducationData.get_certificate)
 async def get_sertificate(message: types.Message, state: FSMContext):
@@ -843,10 +868,32 @@ async def get_sertificate(message: types.Message, state: FSMContext):
         await message.answer(f"Xatolik: {e}")
         return
 
-    await message.answer("Fayl yuklandi.", reply_markup=enter_button)
+    await message.answer("Fayl yuklandi.")
     ic('boshlandi1')
     await EducationData.degree_id.set()
     ic('yakunlandi')
+    await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
+    ic('started')
+    my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
+    data = await state.get_data()
+    token = data['token']
+    directions_response = await send_req.directions(token)
+    directions = directions_response
+    unique_degrees = []
+    ic('ok')
+    for obj in directions:
+        degree_id = obj['degree_id']
+        if not any(d['id'] == degree_id for d in unique_degrees):
+            unique_degrees.append({
+                'id': degree_id,
+                'type_degree': my_degree[degree_id]})
+    ic(unique_degrees)
+    buttons = [[InlineKeyboardButton(text=item['type_degree'], 
+                                     callback_data=f"degree_{item['id']}") for item in unique_degrees]]
+    degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    ic('keldi')
+    await message.answer(select_degree, parse_mode='HTML', reply_markup=degreeMenu)
+
 
 @dp.message_handler(state=EducationData.degree_id)
 async def has_application_start(message: types.Message, state: FSMContext):
@@ -887,12 +934,8 @@ async def has_application(callback_query: types.CallbackQuery, state: FSMContext
     await callback_query.answer()
     await EducationData.direction_id.set()
  
-    await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=enter_button,
+    await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=ReplyKeyboardRemove(),
                            parse_mode="HTML")
-
-
-@dp.message_handler(state=EducationData.direction_id)
-async def direction_id_select(message: types.Message, state: FSMContext):
     data = await state.get_data()
     token = data['token']  
     region_response =await send_req.directions(token) 
@@ -903,9 +946,28 @@ async def direction_id_select(message: types.Message, state: FSMContext):
                                      callback_data=f"direc_{item['direction_id']}")] 
                                      for item in regions
                                        if item['degree_id'] == int(selected_degree_id)]
-    regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    directionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
 
-    await message.answer(select_direction, reply_markup=regionMenu)
+    await bot.send_message(callback_query.from_user.id, select_direction, reply_markup=directionMenu)
+    
+
+
+
+# @dp.message_handler(state=EducationData.direction_id)
+# async def direction_id_select(message: types.Message, state: FSMContext):
+#     data = await state.get_data()
+#     token = data['token']  
+#     region_response =await send_req.directions(token) 
+#     regions = region_response
+#     selected_degree_id = data['degree_id']
+#     ic(selected_degree_id)
+#     buttons = [[InlineKeyboardButton(text=item['direction_name_uz'], 
+#                                      callback_data=f"direc_{item['direction_id']}")] 
+#                                      for item in regions
+#                                        if item['degree_id'] == int(selected_degree_id)]
+#     directionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+#     await message.answer(select_direction, reply_markup=directionMenu)
     
 
 @dp.callback_query_handler(lambda c: c.data.startswith('direc_'), state=EducationData.direction_id)
@@ -916,11 +978,6 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     await EducationData.education_type.set()  # Proceed to the next state
     
     await callback_query.message.answer(saved_message, parse_mode="HTML")
-
-
-
-@dp.message_handler(state=EducationData.education_type)
-async def direction_id_select(message: types.Message, state: FSMContext):
     data = await state.get_data()
     token = data['token']
     selected_degree_id = int(data['degree_id'])
@@ -929,8 +986,6 @@ async def direction_id_select(message: types.Message, state: FSMContext):
     ic(selected_direction_id)
     edu_type_response =await send_req.directions(token)
     edu_types = edu_type_response
-    
-
     def return_edu_type_name_uz(edu_type_id):
         for edu in edu_types:
             direction_id = edu['direction_id']
@@ -963,7 +1018,53 @@ async def direction_id_select(message: types.Message, state: FSMContext):
     
     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"edu_type_{item['id']}")] for item in uniq_edu_types]
     eduTypesMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await message.answer(select_edu_type, reply_markup=eduTypesMenu)
+    await callback_query.message.answer(select_edu_type, reply_markup=eduTypesMenu)
+
+
+
+# @dp.message_handler(state=EducationData.education_type)
+# async def direction_id_select(message: types.Message, state: FSMContext):
+#     data = await state.get_data()
+#     token = data['token']
+#     selected_degree_id = int(data['degree_id'])
+#     selected_direction_id = int(data['direction_id'])
+#     ic(selected_degree_id)
+#     ic(selected_direction_id)
+#     edu_type_response =await send_req.directions(token)
+#     edu_types = edu_type_response
+#     def return_edu_type_name_uz(edu_type_id):
+#         for edu in edu_types:
+#             direction_id = edu['direction_id']
+#             degree_id = edu['degree_id']
+#             education_types = edu['education_types']
+#             if edu['direction_id'] == direction_id and edu['degree_id'] == degree_id:
+#                 for k in education_types:
+#                     if k['education_type_id'] == edu_type_id:
+#                         return k['education_type_name_uz']
+#         return None
+
+#     uniq_edu_types = []
+#     for obj in edu_types:
+#         direction_id = obj['direction_id']
+#         degree_id = obj['degree_id']
+#         if selected_degree_id == degree_id and direction_id == selected_direction_id:
+            
+#             tuition_fees = obj['tuition_fees']
+#             for k in tuition_fees:
+#                 education_type_id = k['education_type_id']
+#                 edu_type_name = return_edu_type_name_uz(education_type_id)
+#                 if edu_type_name:
+#                     obj = {
+#                             'id': education_type_id,
+#                             'name': edu_type_name
+#                         }
+#                     ic(obj)
+#                     if obj not in uniq_edu_types:
+#                         uniq_edu_types.append(obj)
+    
+#     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"edu_type_{item['id']}")] for item in uniq_edu_types]
+#     eduTypesMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+#     await message.answer(select_edu_type, reply_markup=eduTypesMenu)
   
 
 @dp.callback_query_handler(lambda c: c.data.startswith('edu_type_'), state=EducationData.education_type)
@@ -974,12 +1075,6 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     await callback_query.answer()
     await EducationData.education_lang_id.set() 
     await callback_query.message.answer(saved_message, parse_mode="HTML")
-
-
-
-
-@dp.message_handler(state=EducationData.education_lang_id)
-async def lang_id_select(message: types.Message, state: FSMContext):
     data = await state.get_data()
     token = data['token']  
     education_type_id_selected = int(data['education_type'])
@@ -987,9 +1082,7 @@ async def lang_id_select(message: types.Message, state: FSMContext):
     degree_id_selected = int(data['degree_id'])
     edu_lang_response = await send_req.directions(token)  
     edu_languages = edu_lang_response
-    
     edu_langs = []
-
     def return_language_name(language_id):
         for obj in edu_languages:
             education_languages = obj['education_languages']
@@ -998,7 +1091,6 @@ async def lang_id_select(message: types.Message, state: FSMContext):
                 if language_id == education_language_id:
                     return lang['education_language_name_uz']
         return None
-            
     for obj in edu_languages:
         direction_id = int(obj['direction_id'])
         degree_id = int(obj['degree_id'])
@@ -1020,8 +1112,53 @@ async def lang_id_select(message: types.Message, state: FSMContext):
                             edu_langs.append(lang_obj)
 
     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
-    regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await message.answer(select_edu_language, reply_markup=regionMenu)
+    languageMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await callback_query.message.answer(select_edu_language, reply_markup=languageMenu)
+
+
+
+
+# @dp.message_handler(state=EducationData.education_lang_id)
+# async def lang_id_select(message: types.Message, state: FSMContext):
+#     data = await state.get_data()
+#     token = data['token']  
+#     education_type_id_selected = int(data['education_type'])
+#     direction_id_selected = int(data['direction_id'])
+#     degree_id_selected = int(data['degree_id'])
+#     edu_lang_response = await send_req.directions(token)  
+#     edu_languages = edu_lang_response
+#     edu_langs = []
+#     def return_language_name(language_id):
+#         for obj in edu_languages:
+#             education_languages = obj['education_languages']
+#             for lang in education_languages:
+#                 education_language_id = int(lang['education_language_id'])
+#                 if language_id == education_language_id:
+#                     return lang['education_language_name_uz']
+#         return None
+#     for obj in edu_languages:
+#         direction_id = int(obj['direction_id'])
+#         degree_id = int(obj['degree_id'])
+#         if direction_id == direction_id_selected and degree_id == degree_id_selected:
+#             tuition_fees = obj['tuition_fees']
+#             for t in tuition_fees:
+#                 education_language_id = int(t['education_language_id'])
+#                 education_type_id = int(t['education_type_id'])
+#                 if education_type_id == education_type_id_selected:
+#                     get_lang_name = return_language_name(education_language_id)
+#                     if get_lang_name:
+#                         lang_obj = {
+#                             'name': get_lang_name,
+#                             'id': education_language_id,
+#                             'tuition_fee': t['tuition_fee']
+#                         }
+#                         if lang_obj not in edu_langs:
+#                             ic(lang_obj)
+#                             edu_langs.append(lang_obj)
+
+#     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
+#     regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+#     await message.answer(select_edu_language, reply_markup=regionMenu)
 
 @dp.callback_query_handler(lambda c: c.data.startswith('_'), state=EducationData.education_lang_id)
 async def after_select_lang(callback_query: types.CallbackQuery, state: FSMContext):

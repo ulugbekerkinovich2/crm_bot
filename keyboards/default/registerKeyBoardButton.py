@@ -33,15 +33,15 @@ language = ReplyKeyboardMarkup(
 menu = ReplyKeyboardMarkup(
     keyboard = [
         [
-            KeyboardButton(text="ℹ️Shaxsiy ma'lumotlar"),
-            KeyboardButton(text="📚Ta'lim ma'lumotlari"),
+            KeyboardButton(text="ℹ️Shaxsiy ma'lumotlarim"),
+            KeyboardButton(text="📚Ta'lim ma'lumotlarim"),
         ],
         # [
             # KeyboardButton(text="📃Chet tili sertifikat qo'shish"),
             # KeyboardButton(text="🗂Yo'nalish tanlash"),
         # ],
         [
-            KeyboardButton(text="📁Arizalar"),
+            KeyboardButton(text="📁Arizam"),
             KeyboardButton(text="🗑Akkauntni o'chirish"),
         ],
         [

@@ -52,7 +52,7 @@ async def exit_menu(message: Message, state: FSMContext):
 async def stay_menu(message: Message, state: FSMContext):
     await message.answer("Asosiy sahifa", reply_markup=menu)
 
-@dp.message_handler(Text(equals="ℹ️Shaxsiy ma'lumotlar"), state=EducationData.menu)
+@dp.message_handler(Text(equals="ℹ️Shaxsiy ma'lumotlarim"), state=EducationData.menu)
 async def my_menu(message: Message, state: FSMContext):
     data = await state.get_data()
     token = data.get('token')
@@ -92,7 +92,7 @@ async def my_menu(message: Message, state: FSMContext):
     else:
         await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
-@dp.message_handler(Text(equals="📚Ta'lim ma'lumotlari"), state=EducationData.menu)
+@dp.message_handler(Text(equals="📚Ta'lim ma'lumotlarim"), state=EducationData.menu)
 async def education_menu(message: Message, state: FSMContext):
     data = await state.get_data()
     token = data.get('token')
@@ -156,7 +156,8 @@ async def education_menu(message: Message, state: FSMContext):
     else:
         # Handle the case where the token is None or invalid
         await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, qayta urinib ko'ring.")
-@dp.message_handler(Text(equals="📁Arizalar"), state=EducationData.menu)
+
+@dp.message_handler(Text(equals="📁Arizam"), state=EducationData.menu)
 async def my_application(message: Message, state: FSMContext):
     data = await state.get_data()
     token = data.get('token')
