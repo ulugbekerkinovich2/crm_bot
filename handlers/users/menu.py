@@ -9,7 +9,7 @@ from aiogram.dispatcher import FSMContext
 from icecream import ic
 from data.config import domain_name
 from datetime import datetime
-
+import pytz
 
 start_button = KeyboardButton('/start')  # The text on the button
 start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
@@ -174,6 +174,9 @@ async def my_application(message: Message, state: FSMContext):
     education_language_name_uz = my_app.get('education_language_name_uz', 'Talim tili topilmadi')
     tuition_fee = my_app.get('tuition_fee', 'Narxi topilmadi')
     date_obj = datetime.fromisoformat(created_at.rstrip("Z"))
+    utc_timezone = pytz.timezone('UTC')
+    desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
+    date_obj = utc_timezone.localize(date_obj).astimezone(desired_timezone)
     human_readable_date = date_obj.strftime("%Y-%m-%d %H:%M")
     if tuition_fee != 'Narxi topilmadi':
         formatted_fee = "{:,.0f}".format(tuition_fee).replace(',', '.')

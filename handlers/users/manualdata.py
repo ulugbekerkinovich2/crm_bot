@@ -244,7 +244,7 @@ async def get_email(message: types.Message, state: FSMContext):
     # Logging example: logger.debug(f"Received email: {email}")
     
     if not re.match(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', email, re.IGNORECASE):
-        await message.answer("Invalid email format. Please enter a valid email address.")
+        await message.answer("Email yaroqli emas. Iltimos yaroqli email kiriting")
         return  # Ask for the email again or handle differently
     
 

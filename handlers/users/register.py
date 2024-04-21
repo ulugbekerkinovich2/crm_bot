@@ -268,21 +268,22 @@ async def secret_code(message: types.Message, state: FSMContext):
                 await PersonalData.document.set()
 
             elif haveApplicationForm is True and haveEducation is False and haveApplied is False:
-                await message.answer("<i>Siz ro'yhatdan o'tgansiz ta'lim ma'lumotlarini to'ldirishingiz kerak</i>", reply_markup=enter_button)
+                await message.answer("<i>-✅Siz ro'yhatdan o'tgansiz.\n🔴Ta'lim ma'lumotlarini to'ldirishingiz kerak</i>", reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=False,haveApplied=False)
                 ic('002')
                 await EducationData.education_id.set()
                 
             
-            elif haveApplicationForm is True and haveEducation is True and haveApplied is False:
-                await message.answer("<i>Siz ro'yhatdan o'tkansiz, ta'lim ma'lumotlaringiz ham to'ldirilgan, universitetda ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
+            elif haveApplicationForm and haveEducation and not haveApplied:
+                await message.answer("<i>- ✅ Siz ro'yhatdan o'tkansiz.\n- ✅ Ta'lim ma'lumotlaringiz ham to'ldirilgan.\n\nUniversitetga ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
                 ic('keldi 003')
+
                 await state.update_data(haveApplicationForm=True,haveEducation=True,haveApplied=False)
                 
 
                 await EducationData.degree_id.set()
             elif haveApplicationForm is True and haveEducation is True and haveApplied is True:
-                await message.answer("<i>- Siz ro'yhatdan o'tkansiz\n-Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n- Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
+                await message.answer("<i>-✅Siz ro'yhatdan o'tkansiz\n-✅Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n-✅Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
                 ic('keldi 004')
                 await state.update_data(haveApplicationForm=True,haveEducation=True,haveApplied=True)
 
