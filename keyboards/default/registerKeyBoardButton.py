@@ -9,10 +9,13 @@ reset_password = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+
+
 register = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="🧾Ro'yhatdan o'tish"),
+            KeyboardButton(text="🧾Abiturient"),
+            KeyboardButton(text="🔄O'qishni ko'chirish"),
         ],
     ],
     resize_keyboard=True
@@ -56,17 +59,52 @@ update_menu = ReplyKeyboardMarkup(
         [
             KeyboardButton(text="📝Shaxsiy ma'lumotlarni tahrirlash"),
         ],
+        # [
+        #     KeyboardButton(text="📖Ta'lim ma'lumotlarini tahrirlash"),
+        # ],
+        # [
+        #     KeyboardButton(text="📃Chet tili sertifikatini tahrirlash"),
+        # ],
+        # [
+        #     KeyboardButton(text="🈸Arizani tahrirlash"),
+        # ]
+    ],
+    resize_keyboard=True
+)
+
+update_personal_info = ReplyKeyboardMarkup(
+    keyboard=[
         [
-            KeyboardButton(text="📖Ta'lim ma'lumotlarini tahrirlash"),
+        KeyboardButton(text="📝Shaxsiy ma'lumotlarni tahrirlash"),
         ],
         [
-            KeyboardButton(text="📃Chet tili sertifikatini tahrirlash"),
-        ],
-        [
-            KeyboardButton(text="🈸Arizani tahrirlash"),
+        KeyboardButton(text="📄Shaxsiy ma'lumotlarni ko'rish"),
         ]
     ],
     resize_keyboard=True
+)
+
+update_education_info = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+        KeyboardButton(text="📝 Ta'lim ma'lumotlarni tahrirlash"),
+        ],
+        [
+        KeyboardButton(text="📚 Ta'lim ma'lumotlarni ko'rish"),
+        ]
+    ],
+    resize_keyboard=True
+)
+
+update_application = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+        KeyboardButton(text="📝Arizani tahrirlash"),
+        ],
+        [
+        KeyboardButton(text="📄Arizani ko'rish"),
+        ]
+    ]
 )
 
 application = ReplyKeyboardMarkup(
@@ -127,3 +165,14 @@ exit_from_account = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+finish_edit = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Tahrirlashni yakunlash"),
+        ]
+    ],
+    resize_keyboard=True
+)
+
+

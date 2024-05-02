@@ -98,3 +98,44 @@ def upload_new_file_sertificate(token, filename):
 
 
 
+def upload_new_file_transcript(token, filename):
+    url = f"https://{domain_name}/v1/files/upload"
+
+    headers = {
+        'accept': 'application/json', 
+        'Authorization': f'Bearer {token}',
+        'Origin': f'{origin}',
+    }
+
+    # Построение полного пути к файлу
+    script_directory_path = os.path.dirname(os.path.abspath(__file__))
+    project_directory_path = os.path.abspath(os.path.join(script_directory_path, '..', '..'))
+    full_image_path = os.path.join(project_directory_path, filename)
+
+    # ic(full_image_path)
+
+
+    try:
+        file1 = open(full_image_path, 'rb')
+        print("Файл успешно открыт:", full_image_path)
+        # files = {
+        # 'file': (full_image_path, file1, 'image/jpeg'),
+        # }
+        files = {
+                'file': (os.path.basename(full_image_path), file1, 'image/jpeg'),
+                 'associated_with': (None, 'users'),
+                'usage': (None, 'transcript')
+            }
+        # data = {
+        #     'associated_with': (None, 'users'),
+        #     'usage': (None, 'diploma')
+        # }
+
+        response = requests.post(url, headers=headers, files=files)
+        file1.close()
+        # a = response.json()
+        # ic(a)
+        # print(a['path'])
+        return response
+    except FileNotFoundError:
+        print("Ошибка: файл не найден по пути:", full_image_path)

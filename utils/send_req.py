@@ -6,7 +6,7 @@ from icecream import ic
 import aiofiles
 from datetime import datetime
 import pytz
-
+import random
 # from data.config import  origin, crm_django_domain, username, password
 import aiohttp
 host = 'crmapi.mentalaba.uz'
@@ -369,16 +369,8 @@ def upload_file(token, file_name, associated_with, usage):
 
 
 
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=headers, data=payload, files=filename) as response:
-    #         if response.status == 201:
-    #             response_data = await response
-    #             return response_data, file_size
-    #         else:
-    #             return {'error': 'Failed to upload the file.', 'status_code': response.status}            
 
-
-def application_forms(token,birth_date,birth_place,citizenship,extra_phone,
+async def application_forms(token,birth_date,birth_place,citizenship,extra_phone,
                       first_name,last_name, gender,phone,photo,pin,serial_number,src,third_name):
     url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f'Bearer {token}'
@@ -397,15 +389,40 @@ def application_forms(token,birth_date,birth_place,citizenship,extra_phone,
         'src': src,
         'third_name': third_name
     }
-    response = requests.post(url, headers=default_header, json=body)
-    return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=default_header, json=body) as response:
-    #         if response.status == 201:
-    #             data = await response
-    #             return data
-    #         else:
-    #             return {'error': 'Failed to post request', 'status_code': response.status}
+    # response = requests.post(url, headers=default_header, json=body)
+    # return response
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=default_header, json=body) as response:
+            if response.status == 201:
+                data = await response.json()
+                return data
+            else:
+                return {'error': 'Failed to post request', 'status_code': response.status}
+
+
+async def application_forms_transfer(token,country_id, direction_name,
+                                     institution_name, transcript_file, which_course_now):
+    url = f"https://{host}/v1/application-forms"
+    default_header['Authorization'] = f'Bearer {token}'
+    body = {
+        'user_previous_education': {
+            'country_id': country_id,
+            'direction_name': direction_name,
+            'institution_name': institution_name,
+            'transcript_file': transcript_file,
+            'which_course_now': which_course_now
+        }
+    }
+    ic(body)
+    # response = requests.post(url, headers=default_header, json=body)
+    # return response
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=default_header, json=body) as response:
+            if response.status == 201:
+                data = await response.json()
+                return data
+            else:
+                return {'error': 'Failed to post request', 'status_code': response.status}
 
 
 async def application_forms_me(token):
@@ -523,6 +540,26 @@ def application_forms_for_edu(token,  district_id, education_id, file_, institut
     #             return data
     #         else:
     #             return {'error': 'Failed to create application', 'status_code': response.status}
+
+def application_forms_for_personal_data(token,  birth_date, birth_place, citizenship, extra_phone, first_name,gender,last_name,phone,serial_number,third_name):
+    url = f"https://{host}/v1/application-forms"
+    default_header['Authorization'] = f"Bearer {token}"
+    body = {
+        'birth_date': birth_date,
+        'birth_place': birth_place,
+        'citizenship': citizenship,
+        'extra_phone': extra_phone,
+        'first_name': first_name,
+        'gender': gender,
+        'last_name': last_name,
+        'phone': phone,
+        'serial_number': serial_number,
+        'src': 'manually',
+        'third_name': third_name
+    }
+    response = requests.post(url, json=body, headers=default_header)
+    return response
+
 
 async def djtoken(username, password):
     url = f"https://{crm_django_domain}/api/token/"
@@ -644,15 +681,20 @@ def convert_time(iso_datetime_str):
 # If you just need the date part in your local timezone
     return datetime_obj_local.strftime("%Y-%m-%d")
 
-# iso_datetime_str = "2002-04-27T19:00:00.000Z"
-# a =  convert_time(iso_datetime_str)
-# ic(a)
 
-
-
-                # get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
-                # chat_id_user = get_current_user['chat_id_user']
-                # id_user = get_current_user['id']
-                # await state.update_data(chat_id_user=chat_id_user, id_user=id_user)
-
-                # update_user_data = send_req.update_user_profile(id=id_user, chat_id=chat_id_user, phone=phone_num, first_name="None", last_name="None", pin="None")
+async def countries(token):
+    url = "https://crmapi.mentalaba.uz/v1/application-forms/countries"
+    header = {
+        'Authorization': f'Bearer {token}'
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=header) as response:
+            if response.status == 200:
+                data = await response.json()
+                return data
+            else:
+                return {'error': 'Failed to fetch data', 'status_code': response.status}
+            
+def return_secret_code():
+    random_code = random.randint(100000, 999999)
+    return random_code
