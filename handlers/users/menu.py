@@ -331,25 +331,30 @@ async def handle_education_options(message: types.Message, state: FSMContext):
         register_user = data.get('register_user')
         transfer_user = data.get('transfer_user')
 
-        if token and haveEducation is True:
+        if token and haveEducation:
             education_info = await send_req.application_forms_me(token)
-            # ic(education_info)
+            ic(education_info)
             user_education = education_info.get('user_education', {})
             certifications = education_info.get('certifications', [])
             pinfl_user_education = education_info.get('pinfl_user_education', {})
             # ic(education_info)
             # ic(certifications)
             # ic(pinfl_user_education)
-            ic(user_education)
-            # Constructing the education message
+            # ic(user_education)
             education_message = "<b>📚 Ta'lim Ma'lumotlari:</b>\n\n"
-            education_message += (
-                f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
-                f"• <b>Viloyat:</b> {user_education.get('region_name_uz', 'Viloyat topilmadi')}\n"
-                f"• <b>Tuman:</b> {user_education.get('district_name_uz', 'Tuman topilmadi')}\n"
-                f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
-            )
-            if pinfl_user_education['pinfl_region_id'] is not None:
+            # Constructing the education message
+            if education_info.get('user_education_src', None) == 'automatic':
+                # ic(education_info.get('user_education_src', None))
+                ic('keldi 348')
+                education_message += (
+                    f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
+                    f"• <b>Viloyat:</b> {user_education.get('region_name_uz', 'Viloyat topilmadi')}\n"
+                    f"• <b>Tuman:</b> {user_education.get('district_name_uz', 'Tuman topilmadi')}\n"
+                    f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+                )
+            elif education_info['user_education_src'] != 'automatic':
+                # ic(education_info['user_education_src'])
+                ic('keldi 357')
                 education_message += (
                     f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
                     f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
@@ -358,17 +363,19 @@ async def handle_education_options(message: types.Message, state: FSMContext):
                     f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
                     f"• <b>Ta'lim turi:</b> {pinfl_user_education.get('institution_type', 'Talim turi topilmadi')}\n"
                     f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+                    f"• <b>Diplom yoki shahodatnoma raqami:</b> {pinfl_user_education.get('document', 'Diplom yoki shahodatnoma raqami topilmadi')}\n"
                 )
 
             # Sending the educational info message
             await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
 
             diploma_file = user_education.get('file')
-            if diploma_file:
+            if diploma_file is not None:
                 try:
                     await message.answer_document(f"https://{domain_name}/{diploma_file[0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
                 except Exception as e:
                     print(f"Failed to send diploma file: {e}")
+
             elif pinfl_user_education:
                 try:
                     await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
@@ -1257,20 +1264,24 @@ async def education_menu(message: Message, state: FSMContext):
         # ic(user_education)
         # Constructing the education message
         education_message = "<b>📚 Ta'lim Ma'lumotlari:</b>\n\n"
-        education_message += (
-            f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
-            f"• <b>Viloyat:</b> {user_education.get('region_name_uz', 'Viloyat topilmadi')}\n"
-            f"• <b>Tuman:</b> {user_education.get('district_name_uz', 'Tuman topilmadi')}\n"
-            f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
-        )
-        if pinfl_user_education['pinfl_region_id'] is not None:
+        if user_education.get('education_type_uz', None) is not None:
             education_message += (
-                f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
-                f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
-                f"• <b> Mamlakat:</b> {pinfl_user_education.get('country', 'Shahar topilmadi')}\n"
+                f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
+                f"• <b>Viloyat:</b> {user_education.get('region_name_uz', 'Viloyat topilmadi')}\n"
+                f"• <b>Tuman:</b> {user_education.get('district_name_uz', 'Tuman topilmadi')}\n"
+                f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+            )
+        elif pinfl_user_education['institution_name'] is not None:
+            institution_type = pinfl_user_education.get('institution_type', 'Talim turi topilmadi')
+            if institution_type == 'school':
+                institution_type = 'Maktab'
+            education_message += (
+                # f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
+                # f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
+                # f"• <b> Mamlakat:</b> {pinfl_user_education.get('country', 'Shahar topilmadi')}\n"
                 f"• <b>Shahar:</b> {pinfl_user_education.get('region', 'Shahar nomi topilmadi')}\n"
                 f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
-                f"• <b>Ta'lim turi:</b> {pinfl_user_education.get('institution_type', 'Talim turi topilmadi')}\n"
+                f"• <b>Ta'lim turi:</b> {institution_type}\n"
                 f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
             )
 
@@ -1278,7 +1289,7 @@ async def education_menu(message: Message, state: FSMContext):
         await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
 
         diploma_file = user_education.get('file')
-        if diploma_file:
+        if diploma_file is not None:
             try:
                 await message.answer_document(f"https://{domain_name}/{diploma_file[0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
             except Exception as e:

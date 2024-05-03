@@ -592,7 +592,7 @@ async def info(message: types.Message, state: FSMContext):
         await state.update_data(**data_obj_applications)
         # await message.answer("Ta'lim malumotlarini kiriting")
 
-        await message.answer("Ta'lim ma'lumotlarini to'ldirish uchun", reply_markup=enter_button)
+        await message.answer("Ta'lim ma'lumotlarini to'ldirish uchun davom etish tugmasini bosing", reply_markup=enter_button)
         ic('davom etish bosildi', 540)
         get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
         chat_id_user = get_current_user['chat_id_user']
