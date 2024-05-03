@@ -416,7 +416,7 @@ async def handle_education_options(message: types.Message, state: FSMContext):
         else:
 
             # Handle the case where the token is None or invalid
-            await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, qayta urinib ko'ring.")
+            await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib qayta tizimga kiring.")
         # Example: Navigate to viewing educational data
         # await message.answer("📚 Ta'lim ma'lumotlari", reply_markup=update_education_info)
     # elif message.text == "📝 Ta'lim ma'lumotlarni tahrirlash":
@@ -1330,7 +1330,7 @@ async def education_menu(message: Message, state: FSMContext):
     else:
 
         # Handle the case where the token is None or invalid
-        await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, qayta urinib ko'ring.", reply_markup=menu)
+        await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu)
 
 
 
