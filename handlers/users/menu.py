@@ -14,6 +14,8 @@ import aiofiles.os
 import os
 import pytz
 import json
+from data.config import username as USERNAME
+from data.config import password as PASSWORD
 from handlers.users import upload,collect_data
 from handlers.users.register import saved_message,select_region,type_your_edu_name,example_diploma_message,wait_file_is_loading,select_type_certificate,example_certification_message,not_found_country,search_university,select_one
 start_button = KeyboardButton('/start')  # The text on the button
@@ -109,6 +111,19 @@ async def my_menu(message: Message, state: FSMContext):
 
 @dp.message_handler(Text(equals="📝Shaxsiy ma'lumotlarni tahrirlash"), state="*")
 async def my_menu(message: Message, state: FSMContext):
+    get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+    access = get_djtoken.get('access')
+    ic(access)
+    await state.update_data(access=access)
+    user_chat_id = message.from_user.id
+    ic(user_chat_id)
+    save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                                                        first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
+                                                        pin=1)
+    ic(save_chat_id)
+
+    get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+    ic(get_this_user)
     data = await state.get_data()
     token = data.get('token')
     # update_personal_info_inline_dict = update_personal_info_inline.to_dict()
@@ -198,6 +213,19 @@ async def get_user_input(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Text(equals="📚Ta'lim ma'lumotlarim"), state="*")
 async def education_menu(message: Message, state: FSMContext):
+    get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+    access = get_djtoken.get('access')
+    ic(access)
+    await state.update_data(access=access)
+    user_chat_id = message.from_user.id
+    ic(user_chat_id)
+    save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                                                        first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
+                                                        pin=1)
+    ic(save_chat_id)
+
+    get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+    ic(get_this_user)
     await message.answer("Quidagilardan birini tanlang", reply_markup=update_education_info)
 
 @dp.message_handler(Text(equals="📝 Ta'lim ma'lumotlarni tahrirlash"), state="*")

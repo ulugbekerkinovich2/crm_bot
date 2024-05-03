@@ -36,6 +36,19 @@ async def bot_start(message: types.Message, state: FSMContext):
     haveApplied = data_in_state.get('haveApplied', False)
     haveEducation = data_in_state.get('haveEducation', False)
     if token and haveApplicationForm and haveApplied and haveEducation:
+        get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+        access = get_djtoken.get('access')
+        ic(access)
+        await state.update_data(access=access)
+        user_chat_id = message.from_user.id
+        ic(user_chat_id)
+        save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                                                           first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
+                                                           pin=1)
+        ic(save_chat_id)
+
+        get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+        ic(get_this_user)
         # If there's a token, show the main menu
         await message.answer("🏠Asosiy sahifa", reply_markup=registerKeyBoardButton.menu)
     else:
