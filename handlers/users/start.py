@@ -16,7 +16,11 @@ async def bot_start(message: types.Message, state: FSMContext):
     all_data_state = await state.get_data() 
     token = all_data_state.get('token', None)
     start_count = all_data_state.get('start_count', 0) + 1  
-
+    ic(message)
+    date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+    ic(date)
+    username = message.from_user.username or message.from_user.full_name
+    ic(username)
     await state.update_data(start_count=start_count)
 
     if (start_count > 1 and start_count < 3) or start_count > 8:
