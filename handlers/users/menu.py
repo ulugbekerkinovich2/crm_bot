@@ -1376,9 +1376,8 @@ async def education_menu(message: Message, state: FSMContext):
                             print(f"Failed to send certification file: {e}") 
     else:
 
-        # Handle the case where the token is None or invalid
-        await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos,akkuntdan chiqib tizimga qayta kiring.", reply_markup=menu)
-
+        await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu)
+        # await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos,akkuntdan chiqib tizimga qayta kiring.", reply_markup=menu)
 
 
 #TODO arizam

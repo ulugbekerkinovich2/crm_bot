@@ -45,7 +45,7 @@ menu = ReplyKeyboardMarkup(
         # ],
         [
             KeyboardButton(text="📁Arizam"),
-            KeyboardButton(text="🗑Akkauntni o'chirish"),
+#            KeyboardButton(text="🗑Akkauntni o'chirish"),
         ],
         [
             KeyboardButton(text="Akkauntdan chiqish"),
