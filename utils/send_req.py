@@ -578,7 +578,7 @@ async def djtoken(username, password):
             else:
                 return {'error': 'Failed to get token', 'status_code': response.status}
 
-def create_user_profile(token,chat_id,first_name,last_name,pin):
+def create_user_profile(token,chat_id,first_name,last_name,pin,date,username):
     url = f"https://{crm_django_domain}/create-user-profile/"
     header = {
         'Authorization': f'Bearer {token}'
@@ -586,8 +586,10 @@ def create_user_profile(token,chat_id,first_name,last_name,pin):
     body = {
         'chat_id_user': chat_id,
         'first_name_user': first_name,
-        'last_name_user': first_name,
-        'pin': pin
+        'last_name_user': last_name,
+        'pin': pin,
+        'username': username,
+        'date': date
     }
     ic(body)
     response = requests.post(url, json=body, headers=header)

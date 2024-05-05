@@ -68,8 +68,10 @@ async def bot_start(message: types.Message, state: FSMContext):
         ic(user_chat_id)
         save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                            first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                           pin=1)
-        ic(save_chat_id)
+                                                           pin=1,
+                                                           date=date,
+                                                           username=username),
+        ic(72, save_chat_id)
 
         get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
         ic(get_this_user)
