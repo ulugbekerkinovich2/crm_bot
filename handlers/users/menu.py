@@ -117,9 +117,13 @@ async def my_menu(message: Message, state: FSMContext):
     await state.update_data(access=access)
     user_chat_id = message.from_user.id
     ic(user_chat_id)
+    date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+    ic(date)
+    username = message.from_user.username or message.from_user.full_name
+    ic(username)
     save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                         first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                        pin=1)
+                                                        pin=1,date=date, username=username)
     ic(save_chat_id)
 
     get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
@@ -219,9 +223,13 @@ async def education_menu(message: Message, state: FSMContext):
     await state.update_data(access=access)
     user_chat_id = message.from_user.id
     ic(user_chat_id)
+    date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+    ic(date)
+    username = message.from_user.username or message.from_user.full_name
+    ic(username)
     save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                         first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                        pin=1)
+                                                        pin=1,date=date, username=username)
     ic(save_chat_id)
 
     get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
