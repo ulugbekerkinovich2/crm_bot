@@ -17,7 +17,8 @@ from icecream import ic
 import json
 from keyboards.default.registerKeyBoardButton import yes_no,update_education_info
 from keyboards.default.registerKeyBoardButton import enter_button, menu,register
-
+from data.config import username as USERNAME
+from data.config import password as PASSWORD
 
 saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
 error_message_birthday = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: yyyy-oo-kk\nTug'ilgan kunni qayta kiriting"
@@ -301,7 +302,19 @@ async def secret_code(message: types.Message, state: FSMContext):
             
             ic(get_token)
             await state.update_data(token=get_token)
+            get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+            access = get_djtoken.get('access')
+            ic(access)
+            await state.update_data(access=access)
+            user_chat_id = message.from_user.id
+            ic(user_chat_id)
+            save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                                                                first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
+                                                                pin=1)
+            ic(save_chat_id)
 
+            get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+            ic(get_this_user)
             if haveApplicationForm is False and (haveEducation is False or havePreviousEducation is False) and haveApplied is False:
                 await message.answer(example_document, reply_markup=ReplyKeyboardRemove())
                 await state.update_data(haveApplicationForm=False,haveEducation=False,haveApplied=False)
@@ -579,7 +592,7 @@ async def info(message: types.Message, state: FSMContext):
         await state.update_data(**data_obj_applications)
         # await message.answer("Ta'lim malumotlarini kiriting")
 
-        await message.answer("Ta'lim ma'lumotlarini to'ldirish uchun", reply_markup=enter_button)
+        await message.answer("Ta'lim ma'lumotlarini to'ldirish uchun davom etish tugmasini bosing", reply_markup=enter_button)
         ic('davom etish bosildi', 540)
         get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
         chat_id_user = get_current_user['chat_id_user']
