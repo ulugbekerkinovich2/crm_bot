@@ -20,7 +20,8 @@ from handlers.users import upload,collect_data
 from handlers.users.register import saved_message,select_region,type_your_edu_name,example_diploma_message,wait_file_is_loading,select_type_certificate,example_certification_message,not_found_country,search_university,select_one
 start_button = KeyboardButton('/start')  # The text on the button
 start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
-
+escape_markdown = send_req.escape_markdown
+convert_time = send_req.convert_time
 @dp.message_handler(Text(equals="🗑Akkauntni o'chirish"), state="*")
 async def delete_account_prompt(message: types.Message, state: FSMContext):
     await message.answer("Akkaunt o'chirilsinmi?", reply_markup=ask_delete_account)
@@ -71,9 +72,9 @@ async def my_menu(message: Message, state: FSMContext):
     ic(66)
     token = data.get('token')
     ic(token)
-    ic(68)
+    ic(74)
     if token:
-        ic('token mavud, shaxsiy ma\'lumotlarni ko\'rish', token)
+        ic('token mavjud, shaxsiy ma\'lumotlarni ko\'rish', token)
         personal_info = await send_req.application_forms_me(token)
         
         photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
@@ -217,23 +218,27 @@ async def get_user_input(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Text(equals="📚Ta'lim ma'lumotlarim"), state="*")
 async def education_menu(message: Message, state: FSMContext):
-    get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
-    access = get_djtoken.get('access')
-    ic(access)
-    await state.update_data(access=access)
-    user_chat_id = message.from_user.id
-    ic(user_chat_id)
-    date = message.date.strftime("%Y-%m-%d %H:%M:%S")
-    ic(date)
-    username = message.from_user.username or message.from_user.full_name
-    ic(username)
-    save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
-                                                        first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                        pin=1,date=date, username=username)
-    ic(save_chat_id)
+    try:
+        get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+        access = get_djtoken.get('access')
+        ic(access)
+        await state.update_data(access=access)
+        user_chat_id = message.from_user.id
+        ic(user_chat_id)
+        date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+        ic(date)
+        username = message.from_user.username or message.from_user.full_name
+        ic(username)
+        save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                                                            first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
+                                                            pin=1,date=date, username=username)
+        ic(save_chat_id)
 
-    get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
-    ic(get_this_user)
+        get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+        ic(get_this_user)
+    except Exception as err:
+        ic(err)
+
     await message.answer("Quidagilardan birini tanlang", reply_markup=update_education_info)
 
 @dp.message_handler(Text(equals="📝 Ta'lim ma'lumotlarni tahrirlash"), state="*")
@@ -383,16 +388,19 @@ async def handle_education_options(message: types.Message, state: FSMContext):
                     await message.answer_document(f"https://{domain_name}/{diploma_file[0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
                 except Exception as e:
                     print(f"Failed to send diploma file: {e}")
+                    await message.answer(chat_id=message.chat.id, text="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli topilmadi, Qayta yuklang")
 
-            elif pinfl_user_education:
+            elif pinfl_user_education['file'][0] is not None:
                 try:
                     await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
                 except Exception as e:
                     print(f"Failed to send diploma file: {e}")
+                    await message.answer(chat_id=message.chat.id, text="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli topilmadi, Qayta yuklang")
+
                 
             # Sending certification files if available
 
-            ic(124)
+            ic(398)
             if certifications:
                 for certification in certifications:
                     if certification.get('file'):
@@ -402,6 +410,7 @@ async def handle_education_options(message: types.Message, state: FSMContext):
                             await message.answer_document(f"https://{domain_name}/{certification['file']}", caption=f"Sertifikat nusxasi: {certification_type.upper()}")
                         except Exception as e:
                             print(f"Failed to send certification file: {e}")   
+                            await message.answer(chat_id=message.chat.id, text=f"Sertifikat nusxasi: {certification_type.upper()} topilmadi, Qayta yuklang")
         elif token and havePreviousEducation:
             ic('mytoken', token)
             education_info = await send_req.application_forms_me(token)
@@ -438,11 +447,13 @@ async def handle_education_options(message: types.Message, state: FSMContext):
                         await message.answer_document(f"https://{domain_name}/{transcript_file}", caption="Transkript nusxasi fayli")
                     except Exception as e:
                         print(f"Failed to send diploma file: {e}")
+                        await message.answer(chat_id=message.chat.id, text="Transkript nusxasi fayli topilmadi, Qayta yuklang")
                 elif pinfl_user_education:
                     try:
                         await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
                     except Exception as e:
                         print(f"Failed to send diploma file: {e}")
+                        await message.answer(chat_id=message.chat.id, text="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli topilmadi, Qayta yuklang")
                     
                 # Sending certification files if available
 
@@ -456,6 +467,7 @@ async def handle_education_options(message: types.Message, state: FSMContext):
                                 await message.answer_document(f"https://{domain_name}/{certification['file']}", caption=f"Sertifikat nusxasi: {certification_type.upper()}")
                             except Exception as e:
                                 print(f"Failed to send certification file: {e}") 
+                                await message.answer(chat_id=message.chat.id, text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang")
         else:
 
             # Handle the case where the token is None or invalid
@@ -484,22 +496,26 @@ async def my_application(message: Message, state: FSMContext):
     education_type_name_uz = my_app.get('education_type_name_uz','Talim turi topilmadi' )
     education_language_name_uz = my_app.get('education_language_name_uz', 'Talim tili topilmadi')
     tuition_fee = my_app.get('tuition_fee', 'Narxi topilmadi')
+    comments = my_app.get('comment', 'Izoh topilmadi')
     date_obj = datetime.fromisoformat(created_at.rstrip("Z"))
     utc_timezone = pytz.timezone('UTC')
     desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
     date_obj = utc_timezone.localize(date_obj).astimezone(desired_timezone)
     human_readable_date = date_obj.strftime("%Y-%m-%d %H:%M")
+    if len(comments) >= 2:
+        comments = comments[-1]
+    
     if tuition_fee != 'Narxi topilmadi':
         formatted_fee = "{:,.0f}".format(tuition_fee).replace(',', '.')
-
+    ic(status)
     applicant_status_translations = {
     'PENDING': 'kutilmoqda',
     'ACCEPTED': 'qabul qilingan',
     'REJECTED': 'rad etilgan',
-    'EDIT_REJECT': 'tahrirlash rad etildi',
-    'CALLED_EXAM': 'imtihonga chaqirilgan',
-    'EXAM_FEE': 'imtihon uchun to\'lov to\'langan',
-    'CAME_EXAM': 'imtihonga kelgan',
+    'EDIT-REJECT': 'tahrirlash uchun ariza rad etildi',
+    'CALLED-EXAM': 'imtihonga chaqirilgan',
+    'EXAM-FEE': 'imtihon uchun to\'lov to\'langan',
+    'CAME-EXAM': 'imtihonga kelgan',
     'MARKED': 'baholangan',
     'SUCCESS': 'muvaffaqiyatli',
     'FAIL': 'muvaqqiyatsiz',
@@ -508,6 +524,11 @@ async def my_application(message: Message, state: FSMContext):
     'RECOMMENDED_STUDENT': 'tavsiya etilgan talaba'
     }
     status_name = applicant_status_translations.get(status.upper(), "Topilmadi")
+    comment = comments.get('comment', 'Izoh topilmadi')
+    comment_time = comments.get('created_at', 'Izoh topilmadi')
+    if comment_time != 'Izoh topilmadi':
+        comment_time = datetime.fromisoformat(comment_time.rstrip("Z")).strftime("%Y-%m-%d %H:%M")
+    ic(my_app.get('status'))
     response_message = (
         f"<b>Ariza Tafsilotlari:</b>\n"
         f"Yaratilgan vaqti: {human_readable_date}\n"
@@ -516,7 +537,9 @@ async def my_application(message: Message, state: FSMContext):
         f"Darajasi: {degree_name_uz}\n"
         f"Ta'lim turi: {education_type_name_uz}\n"
         f"Ta'lim til: {education_language_name_uz}\n"
-        f"Ta'lim narix: {formatted_fee} so'm"
+        f"Ta'lim narix: {formatted_fee} so'm\n"
+        f"Izoh vaqti: {comment_time}\n"
+        f"Izoh: {comment}"
     )
     await message.answer(response_message, parse_mode='HTML')
 
@@ -1393,6 +1416,9 @@ async def my_application(message: Message, state: FSMContext):
 
     created_at = my_app.get('created_at', 'yaratilgan vaqti topilmadi')
     status = my_app.get('status', 'status topilmadi')
+    comments = my_app.get('comment', 'izoh topilmadi')
+    # status1 = my_app.get('status')
+    # ic(status1)
     direction_name_uz = my_app.get('direction_name_uz', 'Talim turi topilmadi')
     degree_name_uz = my_app.get('degree_name_uz', 'Talim darajasi topilmadi')
     education_type_name_uz = my_app.get('education_type_name_uz','Talim turi topilmadi' )
@@ -1403,6 +1429,8 @@ async def my_application(message: Message, state: FSMContext):
     desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
     date_obj = utc_timezone.localize(date_obj).astimezone(desired_timezone)
     human_readable_date = date_obj.strftime("%Y-%m-%d %H:%M")
+    if len(comments) >= 2:
+        comments = comments[-1]
     if tuition_fee != 'Narxi topilmadi':
         formatted_fee = "{:,.0f}".format(tuition_fee).replace(',', '.')
 
@@ -1410,10 +1438,10 @@ async def my_application(message: Message, state: FSMContext):
     'PENDING': 'kutilmoqda',
     'ACCEPTED': 'qabul qilingan',
     'REJECTED': 'rad etilgan',
-    'EDIT_REJECT': 'tahrirlash rad etildi',
-    'CALLED_EXAM': 'imtihonga chaqirilgan',
-    'EXAM_FEE': 'imtihon uchun to\'lov to\'langan',
-    'CAME_EXAM': 'imtihonga kelgan',
+    'EDIT-REJECT': 'tahrirlash uchun ariza rad etildi',
+    'CALLED-EXAM': 'imtihonga chaqirilgan',
+    'EXAM-FEE': 'imtihon uchun to\'lov to\'langan',
+    'CAME-EXAM': 'imtihonga kelgan',
     'MARKED': 'baholangan',
     'SUCCESS': 'muvaffaqiyatli',
     'FAIL': 'muvaqqiyatsiz',
@@ -1421,6 +1449,10 @@ async def my_application(message: Message, state: FSMContext):
     'STUDENT': 'talaba',
     'RECOMMENDED_STUDENT': 'tavsiya etilgan talaba'
     }
+    comment = comments.get('comment', 'izoh topilmadi')
+    comment_time = comments.get('created_at', 'izoh vaqti topilmadi')
+    if comment_time != 'izoh vaqti topilmadi':
+        comment_time = convert_time(comment_time)
     status_name = applicant_status_translations.get(status.upper(), "Topilmadi")
     response_message = (
         f"<b>Ariza Tafsilotlari:</b>\n"
@@ -1430,7 +1462,9 @@ async def my_application(message: Message, state: FSMContext):
         f"Darajasi: {degree_name_uz}\n"
         f"Ta'lim turi: {education_type_name_uz}\n"
         f"Ta'lim til: {education_language_name_uz}\n"
-        f"Ta'lim narix: {formatted_fee} so'm"
+        f"Ta'lim narix: {formatted_fee} so'm\n"
+        f"Izoh vaqti {escape_markdown(comment_time)}"
+        f" 🔴 Izoh: {escape_markdown(comment)}\n"
     )
     await message.answer(response_message, parse_mode='HTML')
 
@@ -1441,6 +1475,7 @@ async def my_application(message: Message, state: FSMContext):
     token = data.get('token')
     ic('keldi arizaga')
     my_app = await send_req.my_applications(token=token)
+    ic(my_app)
     if not my_app:
         await message.answer("Ariza ma'lumotlari topilmadi.")
         return
@@ -1452,11 +1487,14 @@ async def my_application(message: Message, state: FSMContext):
     education_type_name_uz = my_app.get('education_type_name_uz','Talim turi topilmadi' )
     education_language_name_uz = my_app.get('education_language_name_uz', 'Talim tili topilmadi')
     tuition_fee = my_app.get('tuition_fee', 'Narxi topilmadi')
+    comments = my_app.get('comment', [])
     date_obj = datetime.fromisoformat(created_at.rstrip("Z"))
     utc_timezone = pytz.timezone('UTC')
     desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
     date_obj = utc_timezone.localize(date_obj).astimezone(desired_timezone)
     human_readable_date = date_obj.strftime("%Y-%m-%d %H:%M")
+    if len(comments) >= 2:
+        comments = comments[-1]
     if tuition_fee != 'Narxi topilmadi':
         formatted_fee = "{:,.0f}".format(tuition_fee).replace(',', '.')
 
@@ -1464,10 +1502,10 @@ async def my_application(message: Message, state: FSMContext):
     'PENDING': 'kutilmoqda',
     'ACCEPTED': 'qabul qilingan',
     'REJECTED': 'rad etilgan',
-    'EDIT_REJECT': 'tahrirlash rad etildi',
-    'CALLED_EXAM': 'imtihonga chaqirilgan',
-    'EXAM_FEE': 'imtihon uchun to\'lov to\'langan',
-    'CAME_EXAM': 'imtihonga kelgan',
+    'EDIT-REJECT': 'tahrirlash uchun ariza rad etildi',
+    'CALLED-EXAM': 'imtihonga chaqirilgan',
+    'EXAM-FEE': 'imtihon uchun to\'lov to\'langan',
+    'CAME-EXAM': 'imtihonga kelgan',
     'MARKED': 'baholangan',
     'SUCCESS': 'muvaffaqiyatli',
     'FAIL': 'muvaqqiyatsiz',
@@ -1475,15 +1513,30 @@ async def my_application(message: Message, state: FSMContext):
     'STUDENT': 'talaba',
     'RECOMMENDED_STUDENT': 'tavsiya etilgan talaba'
     }
+    ic(comments)
+    if comments:
+        try:
+            comment = comments['comment']
+            comment_time = convert_time(comments['created_at'])
+        except:
+            comment = comments[0]['comment']
+            comment_time = convert_time(comments[0]['created_at'])
+    else:
+        comment = 'izoh topilmadi'
+        comment_time = 'izoh vaqti topilmadi'
     status_name = applicant_status_translations.get(status.upper(), "Topilmadi")
+
+    
     response_message = (
-        f"<b>Ariza Tafsilotlari:</b>\n"
-        f"Yaratilgan vaqti: {human_readable_date}\n"
-        f"Holati:   <b>{status_name}</b>\n"
-        f"Yo'nalishi: {direction_name_uz}\n"
-        f"Darajasi: {degree_name_uz}\n"
-        f"Ta'lim turi: {education_type_name_uz}\n"
-        f"Ta'lim til: {education_language_name_uz}\n"
-        f"Ta'lim narix: {formatted_fee} so'm"
+        f"*Ariza Tafsilotlari:*\n"
+        f"Yaratilgan vaqti: {escape_markdown(human_readable_date)}\n"
+        f"Holati:   *{escape_markdown(status_name)}*\n"
+        f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
+        f"Darajasi: {escape_markdown(degree_name_uz)}\n"
+        f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
+        f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
+        f"Ta'lim narxi: {escape_markdown(formatted_fee)} so'm\n\n"
+        f"Izoh vaqti: {escape_markdown(comment_time)}\n"
+        f"🔴 *Izoh:* {escape_markdown(comment)}\n"
     )
-    await message.answer(response_message, parse_mode='HTML')
+    await message.answer(response_message, parse_mode='MarkdownV2')

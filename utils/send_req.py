@@ -700,3 +700,12 @@ async def countries(token):
 def return_secret_code():
     random_code = random.randint(100000, 999999)
     return random_code
+
+
+def escape_markdown(text):
+    escape_chars = r'\_*[]()~`>#+-=|{}.!'
+    return ''.join(['\\' + char if char in escape_chars else char for char in text])
+
+def convert_time(timestamp):
+    dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+    return dt.strftime("%Y-%m-%d %H:%M:%S")

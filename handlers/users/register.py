@@ -167,7 +167,7 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                         await message.answer(accepted_phone, parse_mode='HTML', reply_markup=remove_keyboard)
                         await PersonalData.secret_code.set()
                     else:
-                        await message.answer("severda xatolik 63")
+                        await message.answer("Severda xatolik xatolik yuz berdi")
                 # ic(check_user)
                 elif check_user == 'false':
                     ic('check_user_for_false', check_user)
@@ -203,7 +203,7 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                     await message.answer(accepted_phone, parse_mode='HTML', reply_markup=remove_keyboard)
                     await PersonalData.secret_code.set()
                 else:
-                    await message.answer("severda xatolik 63")
+                    await message.answer("severda xatolik yuz berdi")
             # ic(check_user)
             elif check_user == 'false':
                 ic('check_user_for_false', check_user)
@@ -301,48 +301,54 @@ async def secret_code(message: types.Message, state: FSMContext):
             get_token = in_data.get('token')
             
             ic(get_token)
-            await state.update_data(token=get_token)
-            get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
-            access = get_djtoken.get('access')
-            ic(access)
-            await state.update_data(access=access)
-            user_chat_id = message.from_user.id
-            ic(user_chat_id)
-            date = message.date.strftime("%Y-%m-%d %H:%M:%S")
-            ic(date)
-            username = message.from_user.username or message.from_user.full_name
-            ic(username)
-            save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
-                                                                first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                                pin=1,date=date, username=username)
-            ic(save_chat_id)
+            try:
+                await state.update_data(token=get_token)
+                get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+                access = get_djtoken.get('access')
+                ic(access)
+                await state.update_data(access=access)
+                user_chat_id = message.from_user.id
+                ic(user_chat_id)
+                date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+                ic(date)
+                username = message.from_user.username or message.from_user.full_name
+                ic(username)
+                save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                                                                    first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
+                                                                    pin=1,date=date, username=username)
+                ic(save_chat_id)
 
-            get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
-            ic(get_this_user)
-            if haveApplicationForm is False and (haveEducation is False or havePreviousEducation is False) and haveApplied is False:
+                get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+                ic(get_this_user)
+            except Exception as err:
+                ic(err)
+            if haveApplicationForm is False and (haveEducation is False and  havePreviousEducation is False) and haveApplied is False:
                 await message.answer(example_document, reply_markup=ReplyKeyboardRemove())
-                await state.update_data(haveApplicationForm=False,haveEducation=False,haveApplied=False)
+                await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
                 await PersonalData.document.set()
 
-            elif haveApplicationForm is True and (haveEducation is False or havePreviousEducation is False) and haveApplied is False:
+            elif haveApplicationForm is True and (haveEducation is False and havePreviousEducation is False) and haveApplied is False:
                 await message.answer("<i>-✅Siz ro'yhatdan o'tgansiz.\n🔴Ta'lim ma'lumotlarini to'ldirishingiz kerak</i>",reply_markup=enter_button)
-                await state.update_data(haveApplicationForm=True,haveEducation=False,haveApplied=False)
+                await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
                 ic('002')
                 await EducationData.education_id.set()
-              
-            
-            elif haveApplicationForm is True and (haveEducation is True or havePreviousEducation is True) and haveApplied is False:
-                await message.answer("<i>- ✅ Siz ro'yhatdan o'tkansiz.\n- ✅ Ta'lim ma'lumotlaringiz ham to'ldirilgan.\n\nUniversitetga ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
-                ic('keldi 003')
 
-                await state.update_data(haveApplicationForm=True,haveEducation=True,haveApplied=False)
-            
+            elif haveApplicationForm is True and (haveEducation is True and havePreviousEducation is False) and haveApplied is False:
+                await message.answer("<i>- ✅ Siz ro'yhatdan o'tkansiz.\n- ✅ Ta'lim ma'lumotlaringiz ham to'ldirilgan.\n\nUniversitetga ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
+                await state.update_data(haveApplicationForm=True,haveEducation=True,havePreviousEducation=False,haveApplied=False)
+                ic('keldi 003')
+                await EducationData.degree_id.set()
+
+            elif haveApplicationForm is True and (haveEducation is False and havePreviousEducation is True) and haveApplied is False:
+                await message.answer("<i>- ✅ Siz ro'yhatdan o'tkansiz.\n- ✅ Ta'lim ma'lumotlaringiz ham to'ldirilgan .\n\nUniversitetga ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
+                await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
+                ic('keldi 003')
                 await EducationData.degree_id.set()
 
             elif haveApplicationForm is True and (haveEducation is True or havePreviousEducation is True) and haveApplied is True:
                 await message.answer("<i>-✅Siz ro'yhatdan o'tkansiz\n-✅Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n-✅Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
                 ic('keldi 004')
-                await state.update_data(haveApplicationForm=True,haveEducation=True,haveApplied=True)
+                await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
                 ic('keldi 005')
                 await EducationData.menu.set()
 
@@ -350,7 +356,7 @@ async def secret_code(message: types.Message, state: FSMContext):
 
         
         elif res_status_code == 404 or res_status_code == 400 or res_status_code == 410:
-            # ic('\nres',response_.status(), '\n')
+            ic('\nres666',res_status_code, '\n')
             await message.answer(error_secret_code)
             response_msg = await dp.bot.send_message(message.chat.id, retype_secret_code)
             response = await dp.bot.wait_for("message")
@@ -421,6 +427,7 @@ async def birth_date(message: types.Message, state: FSMContext):
     
     check_is_not_duplicate = await send_req.application_form_info(birth_date, document, token)
     ic(check_is_not_duplicate)
+
     if check_is_not_duplicate.get('status_code') in [500,404,409,400]:
         await message.answer(server_error, reply_markup=enter_button)
         await ManualPersonalInfo.personal_info.set()
