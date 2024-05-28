@@ -428,9 +428,12 @@ async def birth_date(message: types.Message, state: FSMContext):
     check_is_not_duplicate = await send_req.application_form_info(birth_date, document, token)
     ic(check_is_not_duplicate)
 
-    if check_is_not_duplicate.get('status_code') in [500,404,409,400]:
+    if check_is_not_duplicate.get('status_code') in [500,404,400]:
         await message.answer(server_error, reply_markup=enter_button)
         await ManualPersonalInfo.personal_info.set()
+    elif check_is_not_duplicate.get('status_code') == 409:
+        error_mes = check_is_not_duplicate.get('data')
+        await message.answer(f"🔴 {error_mes.get('message')}")
     # data_res = check_is_not_duplicate['data']
     # ic(check_is_not_duplicate)
     # if check_is_not_duplicate.get('status_code') == 409 or check_is_not_duplicate.get('status_code') == 401 or check_is_not_duplicate.get('status_code') == 400:
