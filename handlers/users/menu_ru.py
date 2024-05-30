@@ -62,7 +62,7 @@ async def stay_menu(message: Message, state: FSMContext):
 
 @dp.message_handler(Text(equals="ℹ️Моя личная информация"), state="*")
 async def my_menu(message: Message, state: FSMContext):
-    ic('Quidagi amallarni bajarishingiz mumkin')
+    ic('Quyidagi amallarni bajarishingiz mumkin')
     await message.answer("Вы можете выполнить следующие шаги", reply_markup=update_personal_info_ru)
 
 

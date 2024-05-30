@@ -62,8 +62,8 @@ async def stay_menu(message: Message, state: FSMContext):
 
 @dp.message_handler(Text(equals="ℹ️Shaxsiy ma'lumotlarim"), state="*")
 async def my_menu(message: Message, state: FSMContext):
-    ic('Quidagi amallarni bajarishingiz mumkin')
-    await message.answer("Quidagi amallarni bajarishingiz mumkin", reply_markup=update_personal_info)
+    ic('Quyidagi amallarni bajarishingiz mumkin')
+    await message.answer("Quyidagi amallarni bajarishingiz mumkin", reply_markup=update_personal_info)
 
 
 @dp.message_handler(Text(equals="📄Shaxsiy ma'lumotlarni ko'rish"), state="*")
@@ -151,9 +151,9 @@ async def update_personal_info_hand(callback_query: types.CallbackQuery, state: 
         'firstname': 'Yangilamoqchi bo\'lgan ismni kiriting: ',
         'lastname': 'Yangilamoqchi bo\'lgan familiyani kiriting',
         'thirdname': 'Yangilamoqchi bo\'lgan otangizni ismini kiriting',
-        'passport': 'Yangilamoqchi bo\'lgan Passport seriya raqamini kiriting, Quidagi formatda kiriting: AB1234567',
-        'birthdate': 'Yangilamoqchi bo\'lgan tug\'ilgan kuningizni kiriting, Quidagi formatda kiriting: yyyy-oo-kk',
-        'gender': 'Yangilamoqchi bo\'lgan jinsni kiriting, Quidagi formatda kiriting: Erkak/Ayol',
+        'passport': 'Yangilamoqchi bo\'lgan Passport seriya raqamini kiriting, Quyidagi formatda kiriting: AB1234567',
+        'birthdate': 'Yangilamoqchi bo\'lgan tug\'ilgan kuningizni kiriting, Quyidagi formatda kiriting: yyyy-oo-kk',
+        'gender': 'Yangilamoqchi bo\'lgan jinsni kiriting, Quyidagi formatda kiriting: Erkak/Ayol',
         'birthplace': 'Yangilamoqchi bo\'lgan tug\'ilgan joyingizni kiriting, Namuna: Toshkent shahri',
         'extra_phone': 'Yangilamoqchi bo\'lgan qo\'shimcha telefon raqamingizni kiriting, Namuna: +998991234567',
     }
@@ -239,7 +239,7 @@ async def education_menu(message: Message, state: FSMContext):
     except Exception as err:
         ic(err)
 
-    await message.answer("Quidagilardan birini tanlang", reply_markup=update_education_info)
+    await message.answer("Quyidagilardan birini tanlang", reply_markup=update_education_info)
 
 @dp.message_handler(Text(equals="📝 Ta'lim ma'lumotlarni tahrirlash"), state="*")
 async def edit_education_menu(message: Message, state: FSMContext):

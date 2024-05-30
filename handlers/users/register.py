@@ -23,7 +23,7 @@ from data.config import password as PASSWORD
 saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
 error_message_birthday = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: yyyy-oo-kk\nTug'ilgan kunni qayta kiriting"
 error_date = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Kiritilgan sana namunadagidek emas.\nTug'ilgan kunni qayta kiriting"
-example_birthday = "Tug\'ilgan kuningingizni kiriting quidagi formatda\nyyyy-oo-kk\n\nNamuna: 2005-03-21"
+example_birthday = "Tug\'ilgan kuningingizni kiriting quyidagi formatda\nyyyy-oo-kk\n\nNamuna: 2005-03-21"
 example_phone = "☎️ <b>Telefon raqamingizni yuboring</b>\n<i>Namuna: 998991234567</i>"
 example_extra_phone = 'Siz bilan aloqaga chiqish uchun qo\'shimcha telefon raqam kiriting\n\nNamuna: +998991234567'
 example_transkript_message = "✅ *Transkript nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
