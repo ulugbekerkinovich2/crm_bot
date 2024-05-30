@@ -21,6 +21,16 @@ register = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+register_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="🧾 Абитуриент"),
+            KeyboardButton(text="🔄Трансферное обучение"),
+        ],
+    ],
+    resize_keyboard=True
+)
+
 language = ReplyKeyboardMarkup(
     keyboard=[
         [
@@ -39,10 +49,6 @@ menu = ReplyKeyboardMarkup(
             KeyboardButton(text="ℹ️Shaxsiy ma'lumotlarim"),
             KeyboardButton(text="📚Ta'lim ma'lumotlarim"),
         ],
-        # [
-            # KeyboardButton(text="📃Chet tili sertifikat qo'shish"),
-            # KeyboardButton(text="🗂Yo'nalish tanlash"),
-        # ],
         [
             KeyboardButton(text="📁Arizam"),
 #            KeyboardButton(text="🗑Akkauntni o'chirish"),
@@ -53,11 +59,44 @@ menu = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+menu_ru = ReplyKeyboardMarkup(
+    keyboard = [
+        [
+            KeyboardButton(text="ℹ️Моя личная информация"),
+            KeyboardButton(text="📚Моя образовательная информация"),
+        ],
+        [
+            KeyboardButton(text="📁Заявление"),
+#            KeyboardButton(text="🗑Akkauntni o'chirish"),
+        ],
+        [
+            KeyboardButton(text="Выйти из аккаунта"),
+        ]
+    ],
+    resize_keyboard=True
+)
 
 update_menu = ReplyKeyboardMarkup(
     keyboard = [
         [
             KeyboardButton(text="📝Shaxsiy ma'lumotlarni tahrirlash"),
+        ],
+        # [
+        #     KeyboardButton(text="📖Ta'lim ma'lumotlarini tahrirlash"),
+        # ],
+        # [
+        #     KeyboardButton(text="📃Chet tili sertifikatini tahrirlash"),
+        # ],
+        # [
+        #     KeyboardButton(text="🈸Arizani tahrirlash"),
+        # ]
+    ],
+    resize_keyboard=True
+)
+update_menu_ru = ReplyKeyboardMarkup(
+    keyboard = [
+        [
+            KeyboardButton(text="📝 Редактировать личную информацию"),
         ],
         # [
         #     KeyboardButton(text="📖Ta'lim ma'lumotlarini tahrirlash"),
@@ -84,6 +123,18 @@ update_personal_info = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+update_personal_info_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+        KeyboardButton(text="📝 Редактировать личную информацию"),
+        ],
+        [
+        KeyboardButton(text="📄Просмотр личной информации"),
+        ]
+    ],
+    resize_keyboard=True
+)
+
 update_education_info = ReplyKeyboardMarkup(
     keyboard=[
         [
@@ -91,6 +142,17 @@ update_education_info = ReplyKeyboardMarkup(
         ],
         [
         KeyboardButton(text="📚 Ta'lim ma'lumotlarni ko'rish"),
+        ]
+    ],
+    resize_keyboard=True
+)
+update_education_info_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+        KeyboardButton(text="📝 Редактировать образовательную информацию"),
+        ],
+        [
+        KeyboardButton(text="📚 Просмотр образовательной информации"),
         ]
     ],
     resize_keyboard=True
@@ -106,6 +168,17 @@ update_application = ReplyKeyboardMarkup(
         ]
     ]
 )
+update_application_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+        KeyboardButton(text="📝Редактировать заявление"),
+        ],
+        [
+        KeyboardButton(text="📄 Посмотреть заявление"),
+        ]
+    ]
+)
+
 
 application = ReplyKeyboardMarkup(
     keyboard = [
@@ -124,11 +197,36 @@ application = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+application_ru = ReplyKeyboardMarkup(
+    keyboard = [
+        [
+            KeyboardButton(text="🎓 Степень"),
+        ],
+        [
+            KeyboardButton(text="🗂 Направление или специальность"),
+        ],
+        [
+            KeyboardButton(text="Форма обучения"),
+        ],
+        [
+            KeyboardButton(text="Язык обучения"),
+        ]
+    ],
+    resize_keyboard=True
+)
 
 enter_button = ReplyKeyboardMarkup(
     keyboard= [
         [
             KeyboardButton(text='Davom etish'),
+        ]
+    ],
+    resize_keyboard=True
+)
+enter_button_ru = ReplyKeyboardMarkup(
+    keyboard= [
+        [
+            KeyboardButton(text='Продолжить'),
         ]
     ],
     resize_keyboard=True
@@ -145,12 +243,32 @@ yes_no = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+yes_no_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Да, есть'),
+        ],
+        [
+            KeyboardButton(text="Нет, не доступен"),
+        ]
+    ],
+    resize_keyboard=True
+)
 
 ask_delete_account = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Ha, akkauntni o'chirish"),
             KeyboardButton(text="Bekor qilish"),
+        ]
+    ],
+    resize_keyboard=True
+)
+ask_delete_account_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Да, удалить аккаунт"),
+            KeyboardButton(text="Отмена"),
         ]
     ],
     resize_keyboard=True
@@ -165,11 +283,29 @@ exit_from_account = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+exit_from_account_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Да, выйти"),
+            KeyboardButton(text="Отмена"),
+        ]
+    ],
+    resize_keyboard=True
+)
 
 finish_edit = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Tahrirlashni yakunlash"),
+        ]
+    ],
+    resize_keyboard=True
+)
+
+finish_edit_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Завершить редактирование"),
         ]
     ],
     resize_keyboard=True

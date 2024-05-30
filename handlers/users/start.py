@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import CommandStart
 from data.config import university_name_uz, university_name_ru
 from loader import dp
-from states.personalData import PersonalData
+# from states.personalData import PersonalData
 from keyboards.default import registerKeyBoardButton
 from icecream import ic
 from utils import send_req
@@ -28,17 +28,21 @@ async def bot_start(message: types.Message, state: FSMContext):
         username = message.from_user.username or message.from_user.full_name  # Use username if available, otherwise full name
         await message.answer(f"@{username} start tugmasini qayta qayta bosish shart emas😅")
 
-    if start_count > 5 and start_count < 7:
-        username = message.from_user.username or message.from_user.full_name
-        await message.answer(f"@{username} Iltimos asabiylashmang😅")
+    # if start_count > 5 and start_count < 7:
+    #     username = message.from_user.username or message.from_user.full_name
+    #     await message.answer(f"@{username} Iltimos asabiylashmang😅")
 
-    if start_count >= 7 and start_count < 8:
-        username_display = f"@{message.from_user.username}" if message.from_user.username else message.from_user.full_name
-        await message.answer(f"{username_display} zerikkan bo'lsangiz\n\nhttps://mentalaba.uz saytini ko'rishni tavsiya qilaman.")
+    # if start_count >= 7 and start_count < 8:
+    #     username_display = f"@{message.from_user.username}" if message.from_user.username else message.from_user.full_name
+    #     await message.answer(f"{username_display} zerikkan bo'lsangiz\n\nhttps://mentalaba.uz saytini ko'rishni tavsiya qilaman.")
     data_in_state = await state.get_data()
     haveApplicationForm = data_in_state.get('haveApplicationForm', False)
     haveApplied = data_in_state.get('haveApplied', False)
     haveEducation = data_in_state.get('haveEducation', False)
+    data = await state.get_data()
+    language_uz = data.get('language_uz', None)
+    language_ru = data.get('language_ru', None)
+    ic(language_uz, language_ru, 61)
     if token and haveApplicationForm and haveApplied and haveEducation:
         get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
         access = get_djtoken.get('access')
@@ -55,8 +59,15 @@ async def bot_start(message: types.Message, state: FSMContext):
 
         get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
         ic(get_this_user)
-        # If there's a token, show the main menu
-        await message.answer("🏠Asosiy sahifa", reply_markup=registerKeyBoardButton.menu)
+        data = await state.get_data()
+        language_uz = data.get('language_uz', None)
+        language_ru = data.get('language_ru', None)
+        ic(language_uz, language_ru, 61)
+        if language_uz:
+            # If there's a token, show the main menu
+            await message.answer("🏠Asosiy sahifa", reply_markup=registerKeyBoardButton.menu)
+        else:
+            await message.answer("🏠Меню", reply_markup=registerKeyBoardButton.menu_ru)
     else:
         # For new users or if there's no token, reset the state and show the welcome message
         await state.finish()

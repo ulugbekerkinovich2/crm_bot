@@ -49,7 +49,34 @@ update_personal_info_inline = InlineKeyboardMarkup(
         ]
     ]
 )
-
+update_personal_info_inline_ru = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Фамилия", callback_data='lastname'),
+        ],
+        [
+            InlineKeyboardButton(text="Имя", callback_data='firstname'),
+        ],
+        [
+            InlineKeyboardButton(text="Имя отца", callback_data='thirdname'),
+        ],
+        [
+            InlineKeyboardButton(text="Серия и номер паспорта/удостоверения личности", callback_data='passport'),
+        ],
+        [
+            InlineKeyboardButton(text="День рождения", callback_data='birthdate'),
+        ],
+        [
+            InlineKeyboardButton(text="Пол", callback_data='gender'),
+        ],
+        [
+            InlineKeyboardButton(text="Место рождения", callback_data='birthplace'),
+        ],
+        [
+            InlineKeyboardButton(text="Дополнительный номер телефона", callback_data='extra_phone'),
+        ]
+    ]
+)
 
 edit_user_education_inline = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -73,7 +100,28 @@ edit_user_education_inline = InlineKeyboardMarkup(
         ]
     ]
 )
-
+edit_user_education_inline_ru = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Тип учебного заведения, которое посещал или окончил", callback_data='education'),
+        ],
+        [
+            InlineKeyboardButton(text="Город или регион, где расположен образовательный центр", callback_data='region'),
+        ],
+        [
+            InlineKeyboardButton(text="Изменить район", callback_data='district'),
+        ],
+        [
+            InlineKeyboardButton(text="Название учебного заведения", callback_data='education_name'),
+        ],
+        [
+            InlineKeyboardButton(text="Копия диплома, сертификата или сертификата", callback_data='diploma'),
+        ],
+        [
+            InlineKeyboardButton(text="Сертификат иностранного языка", callback_data='certificate'),
+        ]
+    ]
+)
 edit_user_education_transfer_inline = InlineKeyboardMarkup(
     inline_keyboard=[
         [
@@ -90,6 +138,26 @@ edit_user_education_transfer_inline = InlineKeyboardMarkup(
         ],
         [
             InlineKeyboardButton(text="Transkript nusxasi", callback_data='transcript'),
+        ]
+    ]
+)
+
+edit_user_education_transfer_inline_ru = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Страна, в которой находится учебное заведение", callback_data='country_id'),
+        ],
+        [
+            InlineKeyboardButton(text="Название учебного заведения", callback_data='institution_name'),
+        ],
+        [
+            InlineKeyboardButton(text="Курс обучения", callback_data='direction_name'),
+        ],
+        [
+            InlineKeyboardButton(text="Ваш текущий курс", callback_data='current_course'),
+        ],
+        [
+            InlineKeyboardButton(text="Транскрипт", callback_data='transcript'),
         ]
     ]
 )

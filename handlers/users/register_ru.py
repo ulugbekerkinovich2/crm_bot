@@ -3,8 +3,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command,Text
 from utils import send_req
 from loader import dp
-from states.personalData import PersonalData, EducationData
-from states.personalData import ManualPersonalInfo
+from states.personalData import PersonalDataRU, EducationDataRU
+from states.personalData import ManualPersonalInfoRU
 from aiogram.utils.exceptions import Throttled
 from data.config import throttling_time, domain_name
 from pprint import pprint
@@ -15,74 +15,111 @@ import os
 import aiofiles.os
 from icecream import ic
 import json
-from keyboards.default.registerKeyBoardButton import yes_no,update_education_info
-from keyboards.default.registerKeyBoardButton import enter_button, menu,register
+from keyboards.default.registerKeyBoardButton import yes_no,update_education_info,yes_no_ru,update_education_info_ru
+from keyboards.default.registerKeyBoardButton import enter_button, menu,register,register_ru,menu_ru,enter_button_ru
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
 
-saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
-error_message_birthday = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: yyyy-oo-kk\nTug'ilgan kunni qayta kiriting"
-error_date = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Kiritilgan sana namunadagidek emas.\nTug'ilgan kunni qayta kiriting"
-example_birthday = "Tug\'ilgan kuningingizni kiriting quidagi formatda\nyyyy-oo-kk\n\nNamuna: 2005-03-21"
-example_phone = "☎️ <b>Telefon raqamingizni yuboring</b>\n<i>Namuna: 998991234567</i>"
-example_extra_phone = 'Siz bilan aloqaga chiqish uchun qo\'shimcha telefon raqam kiriting\n\nNamuna: +998991234567'
-example_transkript_message = "✅ *Transkript nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
-example_diploma_message = "✅ *Diplom, shahodatnoma yoki ma’lumotnoma nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
-example_certification_message = "✅ *Chet tili sertifikat nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
-accepted_phone = "🟢 <b>Telefon raqamingiz qabul qilindi.</b> Telefon raqamingizga yuborilgan kodni kiriting"
-accepted_birthday_saved_data = '🟢Tu\'gilgan kuningiz qabul qilindi. Ma\'lumotlaringiz muvaffaqiyatli saqlandi.'
-error_message_phone = "🔴Telefon raqam no\'to\'g\'ri kiritildi, Namunadagidek raqam kiriting!"
-accepted_phone_simple = "🟢Telefon raqamingiz qabul qilindi."
-accepted_document = "🟢Passport seriyasi qabul qilindi"
-example_document = "Passport seriyangizni yuboring\nNamuna: AB1234567"
-error_document = "🔴Passport seriya noto'g'ri kiritildi"
-error_secret_code = "🔴Tasdiqlash kodi noto'g'ri kiritildi"
-error_type_edu_name = 'Talim dargoh nomini kiriting, bu majburiy.\nNamuna: 12-maktab'
-error_document = "Passport seriyasi 2 ta harfdan  va 7 raqamdan iborat bo'lishi kerak.\nQayta passport seriyangizni kiriting"
-select_region = "Ta'lim dargohi joylashgan shahar yoki viloyatni tanlang:"
-select_degree = "<b>*Daraja tanlang:</b>"
-select_direction = "Yo'nalish yoki mutaxassislikni tanlang:"
-select_edu_type = "Ta'lim shaklini tanglang:"
-select_edu_language = "Ta'lim tilini tanlang:"
-select_type_certificate = "Sertifikat turini tanlang:"
-select_country = "Ta’lim dargohi joylashgan davlatni tanlang:"
-type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: 12-maktab"
-wait_file_is_loading = "<b>Kuting, fayl yuklanmoqda.</b>"
-retype_secret_code = "Tasdiqlash kodini qayta kiriting"
-application_submited = 'Ariza muvaffaqiyatli topshirildi'
-server_error = '🔴Ma\'lumotlaringizni markaziy ma\'lumotlar omboridan topolmadim\nMa\'lumotlaringizni kiritishingiz mumkin.'
-error_pin = "🔴 JSHSHR 14 raqamdan iborat bolishi kerak"
-error_number = "🔴 Telefon nomer 9ta raqamdan iborat bo'lishi kerak, Iltimos namunadagidek raqam kiriting"
-error_birthplace = "🔴 Tug'ilgan joy noto'g'ri kiritildi"
-search_university = "Mamlakat qisqa nomi yoki to'liq nomini kiriting: Namuna Amerika"
-not_found_country = "🔴 Ma'lumot topilmadi, Iltimos qaytadan urinib ko'ring"
-select_one = "Quyidagi mamlakatdan birini tanlang:"
+# saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
+saved_message_ru = "✅ <b>Данные сохранены!</b>"
+# error_message_birthday = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: yyyy-oo-kk\nTug'ilgan kunni qayta kiriting"
+error_message_birthday_ru = "🔴Дата рождения указана неверно. Формат даты: гггг-мм-дд\nПовторно введите дату рождения."
+# error_date = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Kiritilgan sana namunadagidek emas.\nTug'ilgan kunni qayta kiriting"
+error_date_ru = "🔴Дата рождения указана неверно. Введенная дата не совпадает с приведенной в примере.\nПовторно введите дату рождения."
+# example_birthday = "Tug\'ilgan kuningingizni kiriting quidagi formatda\nyyyy-oo-kk\n\nNamuna: 2005-03-21"
+example_birthday_ru = "Введите дату рождения в следующем формате\nгггг-мм-дд-\n\nПример: 2005-03-21."
+# example_phone = "☎️ <b>Telefon raqamingizni yuboring</b>\n<i>Namuna: 998991234567</i>"
+example_phone_ru = "☎️ <b>Отправьте свой номер телефона</b>\n<i>Пример: 998991234567</i>"
+# example_extra_phone = 'Siz bilan aloqaga chiqish uchun qo\'shimcha telefon raqam kiriting\n\nNamuna: +998991234567'
+example_extra_phone_ru = "Введите дополнительный номер телефона, чтобы связаться с вами.\n\nПример: +998991234567"
+# example_transkript_message = "✅ *Transkript nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf faylni yuklang_"
+example_transkript_message_ru = "✅ *Отправьте копию стенограммы* \n(_Загрузите файл .png, .jpg, .jpeg, .pdf размером не более 5 МБ_"
+# example_diploma_message = "✅ *Diplom, shahodatnoma yoki ma’lumotnoma nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
+example_diploma_message_ru = "✅ *Отправьте копию диплома, сертификата или справки* \n(_Загрузить файлы .png, .jpg, .jpeg, .pdf размером не более 5 МБ_"
+# example_certification_message = "✅ *Chet tili sertifikat nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
+example_certification_message_ru = "✅ *Отправьте копию сертификата по иностранному языку* \n(_Загрузить файлы .png, .jpg, .jpeg, .pdf размером не более 5 МБ_"
+# accepted_phone = "🟢 <b>Telefon raqamingiz qabul qilindi.</b> Telefon raqamingizga yuborilgan kodni kiriting"
+accepted_phone_ru = "🟢 <b>Ваш номер телефона принят.</b> Введите код, отправленный на ваш номер телефона."
+# accepted_birthday_saved_data = '🟢Tu\'gilgan kuningiz qabul qilindi. Ma\'lumotlaringiz muvaffaqiyatli saqlandi.'
+accepted_birthday_saved_data_ru = "🟢Ваш день рождения принят. Ваши данные успешно сохранены."
+# error_message_phone = "🔴Telefon raqam no\'to\'g\'ri kiritildi, Namunadagidek raqam kiriting!"
+error_message_phone_ru = "🔴Номер телефона введен неверно, пожалуйста, введите номер по образцу!"
+# accepted_phone_simple = "🟢Telefon raqamingiz qabul qilindi."
+accepted_phone_simple_ru = "🟢Ваш номер телефона принят."
+# accepted_document = "🟢Passport seriyasi qabul qilindi"
+accepted_document_ru = "🟢Принимаются серии паспортов"
+# example_document = "Passport seriyangizni yuboring\nNamuna: AB1234567"
+example_document_ru = "Отправьте серийный номер паспорта\nОбразец: AB1234567"
+# error_document = "🔴Passport seriya noto'g'ri kiritildi"
+error_document_ru = "🔴Неверно указана серия паспорта"
+# error_secret_code = "🔴Tasdiqlash kodi noto'g'ri kiritildi"
+error_secret_code_ru = "🔴Код подтверждения введен неверно"
+# error_type_edu_name = 'Talim dargoh nomini kiriting, bu majburiy.\nNamuna: 12-maktab'
+error_type_edu_name_ru = 'Talim dargoh nomini kiriting, bu majburiy.\nNamuna: 12-maktab'
+# error_document = "Passport seriyasi 2 ta harfdan  va 7 raqamdan iborat bo'lishi kerak.\nQayta passport seriyangizni kiriting"
+error_document_ru = "Серия паспорта должна содержать 2 буквы и 7 цифр.\nПовторно введите серию паспорта."
+# select_region = "Ta'lim dargohi joylashgan shahar yoki viloyatni tanlang:"
+select_region_ru = "Выберите город или регион, где расположен образовательный центр:"
+# select_degree = "<b>*Daraja tanlang:</b>"
+select_degree_ru = "<b>*Выберите уровень:</b>"
+# select_direction = "Yo'nalish yoki mutaxassislikni tanlang:"
+select_direction_ru = "Выберите сферу или специализацию:"
+# select_edu_type = "Ta'lim shaklini tanglang:"
+select_edu_type_ru = "Выберите тип образования:"
+# select_edu_language = "Ta'lim tilini tanlang:"
+select_edu_language_ru = "Выберите язык обучения:"
+# select_type_certificate = "Sertifikat turini tanlang:"
+select_type_certificate_ru = "Выберите тип сертификата:"
+# select_country = "Ta’lim dargohi joylashgan davlatni tanlang:"
+select_country_ru = "Выберите страну, в которой находится учебное заведение:"
+# type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: 12-maktab"
+type_your_edu_name_ru = "Введите название школы:\nПример: 12-я школа."
+# wait_file_is_loading = "<b>Kuting, fayl yuklanmoqda.</b>"
+wait_file_is_loading_ru = "<b>Подождите, файл загружается.</b>"
+# retype_secret_code = "Tasdiqlash kodini qayta kiriting"
+retype_secret_code_ru = "Повторно введите код подтверждения"
+# application_submited = 'Ariza muvaffaqiyatli topshirildi'
+application_submited_ru = 'Заявка успешно отправлена'
+# server_error = '🔴Ma\'lumotlaringizni markaziy ma\'lumotlar omboridan topolmadim\nMa\'lumotlaringizni kiritishingiz mumkin.'
+server_error_ru = '🔴Мне не удалось найти вашу информацию в центральной базе данных.\nВы можете ввести свою информацию.'
+# error_pin = "🔴 JSHSHR 14 raqamdan iborat bolishi kerak"
+error_pin_ru = "🔴 ПИНФЛ должен состоять из 14 цифр."
+# error_number = "🔴 Telefon nomer 9ta raqamdan iborat bo'lishi kerak, Iltimos namunadagidek raqam kiriting"
+error_number_ru = "🔴 Telefon nomer 9ta raqamdan iborat bo'lishi kerak, Iltimos namunadagidek raqam kiriting"
+# error_birthplace = "🔴 Tug'ilgan joy noto'g'ri kiritildi"
+error_birthplace_ru = "🔴 Место рождения указано неверно"
+# search_university = "Mamlakat qisqa nomi yoki to'liq nomini kiriting: Namuna Amerika"
+search_university_ru = "Введите краткое или полное название страны: Пример: Америка."
+# not_found_country = "🔴 Ma'lumot topilmadi, Iltimos qaytadan urinib ko'ring"
+not_found_country_ru = "🔴Информация не найдена, попробуйте еще раз"
+# select_one = "Quidagi mamlakatdan birini tanlang:"
+select_one_ru = "Выберите одну из следующих стран:"
 
-@dp.message_handler(text="🇺🇿O'zbek tili")
+@dp.message_handler(text="🇷🇺Русский язык")
 async def uz_lang(message: types.Message, state: FSMContext):
-    await state.update_data(language_uz=True, language_ru=False) 
-    await message.answer("2024-2025-o'quv yili uchun ariza topshirish", reply_markup=register)
+    await state.update_data(langauge_uz=False, language_ru=True) 
+    await message.answer("Подать заявку на 2024-2025 учебный год", reply_markup=register_ru)
 
 
-@dp.message_handler(text="🔄O'qishni ko'chirish")
+@dp.message_handler(text="🔄Трансферное обучение")
 async def transfer_edu(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    ic('uzb tanlandi')
+    ic('rus tanlandi')
 
     all_data_state = await state.get_data() 
     token = all_data_state.get('token', None)
     ic('token72', token)
     if token is None:
-        button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+        button_phone = types.KeyboardButton(text='📲 Отправьте номер телефона', request_contact=True)
         keyboard.add(button_phone)
-        await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
+        await message.answer(example_phone_ru, parse_mode="HTML",reply_markup=keyboard)
         await state.update_data(register_user=False, transfer_user=True)
-        await PersonalData.phone.set()
+        await PersonalDataRU.phone.set()
     elif token is not None:
         check_token = await send_req.application_forms_me(token)
         status_code = check_token.get('status_code')
         if status_code  == 200:
-            await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+            await message.answer("🏠Главная страница", reply_markup=menu_ru)
         elif status_code != 200:
             refreshToken = all_data_state.get('refresh_token')
             if refreshToken is not None:
@@ -90,32 +127,32 @@ async def transfer_edu(message: types.Message, state: FSMContext):
                 ic(new_token)
 
 
-@dp.message_handler(Text(equals="🧾Abiturient"))
+@dp.message_handler(Text(equals="🧾 Абитуриент"))
 async def my_application(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    ic('uzb tanlandi')
+    ic('ru tanlandi')
 
     all_data_state = await state.get_data() 
     token = all_data_state.get('token', None)
     ic('token72', token)
     if token is None:
-        button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+        button_phone = types.KeyboardButton(text='📲 Отправьте номер телефона', request_contact=True)
         keyboard.add(button_phone)
-        await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
+        await message.answer(example_phone_ru, parse_mode="HTML",reply_markup=keyboard)
         await state.update_data(register_user=True, transfer_user=False)
-        await PersonalData.phone.set()
+        await PersonalDataRU.phone.set()
     elif token is not None:
         check_token = await send_req.application_forms_me(token)
         status_code = check_token.get('status_code')
         if status_code  == 200:
-            await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+            await message.answer("🏠Главная страница", reply_markup=menu_ru)
         elif status_code != 200:
             refreshToken = all_data_state.get('refresh_token')
             if refreshToken is not None:
                 new_token = await send_req.return_token_use_refresh(refreshToken)
                 ic(new_token)
 
-@dp.message_handler(state=PersonalData.phone, content_types=types.ContentTypes.CONTACT | types.ContentTypes.TEXT)
+@dp.message_handler(state=PersonalDataRU.phone, content_types=types.ContentTypes.CONTACT | types.ContentTypes.TEXT)
 async def phone_contact_received(message: types.Message, state: FSMContext):
     # await message.answer(message.json())
     # ic(message)
@@ -161,14 +198,15 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                     ic('user_login: ',user_login)
                     ic('user_login status: ',user_login.get('status_code'))
                     user_login_status = user_login.get('status_code')
+                    ic('ru', user_login_status)
 
                     if user_login_status == 200:
                         ic('user_login status',user_login_status)
                         remove_keyboard = types.ReplyKeyboardRemove()
-                        await message.answer(accepted_phone, parse_mode='HTML', reply_markup=remove_keyboard)
-                        await PersonalData.secret_code.set()
+                        await message.answer(accepted_phone_ru, parse_mode='HTML', reply_markup=remove_keyboard)
+                        await PersonalDataRU.secret_code.set()
                     else:
-                        await message.answer("Severda xatolik xatolik yuz berdi")
+                        await message.answer("На сервере произошла ошибка")
                 # ic(check_user)
                 elif check_user == 'false':
                     ic('check_user_for_false', check_user)
@@ -177,8 +215,8 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                     remove_keyboard = types.ReplyKeyboardRemove()
                     ic('user_register: ',user_register.status_code)
                     if user_register.status_code == 201:
-                        await message.answer(accepted_phone, reply_markup=remove_keyboard)
-                        await PersonalData.secret_code.set()
+                        await message.answer(accepted_phone_ru, reply_markup=remove_keyboard)
+                        await PersonalDataRU.secret_code.set()
 
         elif len(phone_num) == 13:
             ic('plus bilan keldi')
@@ -201,8 +239,8 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                 if user_login_status == 200:
                     ic('user_login status',user_login_status)
                     remove_keyboard = types.ReplyKeyboardRemove()
-                    await message.answer(accepted_phone, parse_mode='HTML', reply_markup=remove_keyboard)
-                    await PersonalData.secret_code.set()
+                    await message.answer(accepted_phone_ru, parse_mode='HTML', reply_markup=remove_keyboard)
+                    await PersonalDataRU.secret_code.set()
                 else:
                     await message.answer("severda xatolik yuz berdi")
             # ic(check_user)
@@ -213,19 +251,19 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                 remove_keyboard = types.ReplyKeyboardRemove()
                 ic('user_register: ',user_register.status_code)
                 if user_register.status_code == 201:
-                    await message.answer(accepted_phone, reply_markup=remove_keyboard)
-                    await PersonalData.secret_code.set()
+                    await message.answer(accepted_phone_ru, reply_markup=remove_keyboard)
+                    await PersonalDataRU.secret_code.set()
 
     elif custom_writened_phone is not None:
         custom_writened_phone = custom_writened_phone.strip()
         ic('custom_writened_phone: ',custom_writened_phone)
         status_while = True
         while status_while:
-            ic('while ishladi')
+            ic('while ishladi ruschada')
             phone_num = custom_writened_phone.strip()
             if len(phone_num) != 12 or not phone_num.isdigit():
-                await message.answer(error_message_phone)
-                response_msg = await dp.bot.send_message(message.chat.id, "Iltimos, to'g'ri formatda telefon raqamni kiriting.")
+                await message.answer(error_message_phone_ru)
+                response_msg = await dp.bot.send_message(message.chat.id, "Пожалуйста, введите номер телефона в правильном формате.")
                 response = await dp.bot.wait_for("message")
                 custom_writened_phone = message.text.strip() if response.text else None
                 if custom_writened_phone:
@@ -245,28 +283,28 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                     ic('user_login', user_login)
                     if user_login.get('status_code') == 200:
                         keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                        reset_pass_button = types.KeyboardButton(text='Kodni qayta yuborish')
+                        reset_pass_button = types.KeyboardButton(text='Отправить код повторно')
                         keyboard.add(reset_pass_button)
-                        await message.answer(accepted_phone_simple, reply_markup=ReplyKeyboardRemove())
-                        await message.answer(" Telefon raqamingizga yuborilgan kodni yuboring", reply_markup=reset_pass_button)
-                        await PersonalData.secret_code.set()
+                        await message.answer(accepted_phone_simple_ru, reply_markup=ReplyKeyboardRemove())
+                        await message.answer("Введите код, отправленный на ваш номер телефона", reply_markup=reset_pass_button)
+                        await PersonalDataRU.secret_code.set()
                     else:
-                        await message.answer("935920479","severda xatolik 107")
-                        await message.answer("Siz Ro'yhatdan o'tishingiz kerak")
+                        # await message.answer("935920479","severda xatolik 107")
+                        await message.answer("Вы должны зарегистрироваться")
 
                 elif str(check_user) == 'false':
                     await state.update_data(phone=custom_phone)
                     user_register = await send_req.user_register(custom_phone)
                     ic('user_register', user_register)
                     if user_register.get('status') == 200:
-                        await message.answer(accepted_phone, reply_markup=ReplyKeyboardRemove())
+                        await message.answer(accepted_phone_ru, reply_markup=ReplyKeyboardRemove())
                         # await message.answer("Telefon raqamingizga yuborilgan kodni yuboring")
-                        await PersonalData.secret_code.set()
+                        await PersonalDataRU.secret_code.set()
                 else:
-                    await message.answer("severda xatolik yuz berdi 120")
+                    await message.answer("на сервере произошла ошибка")
 
 
-@dp.message_handler(state=PersonalData.secret_code)
+@dp.message_handler(state=PersonalDataRU.secret_code)
 async def secret_code(message: types.Message, state: FSMContext):
     secret_code = message.text
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -324,52 +362,52 @@ async def secret_code(message: types.Message, state: FSMContext):
             except Exception as err:
                 ic(err)
             if haveApplicationForm is False and (haveEducation is False and  havePreviousEducation is False) and haveApplied is False:
-                await message.answer(example_document, reply_markup=ReplyKeyboardRemove())
+                await message.answer(example_document_ru, reply_markup=ReplyKeyboardRemove())
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
-                await PersonalData.document.set()
+                await PersonalDataRU.document.set()
 
             elif haveApplicationForm is True and (haveEducation is False and havePreviousEducation is False) and haveApplied is False:
-                await message.answer("<i>-✅Siz ro'yhatdan o'tgansiz.\n🔴Ta'lim ma'lumotlarini to'ldirishingiz kerak</i>",reply_markup=enter_button)
+                await message.answer("<i>- ✅Вы зарегистрированы.\n🔴Вам необходимо заполнить информацию о своем образовании</i>",reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
                 ic('002')
-                await EducationData.education_id.set()
+                await PersonalDataRU.education_id.set()
 
             elif haveApplicationForm is True and (haveEducation is True and havePreviousEducation is False) and haveApplied is False:
-                await message.answer("<i>- ✅ Siz ro'yhatdan o'tkansiz.\n- ✅ Ta'lim ma'lumotlaringiz ham to'ldirilgan.\n\nUniversitetga ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
+                await message.answer("<i>- ✅ Вы зарегистрированы.\n- ✅ Также заполнена информация о вашем образовании.\n\nВы можете подать заявление в университет</i>", reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=True,havePreviousEducation=False,haveApplied=False)
                 ic('keldi 003')
-                await EducationData.degree_id.set()
+                await PersonalDataRU.degree_id.set()
 
             elif haveApplicationForm is True and (haveEducation is False and havePreviousEducation is True) and haveApplied is False:
-                await message.answer("<i>- ✅ Siz ro'yhatdan o'tkansiz.\n- ✅ Ta'lim ma'lumotlaringiz ham to'ldirilgan .\n\nUniversitetga ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
+                await message.answer("<i>- ✅ Вы зарегистрированы.\n- ✅ Также заполнена информация о вашем образовании.\n\nВы можете подать заявление в университет</i>", reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
                 ic('keldi 003')
-                await EducationData.degree_id.set()
+                await EducationDataRU.degree_id.set()
 
             elif haveApplicationForm is True and (haveEducation is True or havePreviousEducation is True) and haveApplied is True:
-                await message.answer("<i>-✅Siz ro'yhatdan o'tkansiz\n-✅Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n-✅Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
+                await message.answer("<i>-✅​​Вы зарегистрированы\n-​​✅Также заполнена информация о вашем образовании,\n-✅​​Вы также подали заявление в университет.</i>", reply_markup=menu_ru)
                 ic('keldi 004')
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
                 ic('keldi 005')
-                await EducationData.menu.set()
+                await EducationDataRU.menu.set()
 
 
 
         
         elif res_status_code == 404 or res_status_code == 400 or res_status_code == 410:
             ic('\nres666',res_status_code, '\n')
-            await message.answer(error_secret_code)
-            response_msg = await dp.bot.send_message(message.chat.id, retype_secret_code)
+            await message.answer(error_secret_code_ru)
+            response_msg = await dp.bot.send_message(message.chat.id, retype_secret_code_ru)
             response = await dp.bot.wait_for("message")
     else:
-        await message.answer(error_secret_code)
+        await message.answer(error_secret_code_ru)
 
     # remove_keyboard_ = types.ReplyKeyboardRemove()
     await state.update_data(secret_code=secret_code)
 
 
 
-@dp.message_handler(state=PersonalData.document)
+@dp.message_handler(state=PersonalDataRU.document)
 async def document(message: types.Message, state: FSMContext):
     document = message.text.strip().upper()
     document_serial = document[:2]
@@ -383,21 +421,21 @@ async def document(message: types.Message, state: FSMContext):
             break  # Exit loop if the document is valid
         
         # Handle invalid input
-        await message.answer(error_document)
+        await message.answer(error_document_ru)
         
         # Wait for a new user message as a response
-        new_document = await message.answer("Please enter a valid document:")
+        new_document = await message.answer("Пожалуйста, введите действительный документ:")
         document = (await dp.bot.wait_for("message")).text.strip().upper()
         document_serial = document[:2]
         document_number = document[2:]
 
     # After validation loop
-    await message.answer(accepted_document)
-    await message.answer(example_birthday)
-    await PersonalData.birth_date.set()
+    await message.answer(accepted_document_ru)
+    await message.answer(example_birthday_ru)
+    await PersonalDataRU.birth_date.set()
 
 
-@dp.message_handler(state=PersonalData.birth_date)
+@dp.message_handler(state=PersonalDataRU.birth_date)
 async def birth_date(message: types.Message, state: FSMContext):
     ic('birth date')
     birth_date = message.text.strip()
@@ -405,18 +443,18 @@ async def birth_date(message: types.Message, state: FSMContext):
     birth_date_parts = birth_date.split('-') if birth_date else None
     # print('birth_date', birth_date_parts)
     if not birth_date_parts or len(birth_date_parts) != 3:
-        await message.answer(error_message_birthday)
+        await message.answer(error_message_birthday_ru)
         return
 
     check_year, check_month, check_day = birth_date_parts
     if not (check_day.isdigit() and check_month.isdigit() and check_year.isdigit()):
-        await message.answer(error_message_birthday)
+        await message.answer(error_message_birthday_ru)
         return
 
     year, month, day = map(int, birth_date_parts)
     # print(day, month, year)
     if not (1 <= day <= 31 and 1 <= month <= 12 and 2024 > year > 1990):
-        await message.answer(error_date)
+        await message.answer(error_date_ru)
         return
     
 
@@ -430,11 +468,11 @@ async def birth_date(message: types.Message, state: FSMContext):
     ic(check_is_not_duplicate)
 
     if check_is_not_duplicate.get('status_code') in [500,404,400]:
-        await message.answer(server_error, reply_markup=enter_button)
+        await message.answer(server_error_ru, reply_markup=enter_button_ru)
         await ManualPersonalInfo.personal_info.set()
     elif check_is_not_duplicate.get('status_code') == 409:
         error_mes = check_is_not_duplicate.get('data')
-
+        
         await message.answer(f"🔴 {error_mes.get('message')}")
     # data_res = check_is_not_duplicate['data']
     # ic(check_is_not_duplicate)
@@ -444,16 +482,16 @@ async def birth_date(message: types.Message, state: FSMContext):
     #     await state.finish()
     elif check_is_not_duplicate.get('status_code') == 200:
         await state.update_data(birth_date=birth_date)
-        await message.answer(accepted_birthday_saved_data)
+        await message.answer(accepted_birthday_saved_data_ru)
         formatted_birth_date = f'{year}-{month}-{day}'
         await state.update_data(formatted_birth_date=formatted_birth_date)
-        await message.answer(example_extra_phone, reply_markup=ReplyKeyboardRemove())
-        await PersonalData.info.set()
+        await message.answer(example_extra_phone_ru, reply_markup=ReplyKeyboardRemove())
+        await PersonalDataRU.info.set()
 
    
 
 
-@dp.message_handler(state=PersonalData.info)
+@dp.message_handler(state=PersonalDataRU.info)
 async def info(message: types.Message, state: FSMContext):
     extra_phone = message.text.strip()
     # ic('extra_phone', extra_phone)
@@ -608,7 +646,7 @@ async def info(message: types.Message, state: FSMContext):
         await state.update_data(**data_obj_applications)
         # await message.answer("Ta'lim malumotlarini kiriting")
 
-        await message.answer("Ta'lim ma'lumotlarini to'ldirish uchun davom etish tugmasini bosing", reply_markup=enter_button)
+        await message.answer("Нажмите «Продолжить», чтобы заполнить информацию об обучении.", reply_markup=enter_button_ru)
         ic('davom etish bosildi', 540)
         get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
         chat_id_user = get_current_user['chat_id_user']
@@ -635,19 +673,19 @@ async def info(message: types.Message, state: FSMContext):
         educations_response = send_req.educations(token)
         educations = educations_response.json()
         
-        buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"edu_{item['id']}")]
+        buttons = [[InlineKeyboardButton(text=item['name_ru'], callback_data=f"edu_{item['id']}")]
                     for item in educations]
         educationMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-        await message.answer("<b>Universitetga hujjat topshrish uchun ta'lim ma'lumotlaringizni kiritishingiz zarur.</b>", parse_mode='HTML',
+        await message.answer("<b>Чтобы подать заявку в университет, вам необходимо ввести данные об образовании.</b>", parse_mode='HTML',
                             reply_markup=ReplyKeyboardRemove())
-        await message.answer("<b>Bitirgan yoki tahsil olayotgan ta'lim dargohi turini tanlang:</b>", reply_markup=educationMenu, parse_mode='HTML')
+        await message.answer("<b>Выберите тип учебного заведения, которое вы окончили или учитесь:</b>", reply_markup=educationMenu, parse_mode='HTML')
             
-        await EducationData.education_id.set()
-    await EducationData.education_id.set()
+        await EducationDataRU.education_id.set()
+    await EducationDataRU.education_id.set()
     
 
 
-@dp.message_handler(state=EducationData.education_id)
+@dp.message_handler(state=EducationDataRU.education_id)
 async def education_id_handler(message: types.Message, state: FSMContext, page: int = 0):
     ic('education ga keldi')
     data = await state.get_data()
@@ -660,85 +698,85 @@ async def education_id_handler(message: types.Message, state: FSMContext, page: 
         educations_response = send_req.educations(token)
         educations = educations_response.json()
         
-        buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"edu_{item['id']}")]
+        buttons = [[InlineKeyboardButton(text=item['name_ru'], callback_data=f"edu_{item['id']}")]
                    for item in educations]
         educationMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-        await message.answer("<b>Universitetga hujjat topshrish uchun ta'lim ma'lumotlaringizni kiritishingiz zarur.</b>", parse_mode='HTML')
-        await message.answer("<b>Bitirgan yoki tahsil olayotgan ta'lim dargohi turini tanlang:</b>", reply_markup=educationMenu, parse_mode='HTML')
+        await message.answer("<b>Чтобы подать заявку в университет, вам необходимо ввести данные об образовании.</b>", parse_mode='HTML')
+        await message.answer("<b>Выберите тип учебного заведения, которое вы окончили или учитесь:</b>", reply_markup=educationMenu, parse_mode='HTML')
     elif transfer_user:
         # Ask user to input the search query for countries
-        await EducationData.country_search.set()  # Assuming country_search is a state for inputting country search
-        await message.answer(search_university, reply_markup=ReplyKeyboardRemove())
+        await EducationDataRU.country_search.set()  # Assuming country_search is a state for inputting country search
+        await message.answer(search_university_ru, reply_markup=ReplyKeyboardRemove())
 
 # Handle the country search input
-@dp.message_handler(state=EducationData.country_search)
+@dp.message_handler(state=EducationDataRU.country_search)
 async def process_country_search(message: types.Message, state: FSMContext):
     user_query = message.text.lower()
     token = (await state.get_data()).get('token')
     all_countries = await send_req.countries(token)  # Ensure this is an async call to your backend/API
 
-    matching_countries = [country for country in all_countries if user_query in country['name_uz'].lower()]
+    matching_countries = [country for country in all_countries if user_query in country['name_ru'].lower()]
     
     if not matching_countries:
-        await message.answer(not_found_country)
+        await message.answer(not_found_country_ru)
         return
 
     buttons = [
-        [InlineKeyboardButton(text=country['name_uz'], callback_data=f"country_{country['id']}")]
+        [InlineKeyboardButton(text=country['name_ru'], callback_data=f"country_{country['id']}")]
         for country in matching_countries
     ]
     country_menu = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await message.answer(select_one, reply_markup=country_menu)
-    await EducationData.country_search.set()
+    await message.answer(select_one_ru, reply_markup=country_menu)
+    await EducationDataRU.country_search.set()
     # await state.finish()
 
-@dp.callback_query_handler(lambda c: c.data.startswith('country_'), state=EducationData.country_search)
+@dp.callback_query_handler(lambda c: c.data.startswith('country_'), state=EducationDataRU.country_search)
 async def handle_country_selection(callback_query: types.CallbackQuery,state: FSMContext):
     await callback_query.answer()  
     selected_country_id = callback_query.data.split('_')[1]
     ic('selected_country_id',selected_country_id)
     await state.update_data(country_id=selected_country_id)
-    await callback_query.message.answer(saved_message)
-    await callback_query.message.answer("Ta'lim dargohi nomini kiriting: ", reply_markup=ReplyKeyboardRemove())
-    await EducationData.transfer_education_name.set()
+    await callback_query.message.answer(saved_message_ru)
+    await callback_query.message.answer("Введите название учебного заведения:... ", reply_markup=ReplyKeyboardRemove())
+    await EducationDataRU.transfer_education_name.set()
     
-@dp.message_handler(state=EducationData.transfer_education_name)
+@dp.message_handler(state=EducationDataRU.transfer_education_name)
 async def transfer_education_name_handler(message: types.Message, state: FSMContext):
     transfer_edu_name = message.text.strip()
     ic(transfer_edu_name)
     await state.update_data(transfer_education_name=transfer_edu_name)
-    await message.answer("Ta'lim yo'nalishi nomini kiriting: ", reply_markup=ReplyKeyboardRemove())
-    await EducationData.transfer_direction_name.set()
+    await message.answer("Введите название направления обучения:... ", reply_markup=ReplyKeyboardRemove())
+    await EducationDataRU.transfer_direction_name.set()
 
 
-@dp.message_handler(state=EducationData.transfer_direction_name)
+@dp.message_handler(state=EducationDataRU.transfer_direction_name)
 async def transfer_direction_name_handler(message: types.Message, state: FSMContext):
     transfer_direction_name = message.text.strip()
     ic(transfer_direction_name)
     # await message.answer("Ayni vaqtdagi kursingizni tanlang: ")
     inline_buttons = [
         [
-            InlineKeyboardButton(text='1-kursda o\'qiyman', callback_data=1)
+            InlineKeyboardButton(text='учусь на 1 курсе', callback_data=1)
         ],
         [
-            InlineKeyboardButton(text='2-kursda o\'qiyman', callback_data=2)
+            InlineKeyboardButton(text='учусь на 2 курсе', callback_data=2)
         ]
     ]
     inline_kb = InlineKeyboardMarkup(inline_keyboard=inline_buttons)
-    await message.answer("Ayni vaqtdagi kursingizni tanlang: ", reply_markup=inline_kb)
+    await message.answer("Выберите текущий курс: ", reply_markup=inline_kb)
     await state.update_data(transfer_direction_name=transfer_direction_name)
 
-@dp.callback_query_handler(lambda c: c.data.isdigit(), state=EducationData.transfer_direction_name)  # Ensures that only digit callback_data is processed here
+@dp.callback_query_handler(lambda c: c.data.isdigit(), state=EducationDataRU.transfer_direction_name)  # Ensures that only digit callback_data is processed here
 async def handle_callback_query_dir(callback_query: types.CallbackQuery, state: FSMContext):
     selected_course = callback_query.data
     ic(selected_course)
     await callback_query.answer()
     await state.update_data(selected_course=selected_course)
-    await callback_query.message.answer(example_transkript_message, reply_markup=ReplyKeyboardRemove())
-    await EducationData.file_diploma_transkript.set()
+    await callback_query.message.answer(example_transkript_message_ru, reply_markup=ReplyKeyboardRemove())
+    await EducationDataRU.file_diploma_transkript.set()
     # await callback_query.message.answer()
 
-@dp.message_handler(content_types=['document'], state=EducationData.file_diploma_transkript)
+@dp.message_handler(content_types=['document'], state=EducationDataRU.file_diploma_transkript)
 async def upload_file(message: types.Message, state: FSMContext):
     ic(message.document.file_name)
     from aiogram import Bot, Dispatcher
@@ -764,7 +802,7 @@ async def upload_file(message: types.Message, state: FSMContext):
     local_file_path = os.path.join(download_dir, document.file_name)
     # print(local_file_path)
     await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading, parse_mode='HTML')
+    await message.answer(wait_file_is_loading_ru, parse_mode='HTML')
     # ic(local_file_path)
 
     res_file = upload.upload_new_file_transcript(token=token_, filename=local_file_path)
@@ -775,9 +813,9 @@ async def upload_file(message: types.Message, state: FSMContext):
         file_size_mb = file_size_kb / 1024
         ic(f'size: {file_size_mb:.2f}')
     except: 
-        return 'File not found'
+        return 'Файл не найден'
     await state.update_data(file_size=file_size)
-    await message.answer("Fayl yuklandi.")
+    await message.answer("Файл загружен.")
     
     # ic(all_state)
     # print(res_file.status_code)
@@ -801,7 +839,7 @@ async def upload_file(message: types.Message, state: FSMContext):
             int(selected_course)
         )
         ic(res_data)
-        await message.answer(saved_message, reply_markup=enter_button)
+        await message.answer(saved_message_ru, reply_markup=enter_button_ru)
         await state.update_data(file_diploma_transkript=path)
         
     except Exception as e:
@@ -814,11 +852,11 @@ async def upload_file(message: types.Message, state: FSMContext):
     src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
     if src_res is not None or src_res is not False:
         await state.update_data(src=src_res)
-    await EducationData.degree_id.set()
+    await EducationDataRU.degree_id.set()
 
 
 
-@dp.callback_query_handler(lambda c: c.data.startswith('edu_'), state=EducationData.education_id)
+@dp.callback_query_handler(lambda c: c.data.startswith('edu_'), state=EducationDataRU.education_id)
 async def education_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     from aiogram import Bot, Dispatcher, types
     from data.config import BOT_TOKEN 
@@ -828,21 +866,21 @@ async def education_selection_handler(callback_query: types.CallbackQuery, state
     education_id = callback_query.data.split('edu_')[1]
     await state.update_data(education_id=education_id)
     await callback_query.answer()
-    await EducationData.region_id.set() 
-    await bot.send_message(callback_query.from_user.id, saved_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
+    await EducationDataRU.region_id.set() 
+    await bot.send_message(callback_query.from_user.id, saved_message_ru, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
     data = await state.get_data()
     token = data['token']  # Corrected data access
     region_response = send_req.regions(token)  # Ensure it's awaited
     regions = region_response.json()  # Async call should be awaited
     
-    buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"reg_{item['id']}")] for item in regions]
+    buttons = [[InlineKeyboardButton(text=item['name_ru'], callback_data=f"reg_{item['id']}")] for item in regions]
     regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
 
-    await bot.send_message(callback_query.from_user.id,select_region, reply_markup=regionMenu)
+    await bot.send_message(callback_query.from_user.id,select_region_ru, reply_markup=regionMenu)
     # await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=enter_button, parse_mode="HTML")
 
 
-# @dp.message_handler(state=EducationData.region_id)
+# @dp.message_handler(state=EducationDataRU.region_id)
 # async def select_region_id_handler(message: types.Message, state: FSMContext):
 #     data = await state.get_data()
 #     token = data['token']  # Corrected data access
@@ -861,14 +899,14 @@ async def education_selection_handler(callback_query: types.CallbackQuery, state
     
     # await message.answer("Ma'lumot saqlandi", reply_markup=ReplyKeyboardRemove)
 
-@dp.callback_query_handler(lambda c: c.data.startswith('reg_'), state=EducationData.region_id)
+@dp.callback_query_handler(lambda c: c.data.startswith('reg_'), state=EducationDataRU.region_id)
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     region_id = callback_query.data.split('reg_')[1]
     await state.update_data(region_id=region_id)
     await callback_query.answer()
-    await EducationData.district_id.set()  # Proceed to the next state
+    await EducationDataRU.district_id.set()  # Proceed to the next state
     
-    await callback_query.message.answer(saved_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
+    await callback_query.message.answer(saved_message_ru, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
     data = await state.get_data()
     token = data['token']  # Use direct indexing for required data
@@ -876,13 +914,13 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     district_id_response = send_req.districts(token, int(region_id))  # Ensure it's awaited
     districts = district_id_response.json()  # Async call should be awaited
     # pprint(districts)
-    buttons = [[InlineKeyboardButton(text=item['name_uz'], callback_data=f"dist_{item['id']}")] for item in districts]
+    buttons = [[InlineKeyboardButton(text=item['name_ru'], callback_data=f"dist_{item['id']}")] for item in districts]
     districtsMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
     
-    await callback_query.message.answer("Tumanni tanlang:", reply_markup=districtsMenu)
+    await callback_query.message.answer("Выберите район:", reply_markup=districtsMenu)
 
 
-# @dp.message_handler(state=EducationData.district_id)
+# @dp.message_handler(state=EducationDataRU.district_id)
 # async def education_id_handler(message: types.Message, state: FSMContext):
 #     data = await state.get_data()
 #     token = data['token']  # Use direct indexing for required data
@@ -895,36 +933,36 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     
 #     await message.answer("Tumanni tanlang:", reply_markup=districtsMenu)
 
-@dp.callback_query_handler(lambda c: c.data.startswith('dist_'), state=EducationData.district_id)
+@dp.callback_query_handler(lambda c: c.data.startswith('dist_'), state=EducationDataRU.district_id)
 async def district_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     district_id = callback_query.data.split('dist_')[1]
     await state.update_data(district_id=district_id)
     await callback_query.answer()
-    await EducationData.institution_name.set()  # Prepare for the next step
+    await EducationDataRU.institution_name.set()  # Prepare for the next step
     from aiogram import Bot, Dispatcher, types
     from data.config import BOT_TOKEN 
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(bot) 
-    await bot.send_message(callback_query.from_user.id, type_your_edu_name)
+    await bot.send_message(callback_query.from_user.id, type_your_edu_name_ru)
 
-@dp.message_handler(state=EducationData.institution_name)
+@dp.message_handler(state=EducationDataRU.institution_name)
 async def type_institution_name_handler(message: types.Message, state: FSMContext):
     institution_name = message.text.strip()
 
-    if institution_name.lower() != 'davom etish':
+    if institution_name.lower() != 'Продолжить':
         await state.update_data(institution_name=institution_name)
-        await message.answer('Ma\'lumotlar muvaffaqiyatli qabul qilindi.', reply_markup=ReplyKeyboardRemove())
+        await message.answer('Данные получены успешно.', reply_markup=ReplyKeyboardRemove())
         # Proceed to conclude the process or transition to the next state here
         # Example to conclude:
         data = await state.get_data()
-        institution_name = data.get('institution_name', 'Not specified')
-        await message.answer(example_diploma_message, parse_mode="Markdown")
-        await EducationData.file_diploma.set() 
+        institution_name = data.get('institution_name', 'Не указан')
+        await message.answer(example_diploma_message_ru, parse_mode="Markdown")
+        await EducationDataRU.file_diploma.set() 
     else:
         # If the user sends 'Davom etish', prompt them again for the institution name.
-        await message.answer(error_type_edu_name, reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Davom etish')))
+        await message.answer(error_type_edu_name_ru, reply_markup=enter_button_ru)
 
-@dp.message_handler(content_types=['document'], state=EducationData.file_diploma)
+@dp.message_handler(content_types=['document'], state=EducationDataRU.file_diploma)
 async def upload_file(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
@@ -945,7 +983,7 @@ async def upload_file(message: types.Message, state: FSMContext):
     local_file_path = os.path.join(download_dir, document.file_name)
     # print(local_file_path)
     await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading, parse_mode='HTML')
+    await message.answer(wait_file_is_loading_ru, parse_mode='HTML')
     # ic(local_file_path)
 
     res_file = upload.upload_new_file(token=token_, filename=local_file_path)
@@ -956,9 +994,9 @@ async def upload_file(message: types.Message, state: FSMContext):
         file_size_mb = file_size_kb / 1024
         # print(f'size: {file_size_mb:.2f}')
     except: 
-        return 'File not found'
+        return 'Файл не найден'
     await state.update_data(file_size=file_size)
-    await message.answer("Fayl yuklandi.")
+    await message.answer("Файл загружен.")
     
     # ic(all_state)
     # print(res_file.status_code)
@@ -997,16 +1035,16 @@ async def upload_file(message: types.Message, state: FSMContext):
                                                     src
                                                     )
     await state.update_data(me_data=res_data_app_forms_for_edu.json())
-    await message.answer("<b>Sizda chet tili sertifikati mavjudmi?</b>", parse_mode='HTML', reply_markup=yes_no)
+    await message.answer("<b>Есть ли у вас сертификат по иностранному языку?</b>", parse_mode='HTML', reply_markup=yes_no_ru)
     # ic(res_data_app_forms_for_edu.json())
 
-    await EducationData.has_sertificate.set()
+    await EducationDataRU.has_sertificate.set()
 
-@dp.message_handler(state=EducationData.has_sertificate)
+@dp.message_handler(state=EducationDataRU.has_sertificate)
 async def has_sertificate(message: types.Message, state: FSMContext):
 
     text = message.text
-    if text == "Ha, mavjud":
+    if text == "Да, есть":
         cert_types = [
             {'id': 1, 'type': 'IELTS'},
             {'id': 2, 'type': 'TOEFL'},
@@ -1014,24 +1052,24 @@ async def has_sertificate(message: types.Message, state: FSMContext):
             {'id': 4, 'type': 'SAT'},
             {'id': 5, 'type': 'GMAT'},
             {'id': 6, 'type': 'GRE'},
-            {'id': 7, 'type': 'Boshqa'}
+            {'id': 7, 'type': 'Другой'}
         ] 
         buttons = [[InlineKeyboardButton(text=item['type'], 
                                         callback_data=f"type_{item['id']}") for item in cert_types]]
         certTypeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
 
-        await message.answer(select_type_certificate, reply_markup=certTypeMenu)
-        await EducationData.certificate_type.set()
+        await message.answer(select_type_certificate_ru, reply_markup=certTypeMenu)
+        await EducationDataRU.certificate_type.set()
 
 
-    elif text == "Yo'q, mavjud emas":
-        await message.answer("Ta'lim ma'lumotlarini to'ldirishni istasangiz davom etish tugmasini bosing", reply_markup=enter_button)
+    elif text == "Нет, не доступен":
+        await message.answer("Если вы хотите заполнить образовательную информацию, нажмите кнопку «Продолжить».", reply_markup=enter_button_ru)
 
-        await EducationData.degree_id.set()
+        await EducationDataRU.degree_id.set()
         
     
 
-@dp.callback_query_handler(lambda c: c.data.startswith('type_'), state=EducationData.certificate_type)
+@dp.callback_query_handler(lambda c: c.data.startswith('type_'), state=EducationDataRU.certificate_type)
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     certificate_type = callback_query.data.split('type_')[1]
     cert_types = [
@@ -1041,7 +1079,7 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
             {'id': 4, 'type': 'SAT'},
             {'id': 5, 'type': 'GMAT'},
             {'id': 6, 'type': 'GRE'},
-            {'id': 7, 'type': 'Boshqa'}
+            {'id': 7, 'type': 'Другой'}
         ] 
     cert_types = [item['type'] for item in cert_types if item['id'] == int(certificate_type)]
     ic(cert_types)
@@ -1050,13 +1088,13 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
         ic(certificate_type)
     await state.update_data(certificate_type=certificate_type)
     await callback_query.answer()
-    await EducationData.get_certificate.set()  # Proceed to the next state
+    await EducationDataRU.get_certificate.set()  # Proceed to the next state
     # await message.answer(c)
-    await callback_query.message.answer(saved_message, parse_mode="HTML")
-    await callback_query.message.answer(example_certification_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
+    await callback_query.message.answer(saved_message_ru, parse_mode="HTML")
+    await callback_query.message.answer(example_certification_message_ru, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
 # await message.answer(example_certification_message) 
-@dp.message_handler(content_types=['document'], state=EducationData.get_certificate)
+@dp.message_handler(content_types=['document'], state=EducationDataRU.get_certificate)
 async def get_sertificate(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN
@@ -1077,7 +1115,7 @@ async def get_sertificate(message: types.Message, state: FSMContext):
     local_file_path = os.path.join(download_dir, document.file_name)
     ic(local_file_path)
     await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
+    await message.answer(wait_file_is_loading_ru, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
     # ic(local_file_path)
 
     res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
@@ -1088,10 +1126,10 @@ async def get_sertificate(message: types.Message, state: FSMContext):
         file_size_mb = file_size_kb / 1024
         ic(f'size: {file_size_mb:.2f}')
     except:
-        return 'File not found'
+        return 'Файл не найден'
     await state.update_data(file_size_sertificate=file_size)
     # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
-    # await EducationData.has_application.set()
+    # await EducationDataRU.has_application.set()
     # ic(all_state)
     ic(res_file.status_code)
     ic(res_file)
@@ -1107,16 +1145,16 @@ async def get_sertificate(message: types.Message, state: FSMContext):
         res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
         ic(751, res)
     except Exception as e:
-        await message.answer(f"Xatolik: {e}")
+        await message.answer(f"Ошибка: {e}")
         return
 
-    await message.answer("Fayl yuklandi.")
+    await message.answer("Файл загружен.")
     ic('boshlandi1')
-    await EducationData.degree_id.set()
+    await EducationDataRU.degree_id.set()
     ic('yakunlandi')
-    await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
+    await message.answer("<b>Подача заявления в университет</b>", parse_mode="HTML")
     ic('started')
-    my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
+    my_degree = {1: 'Бакалавр',2: 'Магистратура',3: 'Докторантура'}
     data = await state.get_data()
     token = data['token']
     directions_response = await send_req.directions(token)
@@ -1134,14 +1172,14 @@ async def get_sertificate(message: types.Message, state: FSMContext):
                                      callback_data=f"degree_{item['id']}") for item in unique_degrees]]
     degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
     ic('keldi')
-    await message.answer(select_degree, parse_mode='HTML', reply_markup=degreeMenu)
+    await message.answer(select_degree_ru, parse_mode='HTML', reply_markup=degreeMenu)
 
 
-@dp.message_handler(state=EducationData.degree_id)
+@dp.message_handler(state=EducationDataRU.degree_id)
 async def has_application_start(message: types.Message, state: FSMContext):
-    await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
+    await message.answer("<b>Подача заявления в университет</b>", parse_mode="HTML")
     ic('started')
-    my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
+    my_degree = {1: 'Бакалавр',2: 'Магистратура',3: 'Докторантура'}
     data = await state.get_data()
     token = data['token']
     directions_response = await send_req.directions(token)
@@ -1159,12 +1197,12 @@ async def has_application_start(message: types.Message, state: FSMContext):
                                      callback_data=f"degree_{item['id']}") for item in unique_degrees]]
     degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
     ic('keldi')
-    await message.answer(select_degree, parse_mode='HTML', reply_markup=degreeMenu)
+    await message.answer(select_degree_ru, parse_mode='HTML', reply_markup=degreeMenu)
     
 
 
 
-@dp.callback_query_handler(lambda c: c.data.startswith('degree_'), state=EducationData.degree_id)
+@dp.callback_query_handler(lambda c: c.data.startswith('degree_'), state=EducationDataRU.degree_id)
 async def has_application(callback_query: types.CallbackQuery, state: FSMContext):
     from aiogram import Bot
     from data.config import BOT_TOKEN 
@@ -1174,9 +1212,9 @@ async def has_application(callback_query: types.CallbackQuery, state: FSMContext
     ic(degree_id)
     await state.update_data(degree_id=degree_id)
     await callback_query.answer()
-    await EducationData.direction_id.set()
+    await EducationDataRU.direction_id.set()
  
-    await bot.send_message(callback_query.from_user.id, saved_message, reply_markup=ReplyKeyboardRemove(),
+    await bot.send_message(callback_query.from_user.id, saved_message_ru, reply_markup=ReplyKeyboardRemove(),
                            parse_mode="HTML")
     data = await state.get_data()
     token = data['token']  
@@ -1184,18 +1222,18 @@ async def has_application(callback_query: types.CallbackQuery, state: FSMContext
     regions = region_response
     selected_degree_id = data['degree_id']
     ic(selected_degree_id)
-    buttons = [[InlineKeyboardButton(text=item['direction_name_uz'], 
+    buttons = [[InlineKeyboardButton(text=item['direction_name_ru'], 
                                      callback_data=f"direc_{item['direction_id']}")] 
                                      for item in regions
                                        if item['degree_id'] == int(selected_degree_id)]
     directionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
 
-    await bot.send_message(callback_query.from_user.id, select_direction, reply_markup=directionMenu)
+    await bot.send_message(callback_query.from_user.id, select_direction_ru, reply_markup=directionMenu)
     
 
 
 
-# @dp.message_handler(state=EducationData.direction_id)
+# @dp.message_handler(state=EducationDataRU.direction_id)
 # async def direction_id_select(message: types.Message, state: FSMContext):
 #     data = await state.get_data()
 #     token = data['token']  
@@ -1212,14 +1250,14 @@ async def has_application(callback_query: types.CallbackQuery, state: FSMContext
 #     await message.answer(select_direction, reply_markup=directionMenu)
     
 
-@dp.callback_query_handler(lambda c: c.data.startswith('direc_'), state=EducationData.direction_id)
+@dp.callback_query_handler(lambda c: c.data.startswith('direc_'), state=EducationDataRU.direction_id)
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     direction_id = callback_query.data.split('direc_')[1]
     await state.update_data(direction_id=direction_id)
     await callback_query.answer()
-    await EducationData.education_type.set()  # Proceed to the next state
+    await EducationDataRU.education_type.set()  # Proceed to the next state
     
-    await callback_query.message.answer(saved_message, parse_mode="HTML")
+    await callback_query.message.answer(saved_message_ru, parse_mode="HTML")
     data = await state.get_data()
     token = data['token']
     selected_degree_id = int(data['degree_id'])
@@ -1236,7 +1274,7 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
             if edu['direction_id'] == direction_id and edu['degree_id'] == degree_id:
                 for k in education_types:
                     if k['education_type_id'] == edu_type_id:
-                        return k['education_type_name_uz']
+                        return k['education_type_name_ru']
         return None
 
     uniq_edu_types = []
@@ -1260,11 +1298,11 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     
     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"edu_type_{item['id']}")] for item in uniq_edu_types]
     eduTypesMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await callback_query.message.answer(select_edu_type, reply_markup=eduTypesMenu)
+    await callback_query.message.answer(select_edu_type_ru, reply_markup=eduTypesMenu)
 
 
 
-# @dp.message_handler(state=EducationData.education_type)
+# @dp.message_handler(state=EducationDataRU.education_type)
 # async def direction_id_select(message: types.Message, state: FSMContext):
 #     data = await state.get_data()
 #     token = data['token']
@@ -1309,14 +1347,14 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
 #     await message.answer(select_edu_type, reply_markup=eduTypesMenu)
   
 
-@dp.callback_query_handler(lambda c: c.data.startswith('edu_type_'), state=EducationData.education_type)
+@dp.callback_query_handler(lambda c: c.data.startswith('edu_type_'), state=EducationDataRU.education_type)
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     edu_type_id_ = callback_query.data.split('edu_type_')[1]
     ic(866, edu_type_id_)
     await state.update_data(education_type=edu_type_id_)
     await callback_query.answer()
-    await EducationData.education_lang_id.set() 
-    await callback_query.message.answer(saved_message, parse_mode="HTML")
+    await EducationDataRU.education_lang_id.set() 
+    await callback_query.message.answer(saved_message_ru, parse_mode="HTML")
     data = await state.get_data()
     token = data['token']  
     education_type_id_selected = int(data['education_type'])
@@ -1331,7 +1369,7 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
             for lang in education_languages:
                 education_language_id = int(lang['education_language_id'])
                 if language_id == education_language_id:
-                    return lang['education_language_name_uz']
+                    return lang['education_language_name_ru']
         return None
     for obj in edu_languages:
         direction_id = int(obj['direction_id'])
@@ -1355,12 +1393,12 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
 
     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
     languageMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await callback_query.message.answer(select_edu_language, reply_markup=languageMenu)
+    await callback_query.message.answer(select_edu_language_ru, reply_markup=languageMenu)
 
 
 
 
-# @dp.message_handler(state=EducationData.education_lang_id)
+# @dp.message_handler(state=EducationDataRU.education_lang_id)
 # async def lang_id_select(message: types.Message, state: FSMContext):
 #     data = await state.get_data()
 #     token = data['token']  
@@ -1402,14 +1440,14 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
 #     regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
 #     await message.answer(select_edu_language, reply_markup=regionMenu)
 
-@dp.callback_query_handler(lambda c: c.data.startswith('_'), state=EducationData.education_lang_id)
+@dp.callback_query_handler(lambda c: c.data.startswith('_'), state=EducationDataRU.education_lang_id)
 async def after_select_lang(callback_query: types.CallbackQuery, state: FSMContext):
     ic(callback_query.data)
     
     parts = callback_query.data[1:].split('_')
 
     if len(parts) < 2:
-        await callback_query.message.answer("Invalid callback data format.")
+        await callback_query.message.answer("Неверный формат данных ")
         return
 
     education_lang_id, eduaction_tuition_fee = parts
@@ -1419,12 +1457,12 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     all_state_data = await state.get_data()
     # ic(all_state_data)
     await callback_query.answer()
-    await EducationData.menu.set()
-    await callback_query.message.answer(saved_message, parse_mode="HTML")
+    await EducationDataRU.menu.set()
+    await callback_query.message.answer(saved_message_ru, parse_mode="HTML")
     await callback_query.message.answer(
-        f"✅ <b>Tanlangan Yo'nalish Narxi</b>\n"
+        f"✅ <b>Цена выбранного направления</b>\n"
         f"--------------------------------\n"
-        f"💵 <i>Narxi:</i> <b>{all_state_data['tuition_fee']}</b> so'm\n",
+        f"💵 <i>Цена:</i> <b>{all_state_data['tuition_fee']}</b> сум\n",
         parse_mode='HTML'
     )
     new_state_data = await state.get_data()
@@ -1440,10 +1478,10 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     # ic(applicant)
     
     if applicant is not None:
-        await callback_query.message.answer(application_submited, reply_markup=menu)
-        await EducationData.menu.set()
+        await callback_query.message.answer(application_submited_ru, reply_markup=menu_ru)
+        await EducationDataRU.menu.set()
     else:
-        await callback_query.message.answer("Xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring")
+        await callback_query.message.answer("Произошла ошибка, администратор предупрежден, повторите попытку позже.")
         
  
 
