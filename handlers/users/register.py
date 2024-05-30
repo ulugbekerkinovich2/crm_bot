@@ -415,7 +415,7 @@ async def birth_date(message: types.Message, state: FSMContext):
 
     year, month, day = map(int, birth_date_parts)
     # print(day, month, year)
-    if not (1 <= day <= 31 and 1 <= month <= 12 and 2024 > year > 1990):
+    if not (1 <= day <= 31 and 1 <= month <= 12 and 2024 > year > 1800):
         await message.answer(error_date)
         return
     
