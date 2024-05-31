@@ -1534,7 +1534,7 @@ async def my_application(message: Message, state: FSMContext):
     else:
         comment = 'комментарий не найден'
         comment_time = 'время комментария не найдено'
-    status_name = applicant_status_translations.get(status.upper(), "не определено")
+    status_name = applicant_status_translations.get(status.upper(), "Не найдено")
 
     color = 'blue' if status_name == 'Не найдено' else 'red'
     if color == 'blue':
