@@ -1551,6 +1551,6 @@ async def my_application(message: Message, state: FSMContext):
         f"Язык обучения: {escape_markdown(education_language_name_uz)}\n"
         f"Стоимость обучения: {escape_markdown(formatted_fee)} so'm\n\n"
         f"Время комментирования: {escape_markdown(comment_time)}\n"
-        f"{color} *Izoh:* {escape_markdown(comment)}\n"
+        f"{color} *Комментарий:* {escape_markdown(comment)}\n"
     )
     await message.answer(response_message, parse_mode='MarkdownV2')

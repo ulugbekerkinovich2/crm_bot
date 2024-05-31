@@ -546,6 +546,7 @@ async def my_application(message: Message, state: FSMContext):
         f"Izoh vaqti: {comment_time}\n"
         f" {color} Izoh: {comment}"
     )
+    ic(response_message, 549)
     await message.answer(response_message, parse_mode='HTML')
 
 @dp.message_handler(state=PersonalData.country_search)
@@ -1535,7 +1536,7 @@ async def my_application(message: Message, state: FSMContext):
         comment = 'izoh topilmadi'
         comment_time = 'izoh vaqti topilmadi'
     status_name = applicant_status_translations.get(status.upper(), "Topilmadi")
-    color = 'blue' if status_name != 'Topilmadi' else 'red'
+    color = 'blue' if status_name == 'Topilmadi' else 'red'
     if color == 'blue':
         color = "🔵"
     elif color == 'red':
@@ -1554,4 +1555,5 @@ async def my_application(message: Message, state: FSMContext):
         f"Izoh vaqti: {escape_markdown(comment_time)}\n"
         f"{color} *Izoh:* {escape_markdown(comment)}\n"
     )
+    ic(response_message, 1558)
     await message.answer(response_message, parse_mode='MarkdownV2')
