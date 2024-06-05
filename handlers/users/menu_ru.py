@@ -104,7 +104,7 @@ async def my_menu(message: Message, state: FSMContext):
         f"• <b>Гражданство:</b> {citizenship}\n"
         f"• <b>Место рождения:</b> {birth_place}\n"
         f"• <b>Номер телефона:</b> {phone}\n"
-        f"• <b>Дополнительный номер телефона:</b> {extra_phone}\n"
+        f"• <b>Дополнительный номер телефона:</b> {extra_phone.strip()}\n"
         )
         await message.answer_photo(photo, caption=info_message, reply_markup=menu_ru, parse_mode="HTML")
     else:
@@ -485,6 +485,7 @@ async def my_application(message: Message, state: FSMContext):
     token = data.get('token')
     ic('keldi arizaga')
     my_app = await send_req.my_applications(token=token)
+    ic(my_app)
     if not my_app:
         await message.answer("Информация о заявление не найдена.")
         return
@@ -529,7 +530,7 @@ async def my_application(message: Message, state: FSMContext):
     if comment_time != 'Комментарий не найден':
         comment_time = datetime.fromisoformat(comment_time.rstrip("Z")).strftime("%Y-%m-%d %H:%M")
     ic(my_app.get('status'))
-    color = 'blue' if status_name == 'Не найдено' else 'red'
+    color = 'blue' if comment == 'Комментарий не найден' else 'red'
     if color == 'blue':
         color = "🔵"
     elif color == 'red':
@@ -1459,7 +1460,7 @@ async def my_application(message: Message, state: FSMContext):
     if comment_time != 'время комментария не найдено':
         comment_time = convert_time(comment_time)
     status_name = applicant_status_translations.get(status.upper(), "Не найдено")
-    color = 'blue' if status_name == 'Не найдено' else 'red'
+    color = 'blue' if comment == 'комментарий не найден' else 'red'
     if color == 'blue':
         color = "🔵"
     elif color == 'red':
@@ -1536,7 +1537,7 @@ async def my_application(message: Message, state: FSMContext):
         comment_time = 'время комментария не найдено'
     status_name = applicant_status_translations.get(status.upper(), "Не найдено")
 
-    color = 'blue' if status_name == 'Не найдено' else 'red'
+    color = 'blue' if comment == 'комментарий не найден' else 'red'
     if color == 'blue':
         color = "🔵"
     elif color == 'red':

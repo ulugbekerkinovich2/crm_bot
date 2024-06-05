@@ -3,13 +3,14 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import CommandStart
 from data.config import university_name_uz, university_name_ru
 from loader import dp
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton,ReplyKeyboardRemove
 # from states.personalData import PersonalData
 from keyboards.default import registerKeyBoardButton
 from icecream import ic
 from utils import send_req
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
-
+from aiogram.dispatcher.filters import Command, Text
 @dp.message_handler(CommandStart(), state='*')
 async def bot_start(message: types.Message, state: FSMContext):
     # ic('start tanlandi')
@@ -47,12 +48,12 @@ async def bot_start(message: types.Message, state: FSMContext):
     ic(language_uz, language_ru, 61)
     if token:
         user_info = await send_req.application_forms_me(token=token)
-        ic(user_info)
-        haveApplicationForm = user_info['haveApplicationForm']
+        # ic(user_info)
+        haveApplicationForm = user_info['haveApplicationForm'] if user_info['haveApplicationForm'] else False
         haveApplied = user_info['haveApplied']
         haveEducation = user_info['haveEducation']
         havePreviousEducation = user_info['havePreviousEducation']
-        ic(haveApplicationForm, haveApplied, haveEducation, havePreviousEducation)
+        # ic(haveApplicationForm, haveApplied, haveEducation, havePreviousEducation)
 
     if token and haveApplicationForm and haveApplied and (haveEducation or havePreviousEducation):
         get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
@@ -60,25 +61,41 @@ async def bot_start(message: types.Message, state: FSMContext):
         ic(access)
         await state.update_data(access=access)
         user_chat_id = message.from_user.id
-        ic(user_chat_id)
-        save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
-                                                           first_name=message.from_user.first_name,
-                                                           last_name=message.from_user.last_name, 
-                                                           pin=1,
-                                                           date=date,
-                                                           username=username),
-        ic(save_chat_id)
-
+        # ic(user_chat_id)
+        try:
+            save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                                                            first_name=message.from_user.first_name,
+                                                            last_name=message.from_user.last_name, 
+                                                            pin=1,
+                                                            date=date,
+                                                            username=username),
+        
+            ic(save_chat_id, 70)
+        except Exception as err:
+            ic(err)
         get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
-        ic(get_this_user)
+        ic(get_this_user, 73)
         data = await state.get_data()
         language_uz = data.get('language_uz', None)
         language_ru = data.get('language_ru', None)
+        exam_info = await send_req.my_applications(token=token)
+        exam = exam_info.get('exam', {})
         ic(language_uz, language_ru, 61)
-        if language_uz:
+        check_result = None
+        if exam != {}:
+            
+            check_result = exam['exam_result']
+            if language_uz and check_result is None:
             # If there's a token, show the main menu
-            await message.answer("🏠Asosiy sahifa", reply_markup=registerKeyBoardButton.menu)
-        else:
+                await message.answer("🏠Asosiy sahifa", reply_markup=registerKeyBoardButton.menu)
+
+        # exam_status = exam_info.get('status')
+        # ic(exam_status, 79)
+        elif exam == {} and language_uz:
+            await message.answer("🏠Asosiy sahifa", reply_markup=registerKeyBoardButton.menu_full)
+        elif language_uz and check_result is not None:
+            await message.answer("🏠Asosiy sahifa", reply_markup=registerKeyBoardButton.menu_full)
+        elif language_ru:
             await message.answer("🏠Меню", reply_markup=registerKeyBoardButton.menu_ru)
     else:
         # For new users or if there's no token, reset the state and show the welcome message
@@ -111,3 +128,9 @@ async def bot_start(message: types.Message, state: FSMContext):
         )
 
 
+@dp.message_handler(Text(equals='/restart'), state='*')
+async def bot_start(message: types.Message, state: FSMContext):
+    start_button = KeyboardButton('/start')  # The text on the button
+    start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
+    await message.answer("Bot qayta ishga tushdi",reply_markup=start_keyboard)
+    await state.finish()

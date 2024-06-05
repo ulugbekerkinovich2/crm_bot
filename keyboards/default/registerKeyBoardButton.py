@@ -59,6 +59,23 @@ menu = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+menu_full = ReplyKeyboardMarkup(
+    keyboard = [
+        [
+            KeyboardButton(text="ℹ️Shaxsiy ma'lumotlarim"),
+            KeyboardButton(text="📚Ta'lim ma'lumotlarim"),
+        ],
+        [
+            KeyboardButton(text="📁Arizam"),
+           KeyboardButton(text="📃Imtihon natijalari"),
+        ],
+        [
+            KeyboardButton(text="Akkauntdan chiqish"),
+        ]
+    ],
+    resize_keyboard=True
+)
 menu_ru = ReplyKeyboardMarkup(
     keyboard = [
         [

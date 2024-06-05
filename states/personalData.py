@@ -152,6 +152,7 @@ class EducationData(StatesGroup):
     country_name_ru = State()
     country_name_en = State()
     file_diploma_transkript = State()
+    work_experience = State()
 
     
 class EducationDataRU(StatesGroup):
@@ -188,6 +189,7 @@ class EducationDataRU(StatesGroup):
     country_name_ru = State()
     country_name_en = State()
     file_diploma_transkript = State()
+    work_experience = State()
 
 class Account(StatesGroup):
     delete_account = State()

@@ -16,7 +16,7 @@ import aiofiles.os
 from icecream import ic
 import json
 from keyboards.default.registerKeyBoardButton import yes_no,update_education_info
-from keyboards.default.registerKeyBoardButton import enter_button, menu,register
+from keyboards.default.registerKeyBoardButton import enter_button, menu,register, menu_full
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
 
@@ -80,9 +80,13 @@ async def transfer_edu(message: types.Message, state: FSMContext):
         await PersonalData.phone.set()
     elif token is not None:
         check_token = await send_req.application_forms_me(token)
+        check_exam = await send_req.my_applications(token)
+        exam_status = check_exam.get('status')
         status_code = check_token.get('status_code')
-        if status_code  == 200:
+        if status_code  == 200 and exam_status != 'came-exam':
             await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+        elif status_code  == 200 and exam_status == 'came-exam':
+            await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
         elif status_code != 200:
             refreshToken = all_data_state.get('refresh_token')
             if refreshToken is not None:
@@ -107,8 +111,12 @@ async def my_application(message: types.Message, state: FSMContext):
     elif token is not None:
         check_token = await send_req.application_forms_me(token)
         status_code = check_token.get('status_code')
-        if status_code  == 200:
+        check_exam = await send_req.my_applications(token)
+        exam_status = check_exam.get('status')
+        if status_code  == 200 and exam_status != 'came-exam':
             await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+        elif status_code  == 200 and exam_status == 'came-exam':
+            await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
         elif status_code != 200:
             refreshToken = all_data_state.get('refresh_token')
             if refreshToken is not None:
@@ -302,56 +310,82 @@ async def secret_code(message: types.Message, state: FSMContext):
             get_token = in_data.get('token')
             
             ic(get_token)
+            # try:
+            await state.update_data(token=get_token)
+            get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+            access = get_djtoken.get('access')
+            ic(access)
+            await state.update_data(access=access)
+            user_chat_id = message.from_user.id
+            ic(user_chat_id)
+            date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+            ic(date)
+            username = message.from_user.username or message.from_user.full_name
+            ic(username)
             try:
-                await state.update_data(token=get_token)
-                get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
-                access = get_djtoken.get('access')
-                ic(access)
-                await state.update_data(access=access)
-                user_chat_id = message.from_user.id
-                ic(user_chat_id)
-                date = message.date.strftime("%Y-%m-%d %H:%M:%S")
-                ic(date)
-                username = message.from_user.username or message.from_user.full_name
-                ic(username)
                 save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                                     first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username)
                 ic(save_chat_id)
-
-                get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
-                ic(get_this_user)
             except Exception as err:
                 ic(err)
+
+            get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+            ic(get_this_user, 323)
+            # except Exception as err:
+            #     ic(err)
             if haveApplicationForm is False and (haveEducation is False and  havePreviousEducation is False) and haveApplied is False:
+                ic(338, 'keldi 1 chi if ga')
                 await message.answer(example_document, reply_markup=ReplyKeyboardRemove())
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
                 await PersonalData.document.set()
 
             elif haveApplicationForm is True and (haveEducation is False and havePreviousEducation is False) and haveApplied is False:
+                ic(344, 'keldi 2 chi if ga')
                 await message.answer("<i>-✅Siz ro'yhatdan o'tgansiz.\n🔴Ta'lim ma'lumotlarini to'ldirishingiz kerak</i>",reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
                 ic('002')
                 await EducationData.education_id.set()
 
             elif haveApplicationForm is True and (haveEducation is True and havePreviousEducation is False) and haveApplied is False:
+                ic(351, 'keldi 3 chi if ga')
                 await message.answer("<i>- ✅ Siz ro'yhatdan o'tkansiz.\n- ✅ Ta'lim ma'lumotlaringiz ham to'ldirilgan.\n\nUniversitetga ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=True,havePreviousEducation=False,haveApplied=False)
                 ic('keldi 003')
                 await EducationData.degree_id.set()
 
             elif haveApplicationForm is True and (haveEducation is False and havePreviousEducation is True) and haveApplied is False:
+                ic(358, 'keldi 4 chi if ga')
                 await message.answer("<i>- ✅ Siz ro'yhatdan o'tkansiz.\n- ✅ Ta'lim ma'lumotlaringiz ham to'ldirilgan .\n\nUniversitetga ariza topshirishingiz mumkin</i>", reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
                 ic('keldi 003')
                 await EducationData.degree_id.set()
 
             elif haveApplicationForm is True and (haveEducation is True or havePreviousEducation is True) and haveApplied is True:
-                await message.answer("<i>-✅Siz ro'yhatdan o'tkansiz\n-✅Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n-✅Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
-                ic('keldi 004')
-                await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
-                ic('keldi 005')
-                await EducationData.menu.set()
+                ic(365, 'keldi 4 chi if ga')
+                check_exam = await send_req.my_applications(token=get_token)
+                exam = check_exam.get('exam')
+                check_result = None
+                exam_status = check_exam.get('status')
+                if exam != {}:
+                    ic(exam)
+                    check_result = exam['exam_result']
+                    # if check_result is not None:
+                    
+                    if exam_status == "came-exam" or check_result is not None :
+
+                        await message.answer("<i>-✅Siz ro'yhatdan o'tkansiz\n-✅Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n-✅Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu_full)
+                        ic('keldi 004')
+                        await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
+                        ic('keldi 005')
+                        await EducationData.menu.set()
+                elif exam == {}:
+                    if exam_status != "came-exam":
+                        await message.answer("<i>-✅Siz ro'yhatdan o'tkansiz\n-✅Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n-✅Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
+                        ic('keldi 006')
+                        await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
+                        ic('keldi 007')
+                        await EducationData.menu.set()
 
 
 
@@ -434,8 +468,12 @@ async def birth_date(message: types.Message, state: FSMContext):
         await ManualPersonalInfo.personal_info.set()
     elif check_is_not_duplicate.get('status_code') == 409:
         error_mes = check_is_not_duplicate.get('data')
+        start_button = KeyboardButton('/start')  # The text on the button
+        start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
+        await state.finish()
+        await message.answer(f"🔴 {error_mes.get('message')}",reply_markup=start_keyboard)
 
-        await message.answer(f"🔴 {error_mes.get('message')}")
+
     # data_res = check_is_not_duplicate['data']
     # ic(check_is_not_duplicate)
     # if check_is_not_duplicate.get('status_code') == 409 or check_is_not_duplicate.get('status_code') == 401 or check_is_not_duplicate.get('status_code') == 400:
@@ -1226,6 +1264,7 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     selected_direction_id = int(data['direction_id'])
     ic(selected_degree_id)
     ic(selected_direction_id)
+    await state.update_data(direction_id=selected_direction_id)
     edu_type_response =await send_req.directions(token)
     edu_types = edu_type_response
     def return_edu_type_name_uz(edu_type_id):
@@ -1264,67 +1303,329 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
 
 
 
-# @dp.message_handler(state=EducationData.education_type)
-# async def direction_id_select(message: types.Message, state: FSMContext):
-#     data = await state.get_data()
-#     token = data['token']
-#     selected_degree_id = int(data['degree_id'])
-#     selected_direction_id = int(data['direction_id'])
-#     ic(selected_degree_id)
-#     ic(selected_direction_id)
-#     edu_type_response =await send_req.directions(token)
-#     edu_types = edu_type_response
-#     def return_edu_type_name_uz(edu_type_id):
-#         for edu in edu_types:
-#             direction_id = edu['direction_id']
-#             degree_id = edu['degree_id']
-#             education_types = edu['education_types']
-#             if edu['direction_id'] == direction_id and edu['degree_id'] == degree_id:
-#                 for k in education_types:
-#                     if k['education_type_id'] == edu_type_id:
-#                         return k['education_type_name_uz']
-#         return None
 
-#     uniq_edu_types = []
-#     for obj in edu_types:
-#         direction_id = obj['direction_id']
-#         degree_id = obj['degree_id']
-#         if selected_degree_id == degree_id and direction_id == selected_direction_id:
-            
-#             tuition_fees = obj['tuition_fees']
-#             for k in tuition_fees:
-#                 education_type_id = k['education_type_id']
-#                 edu_type_name = return_edu_type_name_uz(education_type_id)
-#                 if edu_type_name:
-#                     obj = {
-#                             'id': education_type_id,
-#                             'name': edu_type_name
-#                         }
-#                     ic(obj)
-#                     if obj not in uniq_edu_types:
-#                         uniq_edu_types.append(obj)
+  #TODO:
+
+# @dp.callback_query_handler(lambda c: c.data.startswith('edu_type_'), state=EducationData.education_type)
+# async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
+#     edu_type_id_ = callback_query.data.split('edu_type_')[1]
+#     ic(866, edu_type_id_)
+#     await state.update_data(education_type=edu_type_id_)
+
+#     data = await state.get_data()
+#     token = data['token']  
+#     education_type_id_selected = int(data['education_type'])
+#     direction_id_selected = int(data['direction_id'])
+#     degree_id_selected = int(data['degree_id'])
+#     await state.update_data(education_type=education_type_id_selected)
+#     ic(education_type_id_selected, direction_id_selected, type(education_type_id_selected), type(direction_id_selected))
+#     if (int(degree_id_selected) == 3 and int(education_type_id_selected) == 2):
+#         await callback_query.answer()
+         
+#         await callback_query.message.answer(saved_message, parse_mode="HTML")
+#         edu_lang_response = await send_req.directions(token)  
+#         edu_languages = edu_lang_response
+#         edu_langs = []
+#         def return_language_name(language_id):
+#             for obj in edu_languages:
+#                 education_languages = obj['education_languages']
+#                 for lang in education_languages:
+#                     education_language_id = int(lang['education_language_id'])
+#                     if language_id == education_language_id:
+#                         return lang['education_language_name_uz']
+#             return None
+#         for obj in edu_languages:
+#             direction_id = int(obj['direction_id'])
+#             degree_id = int(obj['degree_id'])
+#             if direction_id == direction_id_selected and degree_id == degree_id_selected:
+#                 tuition_fees = obj['tuition_fees']
+#                 for t in tuition_fees:
+#                     education_language_id = int(t['education_language_id'])
+#                     education_type_id = int(t['education_type_id'])
+#                     if education_type_id == education_type_id_selected:
+#                         get_lang_name = return_language_name(education_language_id)
+#                         if get_lang_name:
+#                             lang_obj = {
+#                                 'name': get_lang_name,
+#                                 'id': education_language_id,
+#                                 'tuition_fee': t['tuition_fee']
+#                             }
+#                             if lang_obj not in edu_langs:
+#                                 ic(lang_obj)
+#                                 edu_langs.append(lang_obj)
+
+#         buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
+#         languageMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+#         await callback_query.message.answer(select_edu_language, reply_markup=languageMenu)
+#         await EducationData.work_experience.set()
+#     else:
+#         await callback_query.answer()
+        
+#         await callback_query.message.answer(saved_message, parse_mode="HTML")
+#         edu_lang_response = await send_req.directions(token)
+#         edu_languages = edu_lang_response
+#         edu_langs = []
+#         def return_language_name(language_id):
+#             for obj in edu_languages:
+#                 education_languages = obj['education_languages']
+#                 for lang in education_languages:
+#                     education_language_id = int(lang['education_language_id'])
+#                     if language_id == education_language_id:
+#                         return lang['education_language_name_uz']
+#             return None
+#         for obj in edu_languages:
+#             direction_id = int(obj['direction_id'])
+#             degree_id = int(obj['degree_id'])
+#             if direction_id == direction_id_selected and degree_id == degree_id_selected:
+#                 tuition_fees = obj['tuition_fees']
+#                 for t in tuition_fees:
+#                     education_language_id = int(t['education_language_id'])
+#                     education_type_id = int(t['education_type_id'])
+#                     if education_type_id == education_type_id_selected:
+#                         get_lang_name = return_language_name(education_language_id)
+#                         if get_lang_name:
+#                             lang_obj = {
+#                                 'name': get_lang_name,
+#                                 'id': education_language_id,
+#                                 'tuition_fee': t['tuition_fee']
+#                             }
+#                             if lang_obj not in edu_langs:
+#                                 ic(lang_obj)
+#                                 edu_langs.append(lang_obj)
+
+#         buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
+#         languageMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+#         await callback_query.message.answer(select_edu_language, reply_markup=languageMenu)
+#         await EducationData.education_lang_id.set()
+
+
+
+
+
+# # @dp.callback_query_handler(lambda c: c.data.startswith('edu_type_'), state=EducationData.education_type)
+# # async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
+# #     edu_type_id_ = callback_query.data.split('edu_type_')[1]
+# #     await state.update_data(education_type=edu_type_id_)
+
+# #     data = await state.get_data()
+# #     token = data['token']
+# #     education_type_id_selected = int(data['education_type'])
+# #     direction_id_selected = int(data['direction_id'])
+# #     degree_id_selected = int(data['degree_id'])
+
+# #     await state.update_data(education_type=education_type_id_selected)
+
+# #     if int(degree_id_selected) == 3 and int(education_type_id_selected) == 2:
+# #         await callback_query.answer()
+# #         await callback_query.message.answer(saved_message, parse_mode="HTML")
+# #         await process_education_languages(callback_query, token, direction_id_selected, degree_id_selected, education_type_id_selected)
+# #         await EducationData.work_experience.set()
+# #     else:
+# #         await callback_query.answer()
+# #         await callback_query.message.answer(saved_message, parse_mode="HTML")
+# #         await process_education_languages(callback_query, token, direction_id_selected, degree_id_selected, education_type_id_selected)
+# #         await EducationData.education_lang_id.set()
+
+
+# # async def process_education_languages(callback_query, token, direction_id_selected, degree_id_selected, education_type_id_selected):
+# #     edu_lang_response = await send_req.directions(token)
+# #     edu_languages = edu_lang_response
+# #     edu_langs = []
+
+# #     def return_language_name(language_id):
+# #         for obj in edu_languages:
+# #             education_languages = obj['education_languages']
+# #             for lang in education_languages:
+# #                 education_language_id = int(lang['education_language_id'])
+# #                 if language_id == education_language_id:
+# #                     return lang['education_language_name_uz']
+# #         return None
+
+# #     for obj in edu_languages:
+# #         direction_id = int(obj['direction_id'])
+# #         degree_id = int(obj['degree_id'])
+# #         if direction_id == direction_id_selected and degree_id == degree_id_selected:
+# #             tuition_fees = obj['tuition_fees']
+# #             for t in tuition_fees:
+# #                 education_language_id = int(t['education_language_id'])
+# #                 education_type_id = int(t['education_type_id'])
+# #                 if education_type_id == education_type_id_selected:
+# #                     get_lang_name = return_language_name(education_language_id)
+# #                     if get_lang_name:
+# #                         lang_obj = {
+# #                             'name': get_lang_name,
+# #                             'id': education_language_id,
+# #                             'tuition_fee': t['tuition_fee']
+# #                         }
+# #                         if lang_obj not in edu_langs:
+# #                             edu_langs.append(lang_obj)
+
+# #     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
+# #     languageMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+# #     await callback_query.message.answer(select_edu_language, reply_markup=languageMenu)
+
+
+
+# @dp.message_handler(content_types=['document'], state=EducationData.work_experience)
+# async def get_work_exprerience_sertificate(message: types.Message, state: FSMContext):
+#     from aiogram import Bot, Dispatcher
+#     from data.config import BOT_TOKEN
+#     bot = Bot(token=BOT_TOKEN)
+#     dp = Dispatcher(bot)
     
-#     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"edu_type_{item['id']}")] for item in uniq_edu_types]
-#     eduTypesMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-#     await message.answer(select_edu_type, reply_markup=eduTypesMenu)
-  
+#     data = await state.get_data()
+#     token_ = data['token'] if data['token'] else None
+
+#     document = message.document
+#     file_path = await bot.get_file(document.file_id)
+#     ic(file_path)
+#     file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+#     download_dir = 'work_experience'
+#     # await message.answer(file_url)
+#     await aiofiles.os.makedirs(download_dir, exist_ok=True)
+
+#     local_file_path = os.path.join(download_dir, document.file_name)
+#     ic(local_file_path)
+#     await send_req.download_file(file_url, local_file_path)
+#     await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
+#     # ic(local_file_path)
+
+#     res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
+#     ic(731, res_file)
+#     try:
+#         file_size = os.path.getsize(local_file_path)
+#         file_size_kb = file_size / 1024
+#         file_size_mb = file_size_kb / 1024
+#         ic(f'size: {file_size_mb:.2f}')
+#     except:
+#         return 'Fayl topilmadi'
+#     await state.update_data(file_size_sertificate=file_size)
+#     # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
+#     # await EducationData.has_application.set()
+#     # ic(all_state)
+#     ic(res_file.status_code)
+#     ic(res_file)
+#     data_user = await state.get_data()
+#     certificate_type = "work_experience"
+#     ic(certificate_type)
+#     data1 = res_file.json()
+#     ic(747, data1)
+#     await state.update_data(file_sertificate=data1['path'])
+#     ic(token_)
+#     ic(data1['path'])
+#     try:
+#         res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
+#         ic(751, res)
+#     except Exception as e:
+#         await message.answer(f"Xatolik: {e}")
+#         return
+
+#     await message.answer("Fayl yuklandi.")
+#     ic('boshlandi1')
+#     await EducationData.education_lang_id.set()
+#     ic('yakunlandi')
+#     # await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
+#     # ic('started')
+#     # my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
+#     # data = await state.get_data()
+#     # token = data['token']
+#     # directions_response = await send_req.directions(token)
+#     # directions = directions_response
+#     # unique_degrees = []
+#     # ic('ok')
+#     # for obj in directions:
+#     #     degree_id = obj['degree_id']
+#     #     if not any(d['id'] == degree_id for d in unique_degrees):
+#     #         unique_degrees.append({
+#     #             'id': degree_id,
+#     #             'type_degree': my_degree[degree_id]})
+#     # ic(unique_degrees)
+#     # buttons = [[InlineKeyboardButton(text=item['type_degree'], 
+#     #                                  callback_data=f"degree_{item['id']}") for item in unique_degrees]]
+#     # degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+#     # ic('keldi')
+#     await message.answer("Ta'lim tilini tanlang", parse_mode='HTML', reply_markup=enter_button)
+
+# @dp.callback_query_handler(lambda c: c.data.startswith('_'), state=EducationData.education_lang_id)
+# async def after_select_lang(callback_query: types.CallbackQuery, state: FSMContext):
+#     ic(callback_query.data)
+    
+#     parts = callback_query.data[1:].split('_')
+
+#     if len(parts) < 2:
+#         await callback_query.message.answer("Invalid callback data format.")
+#         return
+
+#     education_lang_id, eduaction_tuition_fee = parts
+#     ic(education_lang_id, eduaction_tuition_fee)
+#     await state.update_data(education_lang_id=education_lang_id, tuition_fee=eduaction_tuition_fee)
+
+#     all_state_data = await state.get_data()
+#     # ic(all_state_data)
+#     await callback_query.answer()
+#     await EducationData.menu.set()
+#     await callback_query.message.answer(saved_message, parse_mode="HTML")
+#     await callback_query.message.answer(
+#         f"✅ <b>Tanlangan Yo'nalish Narxi</b>\n"
+#         f"--------------------------------\n"
+#         f"💵 <i>Narxi:</i> <b>{all_state_data['tuition_fee']}</b> so'm\n",
+#         parse_mode='HTML'
+#     )
+#     new_state_data = await state.get_data()
+#     ic(all_state_data.get('degree_id'), new_state_data.get('direction_id'), all_state_data.get('education_type'), new_state_data.get('education_lang_id'))
+
+#     degree_id = int(new_state_data.get('degree_id'))
+#     direction_id = int(new_state_data.get('direction_id'))
+#     education_language_id = int(new_state_data.get('education_lang_id'))
+#     education_type_id = int(new_state_data.get('education_type'))
+#     token_ = new_state_data.get('token')
+
+#     applicant = await send_req.applicants(token_, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None)
+#     # ic(applicant)
+    
+#     if applicant is not None:
+#         await callback_query.message.answer(application_submited, reply_markup=menu)
+#         await EducationData.menu.set()
+#     else:
+#         await callback_query.message.answer("Xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring")
+        
+ 
+
 
 @dp.callback_query_handler(lambda c: c.data.startswith('edu_type_'), state=EducationData.education_type)
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     edu_type_id_ = callback_query.data.split('edu_type_')[1]
-    ic(866, edu_type_id_)
     await state.update_data(education_type=edu_type_id_)
-    await callback_query.answer()
-    await EducationData.education_lang_id.set() 
-    await callback_query.message.answer(saved_message, parse_mode="HTML")
+
     data = await state.get_data()
-    token = data['token']  
+    token = data['token']
     education_type_id_selected = int(data['education_type'])
     direction_id_selected = int(data['direction_id'])
     degree_id_selected = int(data['degree_id'])
-    edu_lang_response = await send_req.directions(token)  
+    ic(edu_type_id_, type(edu_type_id_))
+    ic(degree_id_selected, type(degree_id_selected))
+    await state.update_data(education_type=education_type_id_selected)
+
+    if int(direction_id_selected) == 3 and int(edu_type_id_) == 2:
+        ic('keldi 1571')
+        await callback_query.answer()
+        await callback_query.message.answer(saved_message, parse_mode="HTML")
+        
+        await callback_query.message.answer("<a href='https://mehnat.uz/oz'>Mehnatuz</a> saytidan olingan ish tajribasi haqidagi ma’lumotnomani yuklang FAYL KO'RINISHIDA!:", reply_markup=ReplyKeyboardRemove(), parse_mode="HTML")
+        await EducationData.work_experience.set()
+    elif int(direction_id_selected) != 3 and int(edu_type_id_) != 2:
+        ic('keldi 1579')
+        await callback_query.answer()
+        await callback_query.message.answer(saved_message, parse_mode="HTML")
+        # await process_education_languages(callback_query, token, direction_id_selected, degree_id_selected, education_type_id_selected)
+        await EducationData.education_lang_id.set()
+        await process_education_languages(callback_query, token, direction_id_selected, degree_id_selected, education_type_id_selected)
+
+async def process_education_languages(callback_query, token, direction_id_selected, degree_id_selected, education_type_id_selected):
+    edu_lang_response = await send_req.directions(token)
     edu_languages = edu_lang_response
     edu_langs = []
+
     def return_language_name(language_id):
         for obj in edu_languages:
             education_languages = obj['education_languages']
@@ -1333,6 +1634,7 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
                 if language_id == education_language_id:
                     return lang['education_language_name_uz']
         return None
+
     for obj in edu_languages:
         direction_id = int(obj['direction_id'])
         degree_id = int(obj['degree_id'])
@@ -1350,74 +1652,112 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
                             'tuition_fee': t['tuition_fee']
                         }
                         if lang_obj not in edu_langs:
-                            ic(lang_obj)
                             edu_langs.append(lang_obj)
 
     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
     languageMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
     await callback_query.message.answer(select_edu_language, reply_markup=languageMenu)
 
+@dp.message_handler(content_types=['document'], state=EducationData.work_experience)
+async def get_work_experience_certificate(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN
+    import aiofiles
+    import os
+    
+    bot = Bot(token=BOT_TOKEN)
+    ic('keldi ++++++++++++++++++++++++++\n++++++++++++++++++++++++++\n++++++++++++++++++++++++++')
+    data = await state.get_data()
+    token_ = data['token'] if 'token' in data else None
 
+    document = message.document
+    file_path = await bot.get_file(document.file_id)
+    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+    download_dir = 'work_experience'
+    
+    await aiofiles.os.makedirs(download_dir, exist_ok=True)
 
+    local_file_path = os.path.join(download_dir, document.file_name)
+    await send_req.download_file(file_url, local_file_path)
+    await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
 
-# @dp.message_handler(state=EducationData.education_lang_id)
-# async def lang_id_select(message: types.Message, state: FSMContext):
-#     data = await state.get_data()
-#     token = data['token']  
-#     education_type_id_selected = int(data['education_type'])
-#     direction_id_selected = int(data['direction_id'])
-#     degree_id_selected = int(data['degree_id'])
-#     edu_lang_response = await send_req.directions(token)  
-#     edu_languages = edu_lang_response
-#     edu_langs = []
-#     def return_language_name(language_id):
-#         for obj in edu_languages:
-#             education_languages = obj['education_languages']
-#             for lang in education_languages:
-#                 education_language_id = int(lang['education_language_id'])
-#                 if language_id == education_language_id:
-#                     return lang['education_language_name_uz']
-#         return None
-#     for obj in edu_languages:
-#         direction_id = int(obj['direction_id'])
-#         degree_id = int(obj['degree_id'])
-#         if direction_id == direction_id_selected and degree_id == degree_id_selected:
-#             tuition_fees = obj['tuition_fees']
-#             for t in tuition_fees:
-#                 education_language_id = int(t['education_language_id'])
-#                 education_type_id = int(t['education_type_id'])
-#                 if education_type_id == education_type_id_selected:
-#                     get_lang_name = return_language_name(education_language_id)
-#                     if get_lang_name:
-#                         lang_obj = {
-#                             'name': get_lang_name,
-#                             'id': education_language_id,
-#                             'tuition_fee': t['tuition_fee']
-#                         }
-#                         if lang_obj not in edu_langs:
-#                             ic(lang_obj)
-#                             edu_langs.append(lang_obj)
+    res_file = upload.work_experince_file_upload(token=token_, filename=local_file_path)
 
-#     buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
-#     regionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-#     await message.answer(select_edu_language, reply_markup=regionMenu)
+    try:
+        file_size = os.path.getsize(local_file_path)
+        file_size_kb = file_size / 1024
+        file_size_mb = file_size_kb / 1024
+    except:
+        return 'Fayl topilmadi'
+    
+    await state.update_data(file_size_certificate=file_size)
 
+    data_user = await state.get_data()
+    certificate_type = "work_experience"
+    data1 = res_file.json()
+    ic(data1['path'])
+    await state.update_data(file_certificate=data1['path'])
+
+    try:
+        res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
+    except Exception as e:
+        await message.answer(f"Xatolik: {e}")
+        return
+
+    await message.answer("Fayl yuklandi.")
+    await EducationData.education_lang_id.set()
+    edu_lang_response = await send_req.directions(token_)
+    edu_languages = edu_lang_response
+    edu_langs = []
+    data = await state.get_data()
+    token = data['token']
+    education_type_id_selected = int(data['education_type'])
+    direction_id_selected = int(data['direction_id'])
+    degree_id_selected = int(data['degree_id'])
+    def return_language_name(language_id):
+        for obj in edu_languages:
+            education_languages = obj['education_languages']
+            for lang in education_languages:
+                education_language_id = int(lang['education_language_id'])
+                if language_id == education_language_id:
+                    return lang['education_language_name_uz']
+        return None
+
+    for obj in edu_languages:
+        direction_id = int(obj['direction_id'])
+        degree_id = int(obj['degree_id'])
+        if direction_id == direction_id_selected and degree_id == degree_id_selected:
+            tuition_fees = obj['tuition_fees']
+            for t in tuition_fees:
+                education_language_id = int(t['education_language_id'])
+                education_type_id = int(t['education_type_id'])
+                if education_type_id == education_type_id_selected:
+                    get_lang_name = return_language_name(education_language_id)
+                    if get_lang_name:
+                        lang_obj = {
+                            'name': get_lang_name,
+                            'id': education_language_id,
+                            'tuition_fee': t['tuition_fee']
+                        }
+                        if lang_obj not in edu_langs:
+                            edu_langs.append(lang_obj)
+
+    buttons = [[InlineKeyboardButton(text=item['name'], callback_data=f"_{item['id']}_{item['tuition_fee']}")] for item in edu_langs]
+    languageMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await message.answer(select_edu_language, reply_markup=languageMenu)
+    
 @dp.callback_query_handler(lambda c: c.data.startswith('_'), state=EducationData.education_lang_id)
 async def after_select_lang(callback_query: types.CallbackQuery, state: FSMContext):
-    ic(callback_query.data)
-    
     parts = callback_query.data[1:].split('_')
 
     if len(parts) < 2:
         await callback_query.message.answer("Invalid callback data format.")
         return
 
-    education_lang_id, eduaction_tuition_fee = parts
-    ic(education_lang_id, eduaction_tuition_fee)
-    await state.update_data(education_lang_id=education_lang_id, tuition_fee=eduaction_tuition_fee)
+    education_lang_id, education_tuition_fee = parts
+    await state.update_data(education_lang_id=education_lang_id, tuition_fee=education_tuition_fee)
 
     all_state_data = await state.get_data()
-    # ic(all_state_data)
     await callback_query.answer()
     await EducationData.menu.set()
     await callback_query.message.answer(saved_message, parse_mode="HTML")
@@ -1427,24 +1767,18 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
         f"💵 <i>Narxi:</i> <b>{all_state_data['tuition_fee']}</b> so'm\n",
         parse_mode='HTML'
     )
-    new_state_data = await state.get_data()
-    ic(all_state_data.get('degree_id'), new_state_data.get('direction_id'), all_state_data.get('education_type'), new_state_data.get('education_lang_id'))
 
+    new_state_data = await state.get_data()
     degree_id = int(new_state_data.get('degree_id'))
     direction_id = int(new_state_data.get('direction_id'))
     education_language_id = int(new_state_data.get('education_lang_id'))
     education_type_id = int(new_state_data.get('education_type'))
     token_ = new_state_data.get('token')
-
-    applicant = await send_req.applicants(token_, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None)
-    # ic(applicant)
+    file_work_experience = new_state_data.get('file_certificate', None)
+    applicant = await send_req.applicants(token_, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=file_work_experience)
     
     if applicant is not None:
         await callback_query.message.answer(application_submited, reply_markup=menu)
         await EducationData.menu.set()
     else:
         await callback_query.message.answer("Xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring")
-        
- 
-
-

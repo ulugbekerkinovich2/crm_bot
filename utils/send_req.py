@@ -517,6 +517,7 @@ def upload_sertificate(token, filename, f_type):
 # ic(u_s)
 
 
+
 def application_forms_for_edu(token,  district_id, education_id, file_, institution_name, region_id,src='manually'):
     url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f"Bearer {token}"
@@ -675,13 +676,23 @@ async def download_file(file_url, dest):
                     
 
 def convert_time(iso_datetime_str):
-    datetime_obj_utc = datetime.strptime(iso_datetime_str, "%Y-%m-%dT%H:%M:%S.%fZ")
-    your_timezone = pytz.timezone("Asia/Tashkent")
-    datetime_obj_local = datetime_obj_utc.replace(tzinfo=pytz.utc).astimezone(your_timezone)
-    # print(datetime_obj_local.strftime("%Y-%m-%d %H:%M:%S %Z"))
+    try:
+        datetime_obj_utc = datetime.strptime(iso_datetime_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+        your_timezone = pytz.timezone("Asia/Tashkent")
+        datetime_obj_local = datetime_obj_utc.replace(tzinfo=pytz.utc).astimezone(your_timezone)
+        return datetime_obj_local.strftime("%Y-%m-%d")
 
-# If you just need the date part in your local timezone
-    return datetime_obj_local.strftime("%Y-%m-%d")
+    except:
+        return "vaqt topilmadi"
+
+def convert_time_new(iso_datetime_str):
+    try:
+        datetime_obj_utc = datetime.strptime(iso_datetime_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+        your_timezone = pytz.timezone("Asia/Tashkent")
+        datetime_obj_local = datetime_obj_utc.replace(tzinfo=pytz.utc).astimezone(your_timezone)
+        return datetime_obj_local
+    except:
+        return "vaqt topilmadi"
 
 
 async def countries(token):
@@ -706,6 +717,14 @@ def escape_markdown(text):
     escape_chars = r'\_*[]()~`>#+-=|{}.!'
     return ''.join(['\\' + char if char in escape_chars else char for char in text])
 
+
 def convert_time(timestamp):
-    dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-    return dt.strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+    except:
+        return "vaqt topilmadi"
+
+def escape_markdown2(text):
+    escape_chars = r'\_*[]()~`>#+-=|{}.!'
+    return ''.join(f'\\{char}' if char in escape_chars else char for char in text)
