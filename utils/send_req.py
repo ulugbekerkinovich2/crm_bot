@@ -10,6 +10,9 @@ import random
 from data.config import  origin, crm_django_domain, username, password
 from data.config import domain_name as host
 import aiohttp
+ic(origin)
+# origin = 'admission.uess.uz'
+# ic(origin)
 # host = 'crmapi.mentalaba.uz'
 # origin = 'admission.tiiu.uz'
 # username = 'ulugbek'

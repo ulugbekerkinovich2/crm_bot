@@ -220,10 +220,19 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                 await state.update_data(phone=custom_phone)
                 user_register = await send_req.user_register(custom_phone)
                 remove_keyboard = types.ReplyKeyboardRemove()
-                ic('user_register: ',user_register.status_code)
-                if user_register.status_code == 201:
-                    await message.answer(accepted_phone, reply_markup=remove_keyboard)
-                    await PersonalData.secret_code.set()
+                ic('user_register: ',user_register)
+                ic('data registeer', user_register['status'])
+                # ic('user_register: ',user_register.status_code)
+                try:
+                    if user_register.status_code == 201:
+                        await message.answer(accepted_phone, reply_markup=remove_keyboard)
+                        await PersonalData.secret_code.set()
+                except:
+                    if user_register['status'] == 200:
+                        await message.answer(accepted_phone, reply_markup=remove_keyboard)
+                        await PersonalData.secret_code.set()
+
+
 
     elif custom_writened_phone is not None:
         custom_writened_phone = custom_writened_phone.strip()
