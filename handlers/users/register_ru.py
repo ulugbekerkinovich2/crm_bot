@@ -19,6 +19,7 @@ from keyboards.default.registerKeyBoardButton import yes_no,update_education_inf
 from keyboards.default.registerKeyBoardButton import enter_button, menu,register,register_ru,menu_ru,enter_button_ru
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
+from data.config import university_id as UNIVERSITY_ID
 
 # saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
 saved_message_ru = "✅ <b>Данные сохранены!</b>"
@@ -354,7 +355,8 @@ async def secret_code(message: types.Message, state: FSMContext):
                 ic(username)
                 save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                                     first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                                    pin=1,date=date, username=username)
+                                                                    pin=1,date=date, username=username,
+                                                                    university_name=int(UNIVERSITY_ID))
                 ic(save_chat_id)
 
                 get_this_user = send_req.get_user_profile(chat_id=user_chat_id)

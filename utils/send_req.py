@@ -7,13 +7,14 @@ import aiofiles
 from datetime import datetime
 import pytz
 import random
-# from data.config import  origin, crm_django_domain, username, password
+from data.config import  origin, crm_django_domain, username, password
+from data.config import domain_name as host
 import aiohttp
-host = 'crmapi.mentalaba.uz'
-origin = 'admission.tiiu.uz'
-crm_django_domain = 'alfa.misterdev.uz'
-username = 'ulugbek'
-password = '998359015a@'
+# host = 'crmapi.mentalaba.uz'
+# origin = 'admission.tiiu.uz'
+# username = 'ulugbek'
+# crm_django_domain = 'alfa.misterdev.uz'
+# password = '998359015a@'
 
 default_header = {
         'accept': 'application/json', 
@@ -579,7 +580,7 @@ async def djtoken(username, password):
             else:
                 return {'error': 'Failed to get token', 'status_code': response.status}
 
-def create_user_profile(token,chat_id,first_name,last_name,pin,date,username):
+def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,university_name):
     url = f"https://{crm_django_domain}/create-user-profile/"
     header = {
         'Authorization': f'Bearer {token}'
@@ -590,7 +591,8 @@ def create_user_profile(token,chat_id,first_name,last_name,pin,date,username):
         'last_name_user': last_name,
         'pin': pin,
         'username': username,
-        'date': date
+        'date': date,
+        "university_name": university_name
     }
     ic(body)
     response = requests.post(url, json=body, headers=header)

@@ -10,6 +10,7 @@ from icecream import ic
 from utils import send_req
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
+from data.config import university_id as UNIVERSITY_ID
 from aiogram.dispatcher.filters import Command, Text
 @dp.message_handler(CommandStart(), state='*')
 async def bot_start(message: types.Message, state: FSMContext):
@@ -68,7 +69,8 @@ async def bot_start(message: types.Message, state: FSMContext):
                                                             last_name=message.from_user.last_name, 
                                                             pin=1,
                                                             date=date,
-                                                            username=username),
+                                                            username=username,
+                                                            university_name=int(UNIVERSITY_ID)),
         
             ic(save_chat_id, 70)
         except Exception as err:
@@ -110,7 +112,8 @@ async def bot_start(message: types.Message, state: FSMContext):
                                                            first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                            pin=1,
                                                            date=date,
-                                                           username=username),
+                                                           username=username,
+                                                           university_name=int(UNIVERSITY_ID)),
         ic(72, save_chat_id)
 
         get_this_user = send_req.get_user_profile(chat_id=user_chat_id)

@@ -16,6 +16,7 @@ import pytz
 import json
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
+from data.config import university_id as UNIVERSITY_ID
 from handlers.users import upload,collect_data
 from handlers.users.register_ru import saved_message_ru,select_region_ru,type_your_edu_name_ru,example_diploma_message_ru,wait_file_is_loading_ru,select_type_certificate_ru,example_certification_message_ru,not_found_country_ru,search_university_ru,select_one_ru
 start_button = KeyboardButton('/start')  # The text on the button
@@ -124,7 +125,8 @@ async def my_menu(message: Message, state: FSMContext):
     ic(username)
     save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                         first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                        pin=1,date=date, username=username)
+                                                        pin=1,date=date, username=username,
+                                                        university_name=int(UNIVERSITY_ID))
     ic(save_chat_id)
 
     get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
@@ -231,7 +233,8 @@ async def education_menu(message: Message, state: FSMContext):
         ic(username)
         save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                             first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                            pin=1,date=date, username=username)
+                                                            pin=1,date=date, username=username,
+                                                            university_name=int(UNIVERSITY_ID))
         ic(save_chat_id)
 
         get_this_user = send_req.get_user_profile(chat_id=user_chat_id)

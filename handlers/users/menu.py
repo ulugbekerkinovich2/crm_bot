@@ -16,6 +16,7 @@ import pytz
 import json
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
+from data.config import university_id as UNIVERSITY_ID
 from handlers.users import upload,collect_data
 from datetime import datetime, timedelta
 from handlers.users.register import saved_message,select_region,type_your_edu_name,example_diploma_message,wait_file_is_loading,select_type_certificate,example_certification_message,not_found_country,search_university,select_one
@@ -23,6 +24,7 @@ start_button = KeyboardButton('/start')  # The text on the button
 start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
 escape_markdown = send_req.escape_markdown
 convert_time = send_req.convert_time
+
 @dp.message_handler(Text(equals="🗑Akkauntni o'chirish"), state="*")
 async def delete_account_prompt(message: types.Message, state: FSMContext):
     await message.answer("Akkaunt o'chirilsinmi?", reply_markup=ask_delete_account)
@@ -151,7 +153,8 @@ async def my_menu(message: Message, state: FSMContext):
     ic(username)
     save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                         first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                        pin=1,date=date, username=username)
+                                                        pin=1,date=date, username=username,
+                                                        university_name=int(UNIVERSITY_ID))
     ic(save_chat_id)
 
     get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
@@ -258,7 +261,8 @@ async def education_menu(message: Message, state: FSMContext):
         ic(username)
         save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                             first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                            pin=1,date=date, username=username)
+                                                            pin=1,date=date, username=username,
+                                                            university_name=int(UNIVERSITY_ID))
         ic(save_chat_id)
 
         get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
