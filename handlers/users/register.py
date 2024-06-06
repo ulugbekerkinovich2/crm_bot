@@ -180,14 +180,24 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                         await message.answer("Severda xatolik xatolik yuz berdi")
                 # ic(check_user)
                 elif check_user == 'false':
-                    ic('check_user_for_false', check_user)
-                    await state.update_data(phone=custom_phone)
-                    user_register = await send_req.user_register(custom_phone)
-                    remove_keyboard = types.ReplyKeyboardRemove()
-                    ic('user_register: ',user_register.status_code)
-                    if user_register.status_code == 201:
-                        await message.answer(accepted_phone, reply_markup=remove_keyboard)
-                        await PersonalData.secret_code.set()
+                    try:
+                        ic('check_user_for_false', check_user)
+                        await state.update_data(phone=custom_phone)
+                        user_register = await send_req.user_register(custom_phone)
+                        remove_keyboard = types.ReplyKeyboardRemove()
+                        ic('user_register: ',user_register.status_code)
+                        if user_register.status_code == 201:
+                            await message.answer(accepted_phone, reply_markup=remove_keyboard)
+                            await PersonalData.secret_code.set()
+                    except:
+                        ic('check_user_for_false', check_user)
+                        await state.update_data(phone=custom_phone)
+                        user_register = await send_req.user_register(custom_phone)
+                        remove_keyboard = types.ReplyKeyboardRemove()
+                        ic('user_register: ',user_register['status'])
+                        if user_register['status'] == 200:
+                            await message.answer(accepted_phone, reply_markup=remove_keyboard)
+                            await PersonalData.secret_code.set()    
 
         elif len(phone_num) == 13:
             ic('plus bilan keldi')

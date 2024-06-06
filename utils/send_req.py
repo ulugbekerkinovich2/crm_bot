@@ -12,9 +12,10 @@ from data.config import domain_name as host
 import aiohttp
 ic(origin)
 # origin = 'admission.uess.uz'
+# origin = 'admission.tiiu.uz'
 # ic(origin)
 # host = 'crmapi.mentalaba.uz'
-# origin = 'admission.tiiu.uz'
+
 # username = 'ulugbek'
 # crm_django_domain = 'alfa.misterdev.uz'
 # password = '998359015a@'
@@ -24,7 +25,7 @@ default_header = {
         'Content-Type': 'application/json',
         'Origin': f'{origin}', 
 }
-
+ic(origin)
 async def check_number(phone):
     url = f'https://{host}/v1/auth/check'
     data = {"phone": phone}
