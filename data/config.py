@@ -12,6 +12,7 @@ IP = env.str("ip")  # Xosting ip manzili
 throttling_time = env.str("throttling_time")
 domain_name = env.str("domain_name")
 origin= env.str("origin")
+
 ic(origin)
 university_name_uz = env.str("university_name_uz")
 university_name_ru = env.str("university_name_ru")

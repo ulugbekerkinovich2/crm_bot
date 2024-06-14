@@ -337,22 +337,28 @@ async def secret_code(message: types.Message, state: FSMContext):
             ic(access)
             await state.update_data(access=access)
             user_chat_id = message.from_user.id
-            ic(user_chat_id)
+            # ic(user_chat_id)
             date = message.date.strftime("%Y-%m-%d %H:%M:%S")
-            ic(date)
+            # ic(date)
             username = message.from_user.username or message.from_user.full_name
-            ic(username)
+            # ic(username)
             try:
                 save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                                     first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username,
                                                                     university_name=int(UNIVERSITY_ID))
-                ic(save_chat_id)
+                # ic(save_chat_id)
+                send_req.update_user_profile(id=save_chat_id, 
+                                            chat_id=user_chat_id,
+                                            phone=phone_number, 
+                                            pin=1,
+                                            first_name=message.from_user.first_name,
+                                            last_name=message.from_user.last_name)
             except Exception as err:
                 ic(err)
 
             get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
-            ic(get_this_user, 323)
+            # ic(get_this_user, 323)
             # except Exception as err:
             #     ic(err)
             if haveApplicationForm is False and (haveEducation is False and  havePreviousEducation is False) and haveApplied is False:
