@@ -347,7 +347,7 @@ async def secret_code(message: types.Message, state: FSMContext):
                                                                     first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username,
                                                                     university_name=int(UNIVERSITY_ID))
-                # ic(save_chat_id)
+                ic(save_chat_id)
                 send_req.update_user_profile(id=save_chat_id, 
                                             chat_id=user_chat_id,
                                             phone=phone_number, 
