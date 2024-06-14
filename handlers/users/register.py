@@ -352,7 +352,7 @@ async def secret_code(message: types.Message, state: FSMContext):
                                                                     last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username,
                                                                     university_name=int(UNIVERSITY_ID))
-                ic(save_chat_id)
+                # ic(save_chat_id)
                 update_user_profile = send_req.update_user_profile(
                     id=save_chat_id,
                     chat_id=user_chat_id,
@@ -361,7 +361,7 @@ async def secret_code(message: types.Message, state: FSMContext):
                     last_name=message.from_user.last_name,
                     pin=1
                 )
-                ic(update_user_profile)
+                # ic(update_user_profile)
             except Exception as err:
                 ic(err)
 
