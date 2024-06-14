@@ -21,3 +21,4 @@ crm_django_domain = env.str("crm_django_domain")
 username = env.str("username")
 password = env.str("password")
 university_id = env.int("university_id")
+university_id = 2
