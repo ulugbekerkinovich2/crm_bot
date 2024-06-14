@@ -4,7 +4,7 @@ from icecream import ic
 # environs kutubxonasidan foydalanish
 env = Env()
 env.read_env()
-
+ic(env.int("university_id"))
 # .env fayl ichidan quyidagilarni o'qiymiz
 BOT_TOKEN = env.str("BOT_TOKEN")  # Bot toekn
 ADMINS = env.list("ADMINS")  # adminlar ro'yxati
@@ -19,4 +19,5 @@ university_name_ru = env.str("university_name_ru")
 crm_django_domain = env.str("crm_django_domain")
 username = env.str("username")
 password = env.str("password")
-university_id = env.int("university_id")
+university_id = 1
+ic(university_id)
