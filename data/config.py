@@ -11,7 +11,12 @@ ADMINS = env.list("ADMINS")  # adminlar ro'yxati
 IP = env.str("ip")  # Xosting ip manzili
 throttling_time = env.str("throttling_time")
 domain_name = env.str("domain_name")
+<<<<<<< HEAD
 origin= env.str("origin") if env.str("origin") == "qabul.aifu.uz" else "qabul.aifu.uz"
+=======
+origin= env.str("origin")
+
+>>>>>>> added_functions
 ic(origin)
 university_name_uz = env.str("university_name_uz")
 university_name_ru = env.str("university_name_ru")

@@ -540,7 +540,7 @@ async def my_application(message: Message, state: FSMContext):
     if not my_app:
         await message.answer("Ariza ma'lumotlari topilmadi.")
         return
-
+    ic(my_app)
     created_at = my_app.get('created_at', 'yaratilgan vaqti topilmadi')
     status = my_app.get('status', 'status topilmadi')
     direction_name_uz = my_app.get('direction_name_uz', 'Talim turi topilmadi')
@@ -554,9 +554,19 @@ async def my_application(message: Message, state: FSMContext):
     desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
     date_obj = utc_timezone.localize(date_obj).astimezone(desired_timezone)
     human_readable_date = date_obj.strftime("%Y-%m-%d %H:%M")
-    if len(comments) >= 2:
-        comments = comments[-1]
+    def get_object_with_max_id(objects):
+        if not objects:
+            return None
     
+        max_id_object = objects[0]
+        for obj in objects[1:]:
+            if obj['id'] > max_id_object['id']:
+                max_id_object = obj
+    
+        return max_id_object
+    ic(comments)
+    comment = get_object_with_max_id(comments)
+    ic(comment)
     if tuition_fee != 'Narxi topilmadi':
         formatted_fee = "{:,.0f}".format(tuition_fee).replace(',', '.')
     ic(status)
@@ -576,8 +586,8 @@ async def my_application(message: Message, state: FSMContext):
     'RECOMMENDED_STUDENT': 'tavsiya etilgan talaba'
     }
     status_name = applicant_status_translations.get(status.upper(), "Topilmadi")
-    comment = comments.get('comment', 'Izoh topilmadi')
-    comment_time = comments.get('created_at', 'Izoh topilmadi')
+    comment = comment.get('comment', 'Izoh topilmadi')
+    comment_time = comment.get('created_at', 'Izoh topilmadi')
     if comment_time != 'Izoh topilmadi':
         comment_time = datetime.fromisoformat(comment_time.rstrip("Z")).strftime("%Y-%m-%d %H:%M")
     ic(my_app.get('status'))
@@ -1501,7 +1511,7 @@ async def my_application(message: Message, state: FSMContext):
     if not my_app:
         await message.answer("Ariza ma'lumotlari topilmadi.")
         return
-
+    ic(my_app)
     created_at = my_app.get('created_at', 'yaratilgan vaqti topilmadi')
     status = my_app.get('status', 'status topilmadi')
     comments = my_app.get('comment', 'izoh topilmadi')
@@ -1517,8 +1527,19 @@ async def my_application(message: Message, state: FSMContext):
     desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
     date_obj = utc_timezone.localize(date_obj).astimezone(desired_timezone)
     human_readable_date = date_obj.strftime("%Y-%m-%d %H:%M")
-    if len(comments) >= 2:
-        comments = comments[-1]
+    ic(comments)
+    def get_object_with_max_id(objects):
+        if not objects:
+            return None
+        
+        max_id_object = objects[0]
+        for obj in objects[1:]:
+            if obj['id'] > max_id_object['id']:
+                max_id_object = obj
+        
+        return max_id_object
+    comment = get_object_with_max_id(comments)
+    ic(comment)
     if tuition_fee != 'Narxi topilmadi':
         formatted_fee = "{:,.0f}".format(tuition_fee).replace(',', '.')
 
@@ -1537,8 +1558,8 @@ async def my_application(message: Message, state: FSMContext):
     'STUDENT': 'talaba',
     'RECOMMENDED_STUDENT': 'tavsiya etilgan talaba'
     }
-    comment = comments.get('comment', 'izoh topilmadi')
-    comment_time = comments.get('created_at', 'izoh vaqti topilmadi')
+    comment = comment.get('comment', 'izoh topilmadi')
+    comment_time = comment.get('created_at', 'izoh vaqti topilmadi')
     if comment_time != 'izoh vaqti topilmadi':
         comment_time = convert_time(comment_time)
     status_name = applicant_status_translations.get(status.upper(), "Topilmadi")
@@ -1583,30 +1604,31 @@ async def my_application_exam(message: Message, state: FSMContext):
     comments = my_app.get('comment', [])
     exam = my_app.get('exam', None)
     ic(exam, 1547)
-    exam_result = exam.get('exam_result', None)
-    first_subject_name = exam_result.get('first_subject_name', None)
-    first_name_uz = first_subject_name['name_uz'] if first_subject_name['name_uz'] else None
-    first_subject_score = exam_result.get('first_subject_score', 0)
-    first_subject_mark = exam_result.get('first_subject_mark', 0)
+    if exam is not None:
+        exam_result = exam.get('exam_result', None)
+        first_subject_name = exam_result.get('first_subject_name', None)
+        first_name_uz = first_subject_name['name_uz'] if first_subject_name['name_uz'] else None
+        first_subject_score = exam_result.get('first_subject_score', 0)
+        first_subject_mark = exam_result.get('first_subject_mark', 0)
 
-    second_subject_name = exam_result.get('second_subject_name', None)
-    
-    second_name_uz = second_subject_name['name_uz'] if second_subject_name['name_uz'] else None
-    
-    second_subject_score = exam_result.get('second_subject_score', 0)
-    second_subject_mark = exam_result.get('second_subject_mark', 0)
+        second_subject_name = exam_result.get('second_subject_name', None)
+        
+        second_name_uz = second_subject_name['name_uz'] if second_subject_name['name_uz'] else None
+        
+        second_subject_score = exam_result.get('second_subject_score', 0)
+        second_subject_mark = exam_result.get('second_subject_mark', 0)
 
-    third_subject_name = exam_result.get('third_subject_name', None)
-    third_name_uz = third_subject_name['name_uz'] if third_subject_name['name_uz'] else None
-    third_subject_score = exam_result.get('third_subject_score', 0)
-    third_subject_mark = exam_result.get('third_subject_mark', 0)
+        third_subject_name = exam_result.get('third_subject_name', None)
+        third_name_uz = third_subject_name['name_uz'] if third_subject_name['name_uz'] else None
+        third_subject_score = exam_result.get('third_subject_score', 0)
+        third_subject_mark = exam_result.get('third_subject_mark', 0)
 
-    total_mark = exam_result.get('total_mark', 0)
-    when_started = exam_result.get('when_started', None)
-    try:
-        time_when_started = send_req.convert_time(when_started)
-    except:
-        time_when_started = when_started
+        total_mark = exam_result.get('total_mark', 0)
+        when_started = exam_result.get('when_started', None)
+        try:
+            time_when_started = send_req.convert_time(when_started)
+        except:
+            time_when_started = when_started
     ic(exam)
     online_exam_link = exam.get('online_exam_link', 'Link topilmadi')
     ic(online_exam_link)
@@ -1728,9 +1750,20 @@ async def my_application(message: Message, state: FSMContext):
     desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
     date_obj = utc_timezone.localize(date_obj).astimezone(desired_timezone)
     human_readable_date = date_obj.strftime("%Y-%m-%d %H:%M")
-    if len(comments) >= 2:
-        comments = comments[-1]
-    elif len(comments) == 0:
+    ic(comments)
+    def get_object_with_max_id(objects):
+        if not objects:
+            return None
+        
+        max_id_object = objects[0]
+        for obj in objects[1:]:
+            if obj['id'] > max_id_object['id']:
+                max_id_object = obj
+        
+        return max_id_object
+    comment = get_object_with_max_id(comments)
+    ic(comment)
+    if len(comments) == 0:
         comments = "Izoh yoq"
     if tuition_fee != 'Narxi topilmadi':
         formatted_fee = "{:,.0f}".format(tuition_fee).replace(',', '.')
