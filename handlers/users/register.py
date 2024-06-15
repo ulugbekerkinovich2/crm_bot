@@ -364,7 +364,7 @@ async def secret_code(message: types.Message, state: FSMContext):
             except Exception as err:
                 ic(err)
 
-            get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+            get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
             # ic(get_this_user, 323)
             # except Exception as err:
             #     ic(err)

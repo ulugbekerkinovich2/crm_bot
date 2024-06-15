@@ -111,12 +111,14 @@ async def bot_start(message: types.Message, state: FSMContext):
         await state.update_data(access=access)
         user_chat_id = message.from_user.id
         ic(user_chat_id)
-        save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
-                                                           first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                           pin=1,
-                                                           date=date,
-                                                           username=username,
-                                                           university_name=int(UNIVERSITY_ID)),
+        save_chat_id = send_req.create_user_profile(token=access, 
+                                                    chat_id=user_chat_id, 
+                                                    first_name=message.from_user.first_name,                                                    
+                                                    last_name=message.from_user.last_name, 
+                                                    pin=1,
+                                                    date=date,
+                                                    username=username,
+                                                    university_name=int(UNIVERSITY_ID)),
         
         ic(72, save_chat_id)
 
