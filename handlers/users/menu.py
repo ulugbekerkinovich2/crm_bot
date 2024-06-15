@@ -109,7 +109,21 @@ async def my_menu(message: Message, state: FSMContext):
             birth_date_str = birth_date
 
         ic('-----------------------***********>', birth_date_str)
-
+        date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            data = send_req.update_user_profile(
+                                university_id=UNIVERSITY_ID, 
+                                chat_id=message.from_user.id,
+                                phone=phone, 
+                                pin=pin,
+                                first_name=first_name,
+                                last_name=last_name,
+                                username=message.from_user.username,
+                                date=date_now)
+            ic(data)
+        except Exception as e:
+            ic(e)
+            # pass
         info_message = (
         "<b>Shaxsiy Ma'lumotlar:</b>\n\n"
         f"• <b>Ism:</b> {first_name}\n"
@@ -157,7 +171,7 @@ async def my_menu(message: Message, state: FSMContext):
                                                         university_name=int(UNIVERSITY_ID))
     ic(save_chat_id)
 
-    get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+    get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
     ic(get_this_user)
     data = await state.get_data()
     token = data.get('token')
@@ -265,7 +279,7 @@ async def education_menu(message: Message, state: FSMContext):
                                                             university_name=int(UNIVERSITY_ID))
         ic(save_chat_id)
 
-        get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+        get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
         ic(get_this_user)
     except Exception as err:
         ic(err)
@@ -1604,7 +1618,7 @@ async def my_application_exam(message: Message, state: FSMContext):
     comments = my_app.get('comment', [])
     exam = my_app.get('exam', None)
     ic(exam, 1547)
-    if exam is not None:
+    if exam != {}:
         exam_result = exam.get('exam_result', None)
         first_subject_name = exam_result.get('first_subject_name', None)
         first_name_uz = first_subject_name['name_uz'] if first_subject_name['name_uz'] else None

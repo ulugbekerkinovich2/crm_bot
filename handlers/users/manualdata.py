@@ -18,7 +18,7 @@ import re
 from keyboards.default.registerKeyBoardButton import yes_no
 from keyboards.default.registerKeyBoardButton import enter_button, menu
 from handlers.users.register import error_message_birthday, error_date,error_document,accepted_document,error_pin, error_number,error_birthplace,wait_file_is_loading
-
+from data.config import university_id as UNIVERSITY_ID
 
 
 # @dp.message_handler(Text(equals="ok"), state=None)
@@ -271,7 +271,7 @@ async def get_email(message: types.Message, state: FSMContext):
     phone = data_obj.get('phone')
     src_ = "manually"
 
-    get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
+    get_current_user = send_req.get_user_profile(chat_id=message.chat.id, university_id=UNIVERSITY_ID)
     chat_id_user = get_current_user['chat_id_user']
     id_user = get_current_user['id']
 

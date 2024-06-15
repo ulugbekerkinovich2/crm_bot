@@ -359,7 +359,7 @@ async def secret_code(message: types.Message, state: FSMContext):
                                                                     university_name=int(UNIVERSITY_ID))
                 ic(save_chat_id)
 
-                get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+                get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=int(UNIVERSITY_ID))
                 ic(get_this_user)
             except Exception as err:
                 ic(err)
@@ -650,7 +650,7 @@ async def info(message: types.Message, state: FSMContext):
 
         await message.answer("Нажмите «Продолжить», чтобы заполнить информацию об обучении.", reply_markup=enter_button_ru)
         ic('davom etish bosildi', 540)
-        get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
+        get_current_user = send_req.get_user_profile(chat_id=message.chat.id, university_id=UNIVERSITY_ID)
         chat_id_user = get_current_user['chat_id_user']
         id_user = get_current_user['id']
         await state.update_data(chat_id_user=chat_id_user, id_user=id_user)
@@ -659,7 +659,16 @@ async def info(message: types.Message, state: FSMContext):
         ic('django')
         ic(id_user, phone, chat_id_user,first_name, last_name)
         try:
-            update_user_profile_response = send_req.update_user_profile(id=message.chat.id, chat_id=chat_id_user, phone=phone, first_name=first_name, last_name=last_name, pin=pin)
+            update_user_profile_response = send_req.update_user_profile(
+                university_id=UNIVERSITY_ID, 
+                chat_id=chat_id_user, 
+                phone=phone, 
+                first_name=first_name, 
+                last_name=last_name, 
+                pin=pin,
+                username=message.chat.username,
+                date=message.date.strftime("%Y-%m-%d %H:%M:%S")
+                )
             ic(update_user_profile_response)
         except Exception as e:
             ic(490,'my_dj_error', e)

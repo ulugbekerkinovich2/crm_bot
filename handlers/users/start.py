@@ -75,8 +75,11 @@ async def bot_start(message: types.Message, state: FSMContext):
             ic(save_chat_id, 70)
         except Exception as err:
             ic(err)
-        get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
-        ic(get_this_user, 73)
+        try:
+            get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
+            ic(get_this_user, 73)
+        except  Exception as err:
+            ic(err)
         data = await state.get_data()
         language_uz = data.get('language_uz', None)
         language_ru = data.get('language_ru', None)
@@ -114,9 +117,10 @@ async def bot_start(message: types.Message, state: FSMContext):
                                                            date=date,
                                                            username=username,
                                                            university_name=int(UNIVERSITY_ID)),
+        
         ic(72, save_chat_id)
 
-        get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+        get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
         ic(get_this_user)
         data_user = await state.get_data()
         phone = data_user.get('phone', None)

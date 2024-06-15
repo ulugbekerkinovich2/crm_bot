@@ -129,7 +129,7 @@ async def my_menu(message: Message, state: FSMContext):
                                                         university_name=int(UNIVERSITY_ID))
     ic(save_chat_id)
 
-    get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+    get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
     ic(get_this_user)
     data = await state.get_data()
     token = data.get('token')
@@ -237,7 +237,7 @@ async def education_menu(message: Message, state: FSMContext):
                                                             university_name=int(UNIVERSITY_ID))
         ic(save_chat_id)
 
-        get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+        get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
         ic(get_this_user)
     except Exception as err:
         ic(err)

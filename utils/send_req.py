@@ -600,17 +600,23 @@ def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,uni
     }
     ic(body)
     response = requests.post(url, json=body, headers=header)
-    return response.json()
+    if response.status_code == 201:
+        return response.json()
+    else:
+        return {'error': 'Failed to create user profile', 'status_code': response.status_code}
 
-def update_user_profile(id, chat_id, phone, first_name, last_name, pin):
-    url = f"https://{crm_django_domain}/user_profile/{chat_id}/update"
+def update_user_profile(university_id, chat_id, phone, first_name, last_name, pin, username,date):
+    url = f"https://{crm_django_domain}/update-user-profile/{chat_id}/{university_id}/"
     ic(url)
     body = {
         'chat_id_user': chat_id,
         'phone': phone,
         'first_name_user': first_name,
-        'last_name_user': last_name,
-        'pin': pin
+        'last_name_user': last_name if last_name else 'None',
+        'pin': pin,
+        'username': username,
+        'date': date,
+        'university_name': university_id
     }
     ic(body)
     response = requests.put(url, json=body)
@@ -632,11 +638,15 @@ async def get_all_ser_profile(token):
             else:
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-def get_user_profile(chat_id):
-    url = f"https://{crm_django_domain}/user_profile/{int(chat_id)}/"
+def get_user_profile(chat_id,university_id):
+    url = f"https://{crm_django_domain}/detail-user-profile/{int(chat_id)}/{int(university_id)}/"
     response = requests.get(url)
     # ic(response.status_code, response.json())
-    return response.json()
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return {'error': 'Failed to fetch data', 'status_code': response.status_code}
+    
 
 
 
