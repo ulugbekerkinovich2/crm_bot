@@ -1107,7 +1107,15 @@ async def update_education_name(callback_query: types.CallbackQuery, state: FSMC
 
 @dp.callback_query_handler(lambda mycallbackdata: mycallbackdata.data == 'diploma', state=UpdateEducation.education_id)
 async def update_diploma(callback_query: types.CallbackQuery, state: FSMContext):
-    await callback_query.message.answer(example_diploma_message)
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
+    # await callback_query.message.answer(example_diploma_message)
+    await bot.send_photo(chat_id=callback_query.message.chat.id,
+                             photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                             caption=example_diploma_message, 
+                             parse_mode="Markdown")
     await UpdateEducation.file_diploma.set()
 
 @dp.message_handler(content_types=['document'], state=UpdateEducation.file_diploma)

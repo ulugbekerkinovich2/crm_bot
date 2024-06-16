@@ -354,12 +354,14 @@ async def secret_code(message: types.Message, state: FSMContext):
                                                                     university_name=int(UNIVERSITY_ID))
                 # ic(save_chat_id)
 
-                send_req.update_user_profile(id=save_chat_id, 
+                send_req.update_user_profile(university_id=UNIVERSITY_ID, 
                                             chat_id=user_chat_id,
                                             phone=phone_number, 
                                             pin=1,
                                             first_name=message.from_user.first_name,
-                                            last_name=message.from_user.last_name)
+                                            last_name=message.from_user.last_name,
+                                            date=date,
+                                            username=username)
 
             except Exception as err:
                 ic(err)
@@ -677,12 +679,13 @@ async def info(message: types.Message, state: FSMContext):
             'user_education': user_education,
             'certifications': certifications,
         }
+        date_now= datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         await state.update_data(**data_obj_applications)
         # await message.answer("Ta'lim malumotlarini kiriting")
 
         await message.answer("Ta'lim ma'lumotlarini to'ldirish uchun davom etish tugmasini bosing", reply_markup=enter_button)
         ic('davom etish bosildi', 540)
-        get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
+        get_current_user = send_req.get_user_profile(chat_id=message.chat.id, university_id=UNIVERSITY_ID)
         chat_id_user = get_current_user['chat_id_user']
         id_user = get_current_user['id']
         await state.update_data(chat_id_user=chat_id_user, id_user=id_user)
@@ -691,7 +694,13 @@ async def info(message: types.Message, state: FSMContext):
         ic('django')
         ic(id_user, phone, chat_id_user,first_name, last_name)
         try:
-            update_user_profile_response = send_req.update_user_profile(id=message.chat.id, chat_id=chat_id_user, phone=phone, first_name=first_name, last_name=last_name, pin=pin)
+            update_user_profile_response = send_req.update_user_profile(university_id=UNIVERSITY_ID, 
+                                                                        chat_id=chat_id_user, 
+                                                                        phone=phone, 
+                                                                        first_name=first_name, 
+                                                                        username=message.from_user.username,
+                                                                        last_name=last_name, 
+                                                                        pin=pin,date=date_now)
             ic(update_user_profile_response)
         except Exception as e:
             ic(490,'my_dj_error', e)
@@ -785,6 +794,7 @@ async def transfer_education_name_handler(message: types.Message, state: FSMCont
 
 @dp.message_handler(state=EducationData.transfer_direction_name)
 async def transfer_direction_name_handler(message: types.Message, state: FSMContext):
+    ic(message)
     transfer_direction_name = message.text.strip()
     ic(transfer_direction_name)
     # await message.answer("Ayni vaqtdagi kursingizni tanlang: ")
@@ -810,8 +820,176 @@ async def handle_callback_query_dir(callback_query: types.CallbackQuery, state: 
     await EducationData.file_diploma_transkript.set()
     # await callback_query.message.answer()
 
+
+@dp.message_handler(content_types=['document', 'photo'], state=EducationData.file_diploma_transkript)
+async def upload_file(message: types.Message, state: FSMContext):
+    ic(820, message)
+    if message.document:
+        document = message.document
+        file_id = document.file_id
+        file_name = document.file_name
+        ic(900, file_name, file_id)
+    elif message.photo:
+        photo = message.photo[-1]
+        file_id = photo.file_id
+        file_name = f"{file_id}.jpg"
+        ic(file_name, photo)
+    
+    ic(file_name)
+    
+    data = await state.get_data()
+    ic(data)
+    token_id = data['token']
+    ic(token_id)
+    
+    token_ = data.get('token')
+    
+    file_path = await bot.get_file(file_id)
+    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+    ic(file_url)
+
+    download_dir = 'transcript_files'
+    os.makedirs(download_dir, exist_ok=True)
+
+    local_file_path = os.path.join(download_dir, file_name)
+    await send_req.download_file(file_url, local_file_path)
+    await message.answer("Please wait while the file is being uploaded...", parse_mode='HTML')
+    
+    res_file = upload.upload_new_file_transcript(token=token_, filename=local_file_path)
+    
+    try:
+        file_size = os.path.getsize(local_file_path)
+        file_size_kb = file_size / 1024
+        file_size_mb = file_size_kb / 1024
+        ic(f'size: {file_size_mb:.2f}')
+    except Exception as e:
+        ic(e)
+        await message.answer("File not found")
+        return
+
+    await state.update_data(file_size=file_size)
+    await message.answer("File has been uploaded successfully.")
+
+    try:
+        data1 = res_file.json()
+        path = data1['path']
+        ic(path)
+        data = await state.get_data()
+        file_diploma_transkript = path
+        country_id = data.get('country_id')
+        selected_course = data.get('selected_course')
+        transfer_direction_name = data.get('transfer_direction_name')
+        transfer_education_name = data.get('transfer_education_name')
+
+        res_data = await send_req.application_forms_transfer(
+            token_,
+            int(country_id),
+            transfer_direction_name,
+            transfer_education_name,
+            file_diploma_transkript,
+            int(selected_course)
+        )
+        ic(res_data)
+        await message.answer("Data has been saved successfully.", reply_markup=enter_button)
+        await state.update_data(file_diploma_transkript=path)
+        
+    except Exception as e:
+        ic(e)
+        await message.answer(f"An error occurred: {e}")
+        return
+    
+    src_ = 'src' 
+    src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+    if src_res is not None and src_res is not False:
+        await state.update_data(src=src_res)
+    await EducationData.degree_id.set()
+    
+@dp.message_handler(content_types=ContentType.PHOTO, state=EducationData.file_diploma_transkript)
+async def upload_file(message: types.Message, state: FSMContext):
+    ic(903, message)
+    if message.document:
+        document = message.document
+        file_id = document.file_id
+        file_name = document.file_name
+        ic(900, file_name, file_id)
+    elif message.photo:
+        photo = message.photo[-1]
+        file_id = photo.file_id
+        file_name = f"{file_id}.jpg"
+        ic(file_name, photo)
+    
+    ic(file_name)
+    
+    data = await state.get_data()
+    ic(data)
+    token_id = data['token']
+    ic(token_id)
+    
+    token_ = data.get('token')
+    
+    file_path = await bot.get_file(file_id)
+    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+    ic(file_url)
+
+    download_dir = 'transcript_files'
+    os.makedirs(download_dir, exist_ok=True)
+
+    local_file_path = os.path.join(download_dir, file_name)
+    await send_req.download_file(file_url, local_file_path)
+    await message.answer("Please wait while the file is being uploaded...", parse_mode='HTML')
+    
+    res_file = upload.upload_new_file_transcript(token=token_, filename=local_file_path)
+    
+    try:
+        file_size = os.path.getsize(local_file_path)
+        file_size_kb = file_size / 1024
+        file_size_mb = file_size_kb / 1024
+        ic(f'size: {file_size_mb:.2f}')
+    except Exception as e:
+        ic(e)
+        await message.answer("File not found")
+        return
+
+    await state.update_data(file_size=file_size)
+    await message.answer("File has been uploaded successfully.")
+
+    try:
+        data1 = res_file.json()
+        path = data1['path']
+        ic(path)
+        data = await state.get_data()
+        file_diploma_transkript = path
+        country_id = data.get('country_id')
+        selected_course = data.get('selected_course')
+        transfer_direction_name = data.get('transfer_direction_name')
+        transfer_education_name = data.get('transfer_education_name')
+
+        res_data = await send_req.application_forms_transfer(
+            token_,
+            int(country_id),
+            transfer_direction_name,
+            transfer_education_name,
+            file_diploma_transkript,
+            int(selected_course)
+        )
+        ic(res_data)
+        await message.answer("Data has been saved successfully.", reply_markup=enter_button)
+        await state.update_data(file_diploma_transkript=path)
+        
+    except Exception as e:
+        ic(e)
+        await message.answer(f"An error occurred: {e}")
+        return
+    
+    src_ = 'src' 
+    src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+    if src_res is not None and src_res is not False:
+        await state.update_data(src=src_res)
+    await EducationData.degree_id.set()
+
 @dp.message_handler(content_types=['document'], state=EducationData.file_diploma_transkript)
 async def upload_file(message: types.Message, state: FSMContext):
+    ic(986, message)
     ic(message.document.file_name)
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
@@ -889,85 +1067,7 @@ async def upload_file(message: types.Message, state: FSMContext):
     await EducationData.degree_id.set()
 
 
-@dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.PHOTO], state=EducationData.file_diploma_transkript)
-async def upload_file(message: types.Message, state: FSMContext):
-    if message.document:
-        document = message.document
-        file_id = document.file_id
-        file_name = document.file_name
-    elif message.photo:
-        photo = message.photo[-1]
-        file_id = photo.file_id
-        file_name = f"{file_id}.jpg"
-    
-    ic(file_name)
-    
-    data = await state.get_data()
-    ic(data)
-    token_id = data['token']
-    ic(token_id)
-    
-    token_ = data.get('token')
-    
-    file_path = await bot.get_file(file_id)
-    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
-    ic(file_url)
 
-    download_dir = 'transcript_files'
-    os.makedirs(download_dir, exist_ok=True)
-
-    local_file_path = os.path.join(download_dir, file_name)
-    await send_req.download_file(file_url, local_file_path)
-    await message.answer("Please wait while the file is being uploaded...", parse_mode='HTML')
-    
-    res_file = upload.upload_new_file_transcript(token=token_, filename=local_file_path)
-    
-    try:
-        file_size = os.path.getsize(local_file_path)
-        file_size_kb = file_size / 1024
-        file_size_mb = file_size_kb / 1024
-        ic(f'size: {file_size_mb:.2f}')
-    except Exception as e:
-        ic(e)
-        await message.answer("File not found")
-        return
-
-    await state.update_data(file_size=file_size)
-    await message.answer("File has been uploaded successfully.")
-
-    try:
-        data1 = res_file.json()
-        path = data1['path']
-        ic(path)
-        data = await state.get_data()
-        file_diploma_transkript = path
-        country_id = data.get('country_id')
-        selected_course = data.get('selected_course')
-        transfer_direction_name = data.get('transfer_direction_name')
-        transfer_education_name = data.get('transfer_education_name')
-
-        res_data = await send_req.application_forms_transfer(
-            token_,
-            int(country_id),
-            transfer_direction_name,
-            transfer_education_name,
-            file_diploma_transkript,
-            int(selected_course)
-        )
-        ic(res_data)
-        await message.answer("Data has been saved successfully.", reply_markup=enter_button)
-        await state.update_data(file_diploma_transkript=path)
-        
-    except Exception as e:
-        ic(e)
-        await message.answer(f"An error occurred: {e}")
-        return
-    
-    src_ = 'src' 
-    src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
-    if src_res is not None and src_res is not False:
-        await state.update_data(src=src_res)
-    await EducationData.degree_id.set()
 
 
 @dp.callback_query_handler(lambda c: c.data.startswith('edu_'), state=EducationData.education_id)
@@ -1061,6 +1161,10 @@ async def district_selection_handler(callback_query: types.CallbackQuery, state:
 
 @dp.message_handler(state=EducationData.institution_name)
 async def type_institution_name_handler(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
     institution_name = message.text.strip()
 
     if institution_name.lower() != 'davom etish':
@@ -1070,7 +1174,10 @@ async def type_institution_name_handler(message: types.Message, state: FSMContex
         # Example to conclude:
         data = await state.get_data()
         institution_name = data.get('institution_name', 'Not specified')
-        await message.answer(example_diploma_message, parse_mode="Markdown")
+        await bot.send_photo(chat_id=message.chat.id,
+                             photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                             caption=example_diploma_message, 
+                             parse_mode="Markdown")
         await EducationData.file_diploma.set() 
     else:
         # If the user sends 'Davom etish', prompt them again for the institution name.
@@ -1185,6 +1292,10 @@ async def has_sertificate(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda c: c.data.startswith('type_'), state=EducationData.certificate_type)
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
     certificate_type = callback_query.data.split('type_')[1]
     cert_types = [
             {'id': 1, 'type': 'IELTS'},
@@ -1205,7 +1316,12 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     await EducationData.get_certificate.set()  # Proceed to the next state
     # await message.answer(c)
     await callback_query.message.answer(saved_message, parse_mode="HTML")
-    await callback_query.message.answer(example_certification_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
+    await bot.send_photo(chat_id=callback_query.message.chat.id,
+                            photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                            caption=example_certification_message, 
+                            parse_mode="Markdown",
+                            reply_markup=ReplyKeyboardRemove())
+    # await callback_query.message.answer(example_certification_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
 # await message.answer(example_certification_message) 
 @dp.message_handler(content_types=['document'], state=EducationData.get_certificate)
