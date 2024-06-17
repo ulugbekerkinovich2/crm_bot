@@ -60,7 +60,7 @@ async def get_image(message: types.Message, state: FSMContext):
                 await state.update_data(image=data1['path'])
             except Exception as e:
                 ic(e)
-                await message.reply(f"Error processing file: {str(e)}")
+                await message.reply(f"Xatolik yuz berdi: {str(e)}")
             await message.reply("Rasm qabul qilindi")
             await message.answer("Familiyangizni kiriting\nNamuna: Abdullayev")
             await ManualPersonalInfo.lastname.set()
@@ -110,7 +110,7 @@ async def get_firstname(message: types.Message, state: FSMContext):
         data['firstname'] = message.text.strip()
         first_name = data['firstname']
         await state.update_data(firstname=first_name)
-    await message.answer("Otangizni ismi ismini kiriting\nNamuna: Najmiddin")
+    await message.answer("Otangizni ismini kiriting\nNamuna: Najmiddin")
     await ManualPersonalInfo.thirdname.set()
 
 @dp.message_handler(state=ManualPersonalInfo.thirdname)
@@ -141,7 +141,7 @@ async def get_document(message: types.Message, state: FSMContext):
             await message.answer(error_document)
             
             # Wait for a new user message as a response
-            new_document = await message.answer("Iltimos, passport seriyasini namunadagidek kiriting:")
+            new_document = await message.answer("Iltimos, passport seriyasini namunadagidek kiriting\nNamuna: AB1234567:")
             new_document = await dp.bot.wait_for("message", lambda msg: msg.chat.id == message.chat.id)
             document = new_document.text.strip().upper()
             document_serial = document[:2]
@@ -194,7 +194,7 @@ async def get_pin(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text not in ["Erkak", "Ayol"], state=ManualPersonalInfo.gender)
 async def gender_invalid(message: types.Message):
-    await message.reply("Iltimos, jinsni 'Erkak' yoki 'Ayol' dan birini tanlang.")
+    await message.reply("Iltimos, jinsingizni 'Erkak' yoki 'Ayol' dan birini tanlang.")
 
 @dp.message_handler(lambda message: message.text in ["Erkak", "Ayol"], state=ManualPersonalInfo.gender)
 async def get_gender(message: types.Message, state: FSMContext):
@@ -206,7 +206,7 @@ async def get_gender(message: types.Message, state: FSMContext):
             await state.update_data(gender="male")
         else:
             await state.update_data(gender="female")
-    await message.answer("Tug'ilgan joyini kiriting\nNamuna: Toshkent shahri", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Tug'ilgan joyingizi kiriting Namuna: Toshkent shahri", reply_markup=ReplyKeyboardRemove())
     await ManualPersonalInfo.birthplace.set()
 
 @dp.message_handler(state=ManualPersonalInfo.birthplace)
@@ -219,7 +219,7 @@ async def get_birthplace(message: types.Message, state: FSMContext):
             await message.answer(error_birthplace)
             return
     await state.update_data(birthplace=birth_place)
-    await message.answer("Qo'shimcha telefon raqamingizni kiriting\nNamuna: 901234567")
+    await message.answer("Qo'shimcha telefon raqamingizni kiriting Namuna: 901234567")
     await ManualPersonalInfo.extranumber.set()
 
 @dp.message_handler(state=ManualPersonalInfo.extranumber)
@@ -233,7 +233,7 @@ async def get_extranumber(message: types.Message, state: FSMContext):
             return
     extra_num = f"+998{data['extranumber']}"
     await state.update_data(extranumber=extra_num)
-    await message.answer("Emailingizni kiriting\nNamuna: alisher@gmail.com")
+    await message.answer("Emailingizni kiriting\n Namuna: yigitaliyeva@gmail.com")
     await ManualPersonalInfo.email.set()
 
 @dp.message_handler(state=ManualPersonalInfo.email)
@@ -244,7 +244,7 @@ async def get_email(message: types.Message, state: FSMContext):
     # Logging example: logger.debug(f"Received email: {email}")
     
     if not re.match(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', email, re.IGNORECASE):
-        await message.answer("Email yaroqli emas. Iltimos yaroqli email kiriting")
+        await message.answer("Email yaroqli emas. Iltimos yaroqli email kiriting, Email kichik harflardan tashkil topgan bo'lishi kerak.")
         return  # Ask for the email again or handle differently
     
 

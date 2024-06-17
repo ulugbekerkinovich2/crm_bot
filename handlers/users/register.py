@@ -29,9 +29,9 @@ error_date = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Kiritilgan sana namunadagi
 example_birthday = "Tug\'ilgan kuningingizni kiriting quyidagi formatda\nyyyy-oo-kk\n\nNamuna: 2005-03-21"
 example_phone = "☎️ <b>Telefon raqamingizni yuboring</b>\n<i>Namuna: 998991234567</i>"
 example_extra_phone = 'Siz bilan aloqaga chiqish uchun qo\'shimcha telefon raqam kiriting\n\nNamuna: +998991234567'
-example_transkript_message = "✅ *Transkript nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
-example_diploma_message = "✅ *Diplom, shahodatnoma yoki ma’lumotnoma nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
-example_certification_message = "✅ *Chet tili sertifikat nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf fayllarni yuklang_"
+example_transkript_message = "✅ *Transkript nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf faylni yuklang_"
+example_diploma_message = "✅ *Diplom, shahodatnoma yoki ma’lumotnoma nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf faylni yuklang_"
+example_certification_message = "✅ *Chet tili sertifikat nusxasini yuboring* \n(_Hajmi 5 MB dan katta bo'lmagan, .png, .jpg, .jpeg, .pdf faylni yuklang_"
 accepted_phone = "🟢 <b>Telefon raqamingiz qabul qilindi.</b> Telefon raqamingizga yuborilgan kodni kiriting"
 accepted_birthday_saved_data = '🟢Tu\'gilgan kuningiz qabul qilindi. Ma\'lumotlaringiz muvaffaqiyatli saqlandi.'
 error_message_phone = "🔴Telefon raqam no\'to\'g\'ri kiritildi, Namunadagidek raqam kiriting!"
@@ -755,9 +755,11 @@ async def education_id_handler(message: types.Message, state: FSMContext, page: 
 @dp.message_handler(state=EducationData.country_search)
 async def process_country_search(message: types.Message, state: FSMContext):
     user_query = message.text.lower()
+    if 'zbekiston' in user_query.lower() or 'zbekistan' in user_query.lower():
+        user_query = 'O`zbekiston'
     token = (await state.get_data()).get('token')
     all_countries = await send_req.countries(token)  # Ensure this is an async call to your backend/API
-
+    ic('all_countries', all_countries)
     matching_countries = [country for country in all_countries if user_query in country['name_uz'].lower()]
     
     if not matching_countries:
