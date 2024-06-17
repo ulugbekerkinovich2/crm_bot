@@ -281,7 +281,7 @@ async def get_email(message: types.Message, state: FSMContext):
     ic('django')
     ic(id_user, email, chat_id_user,firstname, lastname)
     # try: 
-    update_user_profile_response = send_req.update_user_profile(id=message.chat.id, chat_id=chat_id_user, phone=phone, first_name=firstname, last_name=lastname, pin=pinfl)
+    update_user_profile_response = send_req.update_user_profile(UNIVERSITY_ID=UNIVERSITY_ID, chat_id=chat_id_user, phone=phone, first_name=firstname, last_name=lastname, pin=pinfl)
     ic(update_user_profile_response)
     # except Exception as e:
     #     ic(490,'my_dj_error', e)
