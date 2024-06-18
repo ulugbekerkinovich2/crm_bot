@@ -484,8 +484,8 @@ async def birth_date(message: types.Message, state: FSMContext):
         return
 
     year, month, day = map(int, birth_date_parts)
-    # print(day, month, year)
-    if not (1 <= day <= 31 and 1 <= month <= 12 and 2024 > year > 1800):
+    ic(day, month, year)
+    if not ((1 <= day <= 31) and (1 <= month <= 12) and (2010 > year > 1800)):
         await message.answer(error_date)
         return
     
@@ -823,8 +823,14 @@ async def handle_callback_query_dir(callback_query: types.CallbackQuery, state: 
     # await callback_query.message.answer()
 
 
-@dp.message_handler(content_types=['document', 'photo'], state=EducationData.file_diploma_transkript)
-async def upload_file(message: types.Message, state: FSMContext):
+@dp.message_handler(content_types=[types.ContentType.PHOTO, types.ContentType.DOCUMENT], state=EducationData.file_diploma_transkript)
+async def upload_file1(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN
+    import aiofiles
+    import os
+    
+    bot = Bot(token=BOT_TOKEN)
     ic(820, message)
     if message.document:
         document = message.document
@@ -906,8 +912,14 @@ async def upload_file(message: types.Message, state: FSMContext):
         await state.update_data(src=src_res)
     await EducationData.degree_id.set()
     
-@dp.message_handler(content_types=ContentType.PHOTO, state=EducationData.file_diploma_transkript)
-async def upload_file(message: types.Message, state: FSMContext):
+@dp.message_handler(content_types=types.ContentType.PHOTO, state=EducationData.file_diploma_transkript)
+async def upload_file2(message: types.Message, state: FSMContext):
+    from aiogram import Bot
+    from data.config import BOT_TOKEN
+    import aiofiles
+    import os
+    
+    bot = Bot(token=BOT_TOKEN)
     ic(903, message)
     if message.document:
         document = message.document
@@ -918,7 +930,7 @@ async def upload_file(message: types.Message, state: FSMContext):
         photo = message.photo[-1]
         file_id = photo.file_id
         file_name = f"{file_id}.jpg"
-        ic(file_name, photo)
+        ic(927, file_name, photo)
     
     ic(file_name)
     
@@ -990,7 +1002,7 @@ async def upload_file(message: types.Message, state: FSMContext):
     await EducationData.degree_id.set()
 
 @dp.message_handler(content_types=['document'], state=EducationData.file_diploma_transkript)
-async def upload_file(message: types.Message, state: FSMContext):
+async def upload_file3(message: types.Message, state: FSMContext):
     ic(986, message)
     ic(message.document.file_name)
     from aiogram import Bot, Dispatcher
@@ -1186,7 +1198,7 @@ async def type_institution_name_handler(message: types.Message, state: FSMContex
         await message.answer(error_type_edu_name, reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Davom etish')))
 
 @dp.message_handler(content_types=['document'], state=EducationData.file_diploma)
-async def upload_file(message: types.Message, state: FSMContext):
+async def upload_file4(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
     bot = Bot(token=BOT_TOKEN)
@@ -1217,7 +1229,7 @@ async def upload_file(message: types.Message, state: FSMContext):
         file_size_mb = file_size_kb / 1024
         # print(f'size: {file_size_mb:.2f}')
     except: 
-        return 'File not found'
+        return 'Fayl topilmadi'
     await state.update_data(file_size=file_size)
     await message.answer("Fayl yuklandi.")
     
