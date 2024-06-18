@@ -832,6 +832,29 @@ async def upload_file1(message: types.Message, state: FSMContext):
     
     bot = Bot(token=BOT_TOKEN)
     ic(820, message)
+    if message.photo:
+        try:
+            largest_photo = message.photo[-1]  # Get the largest resolution of the photo
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(data1)
+                await state.update_data(image=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Xatolik yuz berdi: {str(e)}")
+        except Exception as e:
+            await message.reply("Rasmni qayta yuboring.")
     if message.document:
         document = message.document
         file_id = document.file_id
@@ -921,6 +944,29 @@ async def upload_file2(message: types.Message, state: FSMContext):
     
     bot = Bot(token=BOT_TOKEN)
     ic(903, message)
+    if message.photo:
+        try:
+            largest_photo = message.photo[-1]  # Get the largest resolution of the photo
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(data1)
+                await state.update_data(image=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Xatolik yuz berdi: {str(e)}")
+        except Exception as e:
+            await message.reply("Rasmni qayta yuboring.")
     if message.document:
         document = message.document
         file_id = document.file_id
@@ -1001,7 +1047,7 @@ async def upload_file2(message: types.Message, state: FSMContext):
         await state.update_data(src=src_res)
     await EducationData.degree_id.set()
 
-@dp.message_handler(content_types=['document'], state=EducationData.file_diploma_transkript)
+@dp.message_handler(content_types=['document', 'photo'], state=EducationData.file_diploma_transkript)
 async def upload_file3(message: types.Message, state: FSMContext):
     ic(986, message)
     ic(message.document.file_name)
@@ -1014,7 +1060,29 @@ async def upload_file3(message: types.Message, state: FSMContext):
     ic(data)
     token_id = data['token']
     ic(token_id)
-    
+    if message.photo:
+        try:
+            largest_photo = message.photo[-1]  # Get the largest resolution of the photo
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(data1)
+                await state.update_data(image=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Xatolik yuz berdi: {str(e)}")
+        except Exception as e:
+            await message.reply("Rasmni qayta yuboring.")
     token_ = data.get('token') if data.get('token') else None
 
     document = message.document
@@ -1039,7 +1107,7 @@ async def upload_file3(message: types.Message, state: FSMContext):
         file_size_mb = file_size_kb / 1024
         ic(f'size: {file_size_mb:.2f}')
     except: 
-        return 'File not found'
+        return 'Fayl topilmadi'
     await state.update_data(file_size=file_size)
     await message.answer("Fayl yuklandi.")
     
@@ -1197,57 +1265,87 @@ async def type_institution_name_handler(message: types.Message, state: FSMContex
         # If the user sends 'Davom etish', prompt them again for the institution name.
         await message.answer(error_type_edu_name, reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Davom etish')))
 
-@dp.message_handler(content_types=['document'], state=EducationData.file_diploma)
+@dp.message_handler(content_types=['document', 'photo'], state=EducationData.file_diploma)
 async def upload_file4(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(bot) 
+    if message.photo:
+        try:
+            data = await state.get_data()
+            token_ = data['token'] if data['token'] else None
+            largest_photo = message.photo[-1] 
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            download_dir = 'diploma_files'
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(1290, data1)
+                await state.update_data(file_diploma=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Xatolik yuz berdi: {str(e)}")
+            await message.reply("Rasm qabul qilindi")
+            src_ = 'src' 
+            src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+            if src_res is not None or src_res is not False:
+                await state.update_data(src=src_res)
+        except Exception as e:
+            await message.reply("Rasmni qaytadan yuboring")
+    if not message.photo:
+        data = await state.get_data()
+        token_ = data['token'] if data['token'] else None
 
-    data = await state.get_data()
-    token_ = data['token'] if data['token'] else None
+        document = message.document
+        file_path = await bot.get_file(document.file_id)
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+        # ic(file_url)
+        # await message.answer(file_url)
+        download_dir = 'diploma_files'
+        await aiofiles.os.makedirs(download_dir, exist_ok=True)
 
-    document = message.document
-    file_path = await bot.get_file(document.file_id)
-    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
-    # ic(file_url)
-    # await message.answer(file_url)
-    download_dir = 'diploma_files'
-    await aiofiles.os.makedirs(download_dir, exist_ok=True)
+        local_file_path = os.path.join(download_dir, document.file_name)
+        # print(local_file_path)
+        await send_req.download_file(file_url, local_file_path)
+        await message.answer(wait_file_is_loading, parse_mode='HTML')
+        # ic(local_file_path)
 
-    local_file_path = os.path.join(download_dir, document.file_name)
-    # print(local_file_path)
-    await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading, parse_mode='HTML')
-    # ic(local_file_path)
-
-    res_file = upload.upload_new_file(token=token_, filename=local_file_path)
-    # if file_size != 'File not found':
-    try:
-        file_size = os.path.getsize(local_file_path)
-        file_size_kb = file_size / 1024
-        file_size_mb = file_size_kb / 1024
-        # print(f'size: {file_size_mb:.2f}')
-    except: 
-        return 'Fayl topilmadi'
-    await state.update_data(file_size=file_size)
-    await message.answer("Fayl yuklandi.")
+        res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+        # if file_size != 'File not found':
+        try:
+            file_size = os.path.getsize(local_file_path)
+            file_size_kb = file_size / 1024
+            file_size_mb = file_size_kb / 1024
+            # print(f'size: {file_size_mb:.2f}')
+        except: 
+            return 'Fayl topilmadi'
+        await state.update_data(file_size=file_size)
+        await message.answer("Fayl yuklandi.")
     
     # ic(all_state)
     # print(res_file.status_code)
     # print(res_file)
-    try:
-        data1 = res_file.json()
-        ic(data1['path'])
-        await state.update_data(file_diploma=data1['path'])
-    except Exception as e:
-        return e
+        try:
+            data1 = res_file.json()
+            ic(data1['path'])
+            await state.update_data(file_diploma=data1['path'])
+        except Exception as e:
+            return e
     
 
-    src_ = 'src' 
-    src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
-    if src_res is not None or src_res is not False:
-        await state.update_data(src=src_res)
+        src_ = 'src' 
+        src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+        if src_res is not None or src_res is not False:
+            await state.update_data(src=src_res)
     
 
 
@@ -1338,61 +1436,96 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     # await callback_query.message.answer(example_certification_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
 # await message.answer(example_certification_message) 
-@dp.message_handler(content_types=['document'], state=EducationData.get_certificate)
+@dp.message_handler(content_types=['document', 'photo'], state=EducationData.get_certificate)
 async def get_sertificate(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
-    from data.config import BOT_TOKEN
+    from data.config import BOT_TOKEN 
     bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot)
-    
-    data = await state.get_data()
-    token_ = data['token'] if data['token'] else None
+    dp = Dispatcher(bot) 
+    if message.photo:
+        try:
+            data = await state.get_data()
+            token_ = data['token'] if data['token'] else None
+            largest_photo = message.photo[-1] 
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            download_dir = 'diploma_files'
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(1290, data1)
+                await state.update_data(file_size_sertificate=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Xatolik yuz berdi: {str(e)}")
+            await message.reply("Rasm qabul qilindi")
+            src_ = 'src' 
+            src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+            if src_res is not None or src_res is not False:
+                await state.update_data(src=src_res)
+        except Exception as e:
+            await message.reply("Rasmni qaytadan yuboring")
+    if not message.photo:
+        from aiogram import Bot, Dispatcher
+        from data.config import BOT_TOKEN
+        bot = Bot(token=BOT_TOKEN)
+        dp = Dispatcher(bot)
+        
+        data = await state.get_data()
+        token_ = data['token'] if data['token'] else None
 
-    document = message.document
-    file_path = await bot.get_file(document.file_id)
-    ic(file_path)
-    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
-    download_dir = 'sertificate_files'
-    # await message.answer(file_url)
-    await aiofiles.os.makedirs(download_dir, exist_ok=True)
+        document = message.document
+        file_path = await bot.get_file(document.file_id)
+        ic(file_path)
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+        download_dir = 'sertificate_files'
+        # await message.answer(file_url)
+        await aiofiles.os.makedirs(download_dir, exist_ok=True)
 
-    local_file_path = os.path.join(download_dir, document.file_name)
-    ic(local_file_path)
-    await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
-    # ic(local_file_path)
+        local_file_path = os.path.join(download_dir, document.file_name)
+        ic(local_file_path)
+        await send_req.download_file(file_url, local_file_path)
+        await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
+        # ic(local_file_path)
 
-    res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
-    ic(731, res_file)
-    try:
-        file_size = os.path.getsize(local_file_path)
-        file_size_kb = file_size / 1024
-        file_size_mb = file_size_kb / 1024
-        ic(f'size: {file_size_mb:.2f}')
-    except:
-        return 'File not found'
-    await state.update_data(file_size_sertificate=file_size)
-    # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
-    # await EducationData.has_application.set()
-    # ic(all_state)
-    ic(res_file.status_code)
-    ic(res_file)
-    data_user = await state.get_data()
-    certificate_type = data_user['certificate_type']
-    ic(certificate_type)
-    data1 = res_file.json()
-    ic(747, data1)
-    await state.update_data(file_sertificate=data1['path'])
-    ic(token_)
-    ic(data1['path'])
-    try:
-        res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
-        ic(751, res)
-    except Exception as e:
-        await message.answer(f"Xatolik: {e}")
-        return
+        res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
+        ic(731, res_file)
+        try:
+            file_size = os.path.getsize(local_file_path)
+            file_size_kb = file_size / 1024
+            file_size_mb = file_size_kb / 1024
+            ic(f'size: {file_size_mb:.2f}')
+        except:
+            return 'File not found'
+        await state.update_data(file_size_sertificate=file_size)
+        # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
+        # await EducationData.has_application.set()
+        # ic(all_state)
+        ic(res_file.status_code)
+        ic(res_file)
+        data_user = await state.get_data()
+        certificate_type = data_user['certificate_type']
+        ic(certificate_type)
+        data1 = res_file.json()
+        ic(747, data1)
+        await state.update_data(file_sertificate=data1['path'])
+        ic(token_)
+        ic(data1['path'])
+        try:
+            res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
+            ic(751, res)
+        except Exception as e:
+            await message.answer(f"Xatolik: {e}")
+            return
 
-    await message.answer("Fayl yuklandi.")
+        await message.answer("Fayl yuklandi.")
     ic('boshlandi1')
     await EducationData.degree_id.set()
     ic('yakunlandi')

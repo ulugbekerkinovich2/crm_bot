@@ -148,4 +148,7 @@ async def bot_start(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Text(equals='/admin'), state='*')
 async def admin_command(message: types.Message):
-    await message.answer("Assalomu aleykum, qo'llab quvvatlash hizmati bot yuzasidan texnik yordam va hujjat topshirish bo'yicha yordam beriladi. Adminga murojat qiling: https://t.me/universittet_qabul_admin_bot")
+    await message.answer("Assalomu alaykum,\n\n"
+"Qo'llab-quvvatlash xizmati boti orqali texnik yordam va hujjat topshirishda yordam olishingiz mumkin. Qo\'shimcha ma\'lumot uchun administratorga murojaat qiling: <a href='https://t.me/universittet_qabul_admin_bot'>Admin</a>"
+, parse_mode='HTML')
+    
