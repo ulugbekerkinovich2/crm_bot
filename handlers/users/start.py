@@ -143,3 +143,9 @@ async def bot_start(message: types.Message, state: FSMContext):
     start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
     await message.answer("Bot qayta ishga tushdi",reply_markup=start_keyboard)
     await state.finish()
+
+
+
+@dp.message_handler(Text(equals='/admin'), state='*')
+async def admin_command(message: types.Message):
+    await message.answer("Assalomu aleykum, qo'llab quvvatlash hizmati bot yuzasidan texnik yordam va hujjat topshirish bo'yicha yordam beriladi. Adminga murojat qiling: https://t.me/universittet_qabul_admin_bot")
