@@ -469,6 +469,11 @@ async def document(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=PersonalData.birth_date)
 async def birth_date(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    import logging,asyncio
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
     ic('birth date')
     birth_date = message.text.strip()
     # Check if the birth date format is valid
@@ -493,16 +498,52 @@ async def birth_date(message: types.Message, state: FSMContext):
     data_state = await state.get_data()
     token = data_state.get('token')
     document = data_state.get('document')
-    ic('birth_date', birth_date)
-    ic("document", document)
-    await message.answer("<b>Sizni ma'lumotlaringizni ma'lumotlar omboridan izlamoqdaman 75 soniyagacha vaqt olishi mumkin.\nIltimos kutib turing...</b>", parse_mode="HTML")
-    check_is_not_duplicate = await send_req.application_form_info(birth_date, document, token)
+    birth_date = data_state.get('birth_date')
+
+    logging.info(f'birth_date: {birth_date}')
+    logging.info(f'document: {document}')
+
+    # Inform the user that the bot is processing their request
+    await message.answer("<b>Ma'lumotlaringizni ma'lumotlar omboridan izlamoqdaman 90 soniyagacha vaqt olishi mumkin.</b>", parse_mode="HTML")
+    msg = await message.reply("Iltimos kuting...")
+
+    # Perform the data check concurrently with the timer
+    check_is_not_duplicate_future = asyncio.create_task(send_req.application_form_info(birth_date, document, token))
+
+    # Start 90-second timer
+    for i in range(90, 0, -1):
+        await asyncio.sleep(1)
+        
+        # Check if the data check is complete and its status code
+        if check_is_not_duplicate_future.done():
+            check_is_not_duplicate = await check_is_not_duplicate_future
+            if check_is_not_duplicate.get('status_code') == 504 or check_is_not_duplicate.get('status_code') == 404 or check_is_not_duplicate.get('status_code') == 400:
+                break
+
+        # Update the message with the remaining time
+        try:
+            await bot.edit_message_text(f"<i>Qoldi vaqt: {i} sekund</i>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="HTML")
+        except Exception as e:
+            logging.error(f"Xatolik yuz berdi: {e}")
+
+    # Notify user when timer is done
+    await bot.edit_message_text("vaqt tugadi!", chat_id=msg.chat.id, message_id=msg.message_id)
+
+    # Retrieve the result of the data check if not already done
+    if not check_is_not_duplicate_future.done():
+        check_is_not_duplicate = await check_is_not_duplicate_future
+
+    
+    
     ic(check_is_not_duplicate)
 
-    if check_is_not_duplicate.get('status_code') in [500,404,400,504]:
+    ic(check_is_not_duplicate.get('status_code'), type(check_is_not_duplicate.get('status_code')))
+    status_code_ = check_is_not_duplicate.get('status_code')
+    ic(473)
+    if status_code_ in [500,404,400,504]:
         await message.answer(server_error, reply_markup=enter_button)
         await ManualPersonalInfo.personal_info.set()
-    elif check_is_not_duplicate.get('status_code') == 409:
+    elif status_code_ == 409:
         error_mes = check_is_not_duplicate.get('data')
         start_button = KeyboardButton('/start')  # The text on the button
         start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
