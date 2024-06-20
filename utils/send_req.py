@@ -117,11 +117,11 @@ async def application_form_info(birth_date, document, token):
         async with session.post(url, headers=default_header, json=body) as response:
             ic(response.status, 'info')
             ic(111, response)
-            json_data = await response.json() 
+            # json_data = await response.json() 
             if response.status == 200:
-                return {'data': json_data, 'status_code': response.status} 
+                return {'data': response.json() , 'status_code': response.status} 
             else:
-                return {'error': "Failed to verify", 'status_code': response.status, 'data': json_data}
+                return {'error': "Failed to verify", 'status_code': response.status, 'data': response}
                 # response = requests.post(url, json=body, headers=default_header)
     # pprint(response.json())
     # return response
@@ -202,7 +202,7 @@ async def directions(token):
                 # Handling errors by returning a simple error message or dict
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-async def applicants(token, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None):
+async def applicants(token,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None):
     url = f"https://{host}/v1/applicants"
     headers = default_header.copy()
     headers['Authorization'] = f'Bearer {token}'
@@ -211,7 +211,8 @@ async def applicants(token, degree_id, direction_id, education_language_id, educ
         'direction_id': direction_id,
         'education_language_id': education_language_id,
         'education_type_id': education_type_id,
-        'work_experience_document': work_experience_document
+        'work_experience_document': work_experience_document,
+        'bot_user_id': chat_id_user
     }
     # ic(body)
     # response = requests.post(url, json=body, headers=default_header)

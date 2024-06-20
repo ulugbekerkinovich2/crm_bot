@@ -74,7 +74,7 @@ select_type_certificate_ru = "Выберите тип сертификата:"
 # select_country = "Ta’lim dargohi joylashgan davlatni tanlang:"
 select_country_ru = "Выберите страну, в которой находится учебное заведение:"
 # type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: 12-maktab"
-type_your_edu_name_ru = "Введите название школы:\nПример: 12-я школа."
+type_your_edu_name_ru = "Введите название учебного заведения:\nПример: 12-я школа."
 # wait_file_is_loading = "<b>Kuting, fayl yuklanmoqda.</b>"
 wait_file_is_loading_ru = "<b>Подождите, файл загружается.</b>"
 # retype_secret_code = "Tasdiqlash kodini qayta kiriting"
@@ -372,13 +372,13 @@ async def secret_code(message: types.Message, state: FSMContext):
                 await message.answer("<i>- ✅Вы зарегистрированы.\n🔴Вам необходимо заполнить информацию о своем образовании</i>",reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
                 ic('002')
-                await PersonalDataRU.education_id.set()
+                await EducationDataRU.education_id.set()
 
             elif haveApplicationForm is True and (haveEducation is True and havePreviousEducation is False) and haveApplied is False:
                 await message.answer("<i>- ✅ Вы зарегистрированы.\n- ✅ Также заполнена информация о вашем образовании.\n\nВы можете подать заявление в университет</i>", reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=True,havePreviousEducation=False,haveApplied=False)
                 ic('keldi 003')
-                await PersonalDataRU.degree_id.set()
+                await EducationDataRU.degree_id.set()
 
             elif haveApplicationForm is True and (haveEducation is False and havePreviousEducation is True) and haveApplied is False:
                 await message.answer("<i>- ✅ Вы зарегистрированы.\n- ✅ Также заполнена информация о вашем образовании.\n\nВы можете подать заявление в университет</i>", reply_markup=enter_button)
@@ -468,14 +468,22 @@ async def birth_date(message: types.Message, state: FSMContext):
     
     check_is_not_duplicate = await send_req.application_form_info(birth_date, document, token)
     ic(check_is_not_duplicate)
-
-    if check_is_not_duplicate.get('status_code') in [500,404,400]:
+    ic(check_is_not_duplicate.get('status_code'), type(check_is_not_duplicate.get('status_code')))
+    status_code_ = check_is_not_duplicate.get('status_code')
+    ic(473)
+    if int(status_code_) in [500,404,400]:
+        ic(475)
         await message.answer(server_error_ru, reply_markup=enter_button_ru)
-        await ManualPersonalInfo.personal_info.set()
-    elif check_is_not_duplicate.get('status_code') == 409:
+        await ManualPersonalInfoRU.personal_info.set()
+    elif int(status_code_) == 409:
+        ic(479)
         error_mes = check_is_not_duplicate.get('data')
-        
         await message.answer(f"🔴 {error_mes.get('message')}")
+    elif int(status_code_) == 404:
+        ic(483)
+        await message.answer(server_error_ru, reply_markup=enter_button_ru)
+        await ManualPersonalInfoRU.personal_info.set()
+
     # data_res = check_is_not_duplicate['data']
     # ic(check_is_not_duplicate)
     # if check_is_not_duplicate.get('status_code') == 409 or check_is_not_duplicate.get('status_code') == 401 or check_is_not_duplicate.get('status_code') == 400:
@@ -483,6 +491,7 @@ async def birth_date(message: types.Message, state: FSMContext):
     #     await message.answer(f"🔴 {error_mes}")
     #     await state.finish()
     elif check_is_not_duplicate.get('status_code') == 200:
+        ic(486)
         await state.update_data(birth_date=birth_date)
         await message.answer(accepted_birthday_saved_data_ru)
         formatted_birth_date = f'{year}-{month}-{day}'
@@ -779,12 +788,22 @@ async def transfer_direction_name_handler(message: types.Message, state: FSMCont
 
 @dp.callback_query_handler(lambda c: c.data.isdigit(), state=EducationDataRU.transfer_direction_name)  # Ensures that only digit callback_data is processed here
 async def handle_callback_query_dir(callback_query: types.CallbackQuery, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot)
     selected_course = callback_query.data
     ic(selected_course)
     await callback_query.answer()
     await state.update_data(selected_course=selected_course)
-    await callback_query.message.answer(example_transkript_message_ru, reply_markup=ReplyKeyboardRemove())
+    await bot.send_photo(chat_id=callback_query.message.chat.id,
+                            photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                            caption=example_transkript_message_ru, 
+                            parse_mode="Markdown",
+                            reply_markup=ReplyKeyboardRemove())
+    
     await EducationDataRU.file_diploma_transkript.set()
+    # await callback_query.message.answer(example_transkript_message_ru, reply_markup=ReplyKeyboardRemove())
     # await callback_query.message.answer()
 
 @dp.message_handler(content_types=['document'], state=EducationDataRU.file_diploma_transkript)
@@ -958,6 +977,10 @@ async def district_selection_handler(callback_query: types.CallbackQuery, state:
 
 @dp.message_handler(state=EducationDataRU.institution_name)
 async def type_institution_name_handler(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
     institution_name = message.text.strip()
 
     if institution_name.lower() != 'Продолжить':
@@ -967,7 +990,11 @@ async def type_institution_name_handler(message: types.Message, state: FSMContex
         # Example to conclude:
         data = await state.get_data()
         institution_name = data.get('institution_name', 'Не указан')
-        await message.answer(example_diploma_message_ru, parse_mode="Markdown")
+        await bot.send_photo(chat_id=message.chat.id,
+                        photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                        caption=example_diploma_message_ru, 
+                        parse_mode="Markdown")
+        # await message.answer(example_diploma_message_ru, parse_mode="Markdown")12312323
         await EducationDataRU.file_diploma.set() 
     else:
         # If the user sends 'Davom etish', prompt them again for the institution name.
@@ -1053,7 +1080,10 @@ async def upload_file(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=EducationDataRU.has_sertificate)
 async def has_sertificate(message: types.Message, state: FSMContext):
-
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
     text = message.text
     if text == "Да, есть":
         cert_types = [
@@ -1068,8 +1098,12 @@ async def has_sertificate(message: types.Message, state: FSMContext):
         buttons = [[InlineKeyboardButton(text=item['type'], 
                                         callback_data=f"type_{item['id']}") for item in cert_types]]
         certTypeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-
-        await message.answer(select_type_certificate_ru, reply_markup=certTypeMenu)
+        await message.bot.send_photo(chat_id=message.chat.id,
+                                photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                                caption=select_type_certificate_ru, 
+                                parse_mode="Markdown",
+                                reply_markup=certTypeMenu)
+        # await message.answer(select_type_certificate_ru, reply_markup=certTypeMenu)
         await EducationDataRU.certificate_type.set()
 
 
@@ -1484,8 +1518,8 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     education_language_id = int(new_state_data.get('education_lang_id'))
     education_type_id = int(new_state_data.get('education_type'))
     token_ = new_state_data.get('token')
-
-    applicant = await send_req.applicants(token_, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None)
+    chat_id_user = new_state_data.get('chat_id_user', None)
+    applicant = await send_req.applicants(token_,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None)
     # ic(applicant)
     
     if applicant is not None:

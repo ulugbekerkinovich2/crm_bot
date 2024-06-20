@@ -456,7 +456,7 @@ async def document(message: types.Message, state: FSMContext):
         await message.answer(error_document)
         
         # Wait for a new user message as a response
-        new_document = await message.answer("Please enter a valid document:")
+        new_document = await message.answer("Passport seriyasini namunadagidek kiriting\nNamuna: AB1234567:")
         document = (await dp.bot.wait_for("message")).text.strip().upper()
         document_serial = document[:2]
         document_number = document[2:]
@@ -495,20 +495,20 @@ async def birth_date(message: types.Message, state: FSMContext):
     document = data_state.get('document')
     ic('birth_date', birth_date)
     ic("document", document)
-    
+    await message.answer("<b>Sizni ma'lumotlaringizni ma'lumotlar omboridan izlamoqdaman 75 soniyagacha vaqt olishi mumkin.\nIltimos kutib turing...</b>", parse_mode="HTML")
     check_is_not_duplicate = await send_req.application_form_info(birth_date, document, token)
     ic(check_is_not_duplicate)
 
-    if check_is_not_duplicate.get('status_code') in [500,404,400]:
+    if check_is_not_duplicate.get('status_code') in [500,404,400,504]:
         await message.answer(server_error, reply_markup=enter_button)
         await ManualPersonalInfo.personal_info.set()
     elif check_is_not_duplicate.get('status_code') == 409:
         error_mes = check_is_not_duplicate.get('data')
         start_button = KeyboardButton('/start')  # The text on the button
         start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
-        await state.finish()
+        
         await message.answer(f"🔴 {error_mes.get('message')}",reply_markup=start_keyboard)
-
+        await state.finish()
 
     # data_res = check_is_not_duplicate['data']
     # ic(check_is_not_duplicate)
@@ -2152,7 +2152,8 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     education_type_id = int(new_state_data.get('education_type'))
     token_ = new_state_data.get('token')
     file_work_experience = new_state_data.get('file_certificate', None)
-    applicant = await send_req.applicants(token_, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=file_work_experience)
+    chat_id_user = new_state_data.get('chat_id_user', None)
+    applicant = await send_req.applicants(token_,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=file_work_experience)
     
     if applicant is not None:
         await callback_query.message.answer(application_submited, reply_markup=menu)
