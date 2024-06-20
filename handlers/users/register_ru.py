@@ -1553,6 +1553,7 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     education_type_id = int(new_state_data.get('education_type'))
     token_ = new_state_data.get('token')
     chat_id_user = new_state_data.get('chat_id_user', None)
+    ic(chat_id_user)
     applicant = await send_req.applicants(token_,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None)
     # ic(applicant)
     
