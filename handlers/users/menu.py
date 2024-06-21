@@ -140,16 +140,18 @@ async def my_menu(message: Message, state: FSMContext):
         )
 
         check_exam = await send_req.my_applications(token)
-        exam = check_exam.get('exam', None)
-        exam_result = None
-        if exam != {}:
-            ic(exam, 111)
-            exam_result = exam['exam_result']
+        ic(check_exam)
+        if check_exam != '':
+            exam = check_exam.get('exam', None)
+            exam_result = None
+            if exam != {}:
+                ic(exam, 111)
+                exam_result = exam['exam_result']
 
-        if exam_result is not None:
-            await message.answer_photo(photo, caption=info_message, reply_markup=menu_full, parse_mode="HTML")
-        else:
-            await message.answer_photo(photo, caption=info_message, reply_markup=menu, parse_mode="HTML")
+            if exam_result is not None:
+                await message.answer_photo(photo, caption=info_message, reply_markup=menu_full, parse_mode="HTML")
+            else:
+                await message.answer_photo(photo, caption=info_message, reply_markup=menu, parse_mode="HTML")
     else:
         await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 

@@ -212,14 +212,16 @@ async def applicants(token,chat_id_user, degree_id, direction_id, education_lang
         'education_language_id': education_language_id,
         'education_type_id': education_type_id,
         'work_experience_document': work_experience_document,
-        'bot_user_id': chat_id_user
+        'bot_user_id': str(chat_id_user),
+        'is_second_specialty': False,
+        'is_transfer_student': False
     }
-    # ic(body)
+    ic(body)
     # response = requests.post(url, json=body, headers=default_header)
     # return response
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, json=body) as response:
-            # ic(173, response.status, response.)
+            ic(173, response.status, response.text)
             if response.status == 201:
                 data = await response.json()  # Read and parse the JSON response
                 return data
@@ -257,11 +259,16 @@ async def my_applications(token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
-                data = await response.json()  # Read and parse the JSON response
+                content_type = response.headers.get('Content-Type', '')
+                if 'application/json' in content_type:
+                    data = await response.json()  # Read and parse the JSON response
+                else:
+                    data = await response.text()  # Read the response as text
                 return data
             else:
                 # Handling errors by returning a simple error message or dict
-                return {'error': 'Failed to fetch data', 'status_code': response.status}    
+                return {'error': 'Failed to fetch data', 'status_code': response.status, 'details': await response.text()}
+ 
 
 def reset_password(phone, token):
     url = f"https://{host}/v1/auth/resend-verify-code"

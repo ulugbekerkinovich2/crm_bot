@@ -431,6 +431,7 @@ async def secret_code(message: types.Message, state: FSMContext):
             await message.answer(error_secret_code)
             response_msg = await dp.bot.send_message(message.chat.id, retype_secret_code)
             response = await dp.bot.wait_for("message")
+            ic(response.text)
     else:
         await message.answer(error_secret_code)
 
@@ -2194,9 +2195,10 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     token_ = new_state_data.get('token')
     file_work_experience = new_state_data.get('file_certificate', None)
     chat_id_user = callback_query.message.chat.id
+    is_second_specialty = False
     ic(chat_id_user)
     applicant = await send_req.applicants(token_,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=file_work_experience)
-    
+    ic(applicant)
     if applicant is not None:
         await callback_query.message.answer(application_submited, reply_markup=menu)
         await EducationData.menu.set()
