@@ -766,6 +766,11 @@ async def education_id_handler(message: types.Message, state: FSMContext, page: 
 @dp.message_handler(state=EducationDataRU.country_search)
 async def process_country_search(message: types.Message, state: FSMContext):
     user_query = message.text.lower()
+    variants = {'zbekiston', 'zbekistan', 'Узбекистан', 'uzbekiston', 'Узбекистан'}
+
+    if any(variant.lower() in user_query.lower() for variant in variants):
+        user_query = 'O`zbekiston'
+
     token = (await state.get_data()).get('token')
     all_countries = await send_req.countries(token)  # Ensure this is an async call to your backend/API
 
@@ -1034,57 +1039,87 @@ async def type_institution_name_handler(message: types.Message, state: FSMContex
         # If the user sends 'Davom etish', prompt them again for the institution name.
         await message.answer(error_type_edu_name_ru, reply_markup=enter_button_ru)
 
-@dp.message_handler(content_types=['document'], state=EducationDataRU.file_diploma)
+@dp.message_handler(content_types=['document','photo'], state=EducationDataRU.file_diploma)
 async def upload_file(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(bot) 
+    if message.photo:
+        try:
+            data = await state.get_data()
+            token_ = data['token'] if data['token'] else None
+            largest_photo = message.photo[-1] 
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            download_dir = 'diploma_files'
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(1290, data1)
+                await state.update_data(file_diploma=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Произошла ошибка: {str(e)}")
+            await message.reply("Изображение принято")
+            src_ = 'src' 
+            src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+            if src_res is not None or src_res is not False:
+                await state.update_data(src=src_res)
+        except Exception as e:
+            await message.reply("Отправить изображение повторно")
+    if not message.photo:
+        data = await state.get_data()
+        token_ = data['token'] if data['token'] else None
 
-    data = await state.get_data()
-    token_ = data['token'] if data['token'] else None
+        document = message.document
+        file_path = await bot.get_file(document.file_id)
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+        # ic(file_url)
+        # await message.answer(file_url)
+        download_dir = 'diploma_files'
+        await aiofiles.os.makedirs(download_dir, exist_ok=True)
 
-    document = message.document
-    file_path = await bot.get_file(document.file_id)
-    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
-    # ic(file_url)
-    # await message.answer(file_url)
-    download_dir = 'diploma_files'
-    await aiofiles.os.makedirs(download_dir, exist_ok=True)
+        local_file_path = os.path.join(download_dir, document.file_name)
+        # print(local_file_path)
+        await send_req.download_file(file_url, local_file_path)
+        await message.answer(wait_file_is_loading_ru, parse_mode='HTML')
+        # ic(local_file_path)
 
-    local_file_path = os.path.join(download_dir, document.file_name)
-    # print(local_file_path)
-    await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading_ru, parse_mode='HTML')
-    # ic(local_file_path)
-
-    res_file = upload.upload_new_file(token=token_, filename=local_file_path)
-    # if file_size != 'File not found':
-    try:
-        file_size = os.path.getsize(local_file_path)
-        file_size_kb = file_size / 1024
-        file_size_mb = file_size_kb / 1024
-        # print(f'size: {file_size_mb:.2f}')
-    except: 
-        return 'Файл не найден'
-    await state.update_data(file_size=file_size)
-    await message.answer("Файл загружен.")
+        res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+        # if file_size != 'File not found':
+        try:
+            file_size = os.path.getsize(local_file_path)
+            file_size_kb = file_size / 1024
+            file_size_mb = file_size_kb / 1024
+            # print(f'size: {file_size_mb:.2f}')
+        except: 
+            return 'файл не найден'
+        await state.update_data(file_size=file_size)
+        await message.answer("Файл загружен.")
     
     # ic(all_state)
     # print(res_file.status_code)
     # print(res_file)
-    try:
-        data1 = res_file.json()
-        ic(data1['path'])
-        await state.update_data(file_diploma=data1['path'])
-    except Exception as e:
-        return e
+        try:
+            data1 = res_file.json()
+            ic(data1['path'])
+            await state.update_data(file_diploma=data1['path'])
+        except Exception as e:
+            return e
     
 
-    src_ = 'src' 
-    src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
-    if src_res is not None or src_res is not False:
-        await state.update_data(src=src_res)
+        src_ = 'src' 
+        src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+        if src_res is not None or src_res is not False:
+            await state.update_data(src=src_res)
     
 
 
@@ -1107,7 +1142,7 @@ async def upload_file(message: types.Message, state: FSMContext):
                                                     src
                                                     )
     await state.update_data(me_data=res_data_app_forms_for_edu.json())
-    await message.answer("<b>Есть ли у вас сертификат по иностранному языку?</b>", parse_mode='HTML', reply_markup=yes_no_ru)
+    await message.answer("<b>Sizda chet tili sertifikati mavjudmi?</b>", parse_mode='HTML', reply_markup=yes_no)
     # ic(res_data_app_forms_for_edu.json())
 
     await EducationDataRU.has_sertificate.set()
@@ -1173,67 +1208,102 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     await callback_query.message.answer(example_certification_message_ru, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
 # await message.answer(example_certification_message) 
-@dp.message_handler(content_types=['document'], state=EducationDataRU.get_certificate)
+@dp.message_handler(content_types=['document','photo'], state=EducationDataRU.get_certificate)
 async def get_sertificate(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
-    from data.config import BOT_TOKEN
+    from data.config import BOT_TOKEN 
     bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot)
-    
-    data = await state.get_data()
-    token_ = data['token'] if data['token'] else None
+    dp = Dispatcher(bot) 
+    if message.photo:
+        try:
+            data = await state.get_data()
+            token_ = data['token'] if data['token'] else None
+            largest_photo = message.photo[-1] 
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            download_dir = 'diploma_files'
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(1290, data1)
+                await state.update_data(file_size_sertificate=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Произошла ошибка: {str(e)}")
+            await message.reply("Изображение принято")
+            src_ = 'src' 
+            src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+            if src_res is not None or src_res is not False:
+                await state.update_data(src=src_res)
+        except Exception as e:
+            await message.reply("Отправить изображение повторно")
+    if not message.photo:
+        from aiogram import Bot, Dispatcher
+        from data.config import BOT_TOKEN
+        bot = Bot(token=BOT_TOKEN)
+        dp = Dispatcher(bot)
+        
+        data = await state.get_data()
+        token_ = data['token'] if data['token'] else None
 
-    document = message.document
-    file_path = await bot.get_file(document.file_id)
-    ic(file_path)
-    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
-    download_dir = 'sertificate_files'
-    # await message.answer(file_url)
-    await aiofiles.os.makedirs(download_dir, exist_ok=True)
+        document = message.document
+        file_path = await bot.get_file(document.file_id)
+        ic(file_path)
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+        download_dir = 'sertificate_files'
+        # await message.answer(file_url)
+        await aiofiles.os.makedirs(download_dir, exist_ok=True)
 
-    local_file_path = os.path.join(download_dir, document.file_name)
-    ic(local_file_path)
-    await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading_ru, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
-    # ic(local_file_path)
+        local_file_path = os.path.join(download_dir, document.file_name)
+        ic(local_file_path)
+        await send_req.download_file(file_url, local_file_path)
+        await message.answer(wait_file_is_loading_ru, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
+        # ic(local_file_path)
 
-    res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
-    ic(731, res_file)
-    try:
-        file_size = os.path.getsize(local_file_path)
-        file_size_kb = file_size / 1024
-        file_size_mb = file_size_kb / 1024
-        ic(f'size: {file_size_mb:.2f}')
-    except:
-        return 'Файл не найден'
-    await state.update_data(file_size_sertificate=file_size)
-    # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
-    # await EducationDataRU.has_application.set()
-    # ic(all_state)
-    ic(res_file.status_code)
-    ic(res_file)
-    data_user = await state.get_data()
-    certificate_type = data_user['certificate_type']
-    ic(certificate_type)
-    data1 = res_file.json()
-    ic(747, data1)
-    await state.update_data(file_sertificate=data1['path'])
-    ic(token_)
-    ic(data1['path'])
-    try:
-        res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
-        ic(751, res)
-    except Exception as e:
-        await message.answer(f"Ошибка: {e}")
-        return
+        res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
+        ic(731, res_file)
+        try:
+            file_size = os.path.getsize(local_file_path)
+            file_size_kb = file_size / 1024
+            file_size_mb = file_size_kb / 1024
+            ic(f'size: {file_size_mb:.2f}')
+        except:
+            return 'Файл не найден'
+        await state.update_data(file_size_sertificate=file_size)
+        # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
+        # await EducationData.has_application.set()
+        # ic(all_state)
+        ic(res_file.status_code)
+        ic(res_file)
+        data_user = await state.get_data()
+        certificate_type = data_user['certificate_type']
+        ic(certificate_type)
+        data1 = res_file.json()
+        ic(747, data1)
+        await state.update_data(file_sertificate=data1['path'])
+        ic(token_)
+        ic(data1['path'])
+        try:
+            res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
+            ic(751, res)
+        except Exception as e:
+            await message.answer(f"Ошибка: {e}")
+            return
 
-    await message.answer("Файл загружен.")
+        await message.answer("Файл загружен.")
     ic('boshlandi1')
     await EducationDataRU.degree_id.set()
     ic('yakunlandi')
     await message.answer("<b>Подача заявления в университет</b>", parse_mode="HTML")
     ic('started')
-    my_degree = {1: 'Бакалавр',2: 'Магистратура',3: 'Докторантура'}
+    my_degree = {1: 'Бакалавр',2: 'Mагистратура',3: 'Докторантура'}
     data = await state.get_data()
     token = data['token']
     directions_response = await send_req.directions(token)
