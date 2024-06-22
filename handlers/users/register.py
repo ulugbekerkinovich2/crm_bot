@@ -2036,7 +2036,7 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
         
         await callback_query.message.answer("<a href='https://mehnat.uz/oz'>Mehnatuz</a> saytidan olingan ish tajribasi haqidagi ma’lumotnomani yuklang FAYL KO'RINISHIDA!:", reply_markup=ReplyKeyboardRemove(), parse_mode="HTML")
         await EducationData.work_experience.set()
-    elif int(direction_id_selected) != 3 and int(edu_type_id_) != 2:
+    else:
         ic('keldi 1579')
         await callback_query.answer()
         await callback_query.message.answer(saved_message, parse_mode="HTML")
