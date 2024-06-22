@@ -415,6 +415,12 @@ async def secret_code(message: types.Message, state: FSMContext):
                         await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
                         ic('keldi 005')
                         await EducationData.menu.set()
+                    else:
+                        await message.answer("<i>-✅Siz ro'yhatdan o'tkansiz\n-✅Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n-✅Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)
+                        ic('keldi 0015')
+                        await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=True,haveApplied=False)
+                        ic('keldi 0016')
+                        await EducationData.menu.set()
                 elif exam == {}:
                     if exam_status != "came-exam":
                         await message.answer("<i>-✅Siz ro'yhatdan o'tkansiz\n-✅Ta'lim ma'lumotlaringiz ham to'ldirilgan,\n-✅Universitetga ham ariza topshirgansiz.</i>", reply_markup=menu)

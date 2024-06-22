@@ -1386,7 +1386,7 @@ async def education_menu(message: Message, state: FSMContext):
         # ic(pinfl_user_education)
         # ic(user_education)
         # Constructing the education message
-        education_message = "<b>📚 Ta'lim Ma'lumotlari:</b>\n\n"
+        education_message = "<b>📚 Ta'lim Ma'lumotlarim:</b>\n\n"
         if user_education.get('education_type_uz', None) is not None:
             education_message += (
                 f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
@@ -1395,6 +1395,7 @@ async def education_menu(message: Message, state: FSMContext):
                 f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
             )
         elif pinfl_user_education['institution_name'] is not None:
+            ic('keldi1398')
             institution_type = pinfl_user_education.get('institution_type', 'Talim turi topilmadi')
             if institution_type == 'school':
                 institution_type = 'Maktab'
@@ -1445,7 +1446,7 @@ async def education_menu(message: Message, state: FSMContext):
                 except Exception as e:
                     print(f"Failed to send certification file: {e}", 1387)   
                     await message.answer(text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang")
-    elif havePreviousEducation:
+    elif havePreviousEducation or haveEducation:
         ic('mytoken', token)
         education_info = await send_req.application_forms_me(token)
         ic(education_info)
