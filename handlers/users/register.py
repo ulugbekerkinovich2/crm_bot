@@ -797,15 +797,17 @@ async def education_id_handler(message: types.Message, state: FSMContext, page: 
 @dp.message_handler(state=EducationData.country_search)
 async def process_country_search(message: types.Message, state: FSMContext):
     user_query = message.text.lower()
-    variants = {'zbekiston', 'zbekistan', 'uzbekistan', 'uzbekiston', 'o\'zbekiston'}
+    # ic(user_query, 8800)
+    variants = {'zbekiston', 'zbekistan', 'uzbekistan', 'uzbekiston', 'o\'zbekistan', 'o\'zbekiston'}
 
     if any(variant.lower() in user_query.lower() for variant in variants):
-        user_query = 'O`zbekiston'
+        user_query = 'o`zbekiston'
+    # ic(user_query, 'result')
     token = (await state.get_data()).get('token')
     all_countries = await send_req.countries(token)  # Ensure this is an async call to your backend/API
-    ic('all_countries', all_countries)
+    # ic('all_countries', all_countries)
     matching_countries = [country for country in all_countries if user_query in country['name_uz'].lower()]
-    
+    ic(matching_countries)
     if not matching_countries:
         await message.answer(not_found_country)
         return
