@@ -1513,16 +1513,18 @@ async def education_menu(message: Message, state: FSMContext):
                             await message.answer(text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang") 
     else:
 
-        check_exam = send_req.my_applications(token=token)
-        exam = check_exam.get('exam', None)
-        exam_result = None
-        if exam != {}:
-            exam_result = exam['exam_result']
-        if exam_result is not None:
-            await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu_full)
-        else: 
-            await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu)
-        # await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos,akkuntdan chiqib tizimga qayta kiring.", reply_markup=menu)
+        check_exam = await send_req.my_applications(token=token)
+        try:
+            exam = check_exam.get('exam', None)
+            exam_result = None
+            if exam != {}:
+                exam_result = exam['exam_result']
+            if exam_result is not None:
+                await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu_full)
+            else: 
+                await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu)
+        except:
+            await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos,akkuntdan chiqib tizimga qayta kiring.", reply_markup=menu)
 
 
 #TODO arizam
