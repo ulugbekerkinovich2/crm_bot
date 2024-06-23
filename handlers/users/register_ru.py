@@ -485,7 +485,12 @@ async def birth_date(message: types.Message, state: FSMContext):
         # Check if the data check is complete and its status code
         if check_is_not_duplicate_future.done():
             check_is_not_duplicate = await check_is_not_duplicate_future
-            if check_is_not_duplicate.get('status_code') in [500, 404, 400, 406, 408 ]:
+            if check_is_not_duplicate.get('status_code') == 200:
+                await bot.edit_message_text("Данные найдены!", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="HTML")
+                check_is_not_duplicate_future.done()
+                check_is_not_duplicate = await check_is_not_duplicate_future
+                break
+            elif check_is_not_duplicate.get('status_code') in [500, 404, 400, 406, 408]:
                 break
 
         # Update the message with the remaining time
