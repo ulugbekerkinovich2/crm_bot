@@ -605,6 +605,7 @@ async def info(message: types.Message, state: FSMContext):
     response = await send_req.application_form_info(formatted_date_str,document,token)
     data = response['data']
     ic(response)
+    ic(data)
     # if response.get('status_code') == 409:
     #     await message.answer(response.get('message'))
     #     await state.finish()

@@ -10,10 +10,10 @@ import random
 from data.config import  origin, crm_django_domain, username, password
 from data.config import domain_name as host
 import aiohttp
-ic(origin)
+ic(origin, 'oldin')
 # origin = 'admission.uess.uz'
-# origin = 'admission.tiiu.uz'
-# ic(origin)
+origin = 'admission.tiiu.uz'
+ic(origin, 'keyingi')
 # host = 'crmapi.mentalaba.uz'
 
 # username = 'ulugbek'
@@ -115,11 +115,13 @@ async def application_form_info(birth_date, document, token):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
+            ic(body, default_header)
             ic(response.status, 'info')
             ic(111, response)
             # json_data = await response.json() 
             if response.status == 200:
-                return {'data': response.json() , 'status_code': response.status} 
+                json_data = await response.json() 
+                return {'data': json_data , 'status_code': response.status} 
             else:
                 return {'error': "Failed to verify", 'status_code': response.status, 'data': response}
                 # response = requests.post(url, json=body, headers=default_header)
