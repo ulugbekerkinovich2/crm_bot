@@ -1435,7 +1435,6 @@ async def upload_file4(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=EducationData.has_sertificate)
 async def has_sertificate(message: types.Message, state: FSMContext):
-
     text = message.text
     if text == "Ha, mavjud":
         cert_types = [
@@ -1493,9 +1492,13 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
                             caption=example_certification_message, 
                             parse_mode="Markdown",
                             reply_markup=ReplyKeyboardRemove())
-    # await callback_query.message.answer(example_certification_message, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
+    
 
-# await message.answer(example_certification_message) 
+@dp.message_handler(Text(equals="Bekor qilish"), state='*')
+async def cancel_upload(message: types.Message, state: FSMContext):
+    await message.answer("Fayl yuklash bekor qilindi.", reply_markup=enter_button)
+    await EducationData.get_certificate.set()
+    
 @dp.message_handler(content_types=['document', 'photo'], state=EducationData.get_certificate)
 async def get_sertificate(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
@@ -2213,9 +2216,12 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     token_ = new_state_data.get('token')
     file_work_experience = new_state_data.get('file_certificate', None)
     chat_id_user = callback_query.message.chat.id
+    data_states = await state.get_data()
+    transfer_user = data_states.get('transfer_user')
+    ic(transfer_user)
     is_second_specialty = False
     ic(chat_id_user)
-    applicant = await send_req.applicants(token_,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=file_work_experience)
+    applicant = await send_req.applicants(token_,transfer_user,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=file_work_experience)
     ic(applicant)
     if applicant is not None:
         await callback_query.message.answer(application_submited, reply_markup=menu)

@@ -1832,8 +1832,8 @@ async def my_application(message: Message, state: FSMContext):
         color = "🔴" 
     ic('------>', online_exam_link)
     
-    response_message = ""
-    if (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam_result is None:
+    response_message = "ma'lumot topilmadi"
+    if (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/" or online_exam_link == "https://imtihon.aifu.uz/" or online_exam_link == "https://imtihon.aifu.uz") and exam_result is None:
         online_exam_link = f"https://exam.tiiu.uz/test-start?{token}"
         ic('*************--->', online_exam_link, 1552)
         response_message = (
@@ -1849,8 +1849,8 @@ async def my_application(message: Message, state: FSMContext):
             f"{color} *Izoh:* {escape_markdown(comment)}\n"
             f"*Online imtihon topshirish:* [Online imtihon topshirish]({(online_exam_link)})"
         )
-        ic(response_message)
-    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam_result is not None:
+        ic(response_message, 1852)
+    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/" or online_exam_link == "https://imtihon.aifu.uz/" or online_exam_link == "https://imtihon.aifu.uz") and exam_result is not None:
         ic(1765)
         response_message = (
             f"*Ariza Tafsilotlari:*\n"
@@ -1864,8 +1864,8 @@ async def my_application(message: Message, state: FSMContext):
             f"Izoh vaqti: {convert_time(comment_time)}\n"
             f"{color} *Izoh:* {escape_markdown(comment)}\n"
         )
-        ic(response_message)
-    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam == {}:
+        ic(response_message, 1867)
+    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/" or online_exam_link == "https://imtihon.aifu.uz/" or online_exam_link == "https://imtihon.aifu.uz") and exam == {}:
         ic(1805)
         response_message = (
             f"*Ariza Tafsilotlari:*\n"
@@ -1879,7 +1879,8 @@ async def my_application(message: Message, state: FSMContext):
             f"Izoh vaqti: {send_req.convert_time(comment_time)}\n"
             f"{color} *Izoh:* {escape_markdown(comment)}\n"
         )
-    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam != {}:
+        ic(response_message, 1882)
+    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/" or online_exam_link == "https://imtihon.aifu.uz/" or online_exam_link == "https://imtihon.aifu.uz") and exam != {}:
         ic(1792)
         response_message = (
             f"*Ariza Tafsilotlari:*\n"
@@ -1893,6 +1894,7 @@ async def my_application(message: Message, state: FSMContext):
             f"Izoh vaqti: {send_req.convert_time(comment_time)}\n"
             f"{color} *Izoh:* {escape_markdown(comment)}\n"
         )
+        ic(response_message, 1896)
     elif  exam == {}:
         ic(1832)
         response_message = (

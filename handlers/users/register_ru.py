@@ -1212,6 +1212,11 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     await callback_query.message.answer(saved_message_ru, parse_mode="HTML")
     await callback_query.message.answer(example_certification_message_ru, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
+@dp.message_handler(Text(equals="Отмена"), state='*')
+async def cancel_upload(message: types.Message, state: FSMContext):
+    await message.answer("Загрузка файла отменена.", reply_markup=enter_button)
+    await EducationDataRU.get_certificate.set()
+    
 # await message.answer(example_certification_message) 
 @dp.message_handler(content_types=['document','photo'], state=EducationDataRU.get_certificate)
 async def get_sertificate(message: types.Message, state: FSMContext):

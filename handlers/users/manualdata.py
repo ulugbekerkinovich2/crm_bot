@@ -31,11 +31,9 @@ async def send_photo_from_message(message: types.Message, photo_url: str, captio
 # @dp.message_handler(Text(equals="ok"), state=None)
 @dp.message_handler(state=ManualPersonalInfo.personal_info)
 async def send_welcome(message: types.Message, state: FSMContext):
-    # await message.reply("PNFL orqali ma'lumotlarni olishni imkoni bo'lmadi", reply_markup=ReplyKeyboardRemove())
     photo_url = "https://api.mentalaba.uz/logo/20fb9b17-4807-410d-8933-b611a63f5efd.png"
     caption = "Rasmingizni yuboring 3x4 formatda. jpg, png formatda"
     await send_photo_from_message(message, photo_url, caption)
-    # await message.answer("Rasmingizni yuboring 3x4 formatda. jpg, png formatda",reply_markup=ReplyKeyboardRemove())
     await ManualPersonalInfo.image.set()
 
 @dp.message_handler(state=ManualPersonalInfo.image, content_types=[types.ContentType.PHOTO, types.ContentType.DOCUMENT])
@@ -46,13 +44,13 @@ async def get_image(message: types.Message, state: FSMContext):
     dp = Dispatcher(bot)
 
     data = await state.get_data()
-    token_ = data.get('token', None)  # Safer access with default None if 'token' doesn't exist
+    token_ = data.get('token', None)
     ic(token_)
     ic(message)
     download_dir = 'profile_images'
     if message.photo:
         try:
-            largest_photo = message.photo[-1]  # Get the largest resolution of the photo
+            largest_photo = message.photo[-1]
             ic(largest_photo)
             file_id = largest_photo.file_id
             file_info = await bot.get_file(file_id)
