@@ -215,7 +215,7 @@ async def applicants(token,is_transfer_student,chat_id_user, degree_id, directio
                 return data
             else:
                 # Handling errors by returning a simple error message or dict
-                return {'error': 'Failed to fetch data', 'status_code': response.status}
+                return {'error': response.message, 'status_code': response.status}
 
 def update_applicant(token, degree_id, direction_id, education_language_id, education_type_id, applicant_id):
     url = f"https://{host}/v1/applicants/{applicant_id}"  # Assuming you need to specify which applicant to update

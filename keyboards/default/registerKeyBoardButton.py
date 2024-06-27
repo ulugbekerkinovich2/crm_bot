@@ -253,9 +253,10 @@ yes_no = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='Ha, mavjud'),
+             KeyboardButton(text="Yo'q, mavjud emas"),
         ],
         [
-            KeyboardButton(text="Yo'q, mavjud emas"),
+            KeyboardButton(text="Bekor qilish"),
         ]
     ],
     resize_keyboard=True
@@ -264,9 +265,10 @@ yes_no_ru = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='Да, есть'),
+            KeyboardButton(text="Нет, не доступен")
         ],
         [
-            KeyboardButton(text="Нет, не доступен"),
+            KeyboardButton(text="Отмена"),
         ]
     ],
     resize_keyboard=True
