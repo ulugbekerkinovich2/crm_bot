@@ -10,7 +10,7 @@ import random
 from data.config import  origin, crm_django_domain, username, password
 from data.config import domain_name as host
 import aiohttp
-# ic(origin, 'oldin')
+ic(origin, 'oldin')
 # origin = 'admission.uess.uz'
 # origin = 'admission.tiiu.uz'
 # ic(origin, 'keyingi')
@@ -19,7 +19,7 @@ import aiohttp
 # username = 'ulugbek'
 # crm_django_domain = 'alfa.misterdev.uz'
 # password = '998359015a@'
-
+# ic.disable()
 default_header = {
         'accept': 'application/json', 
         'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ async def user_register(number):
     # return response
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=body, headers=default_header) as response:
-            ic(response.status)
+            # ic(response.status)
             if response.status == 201:
                 json_data = await response.json()
                 return json_data
@@ -175,36 +175,24 @@ def application_form_manual(token,birth_date,birth_place,email,extra_phone,first
     (162, body)
     response = requests.post(url, headers=default_header, json=body)
     if response.status_code == 201:
-        data = response.json()  # Read and parse the JSON response
-        return {'data': data, 'status_code': response.status_code}  # Return the data
+        data = response.json()
+        return {'data': data, 'status_code': response.status_code}
     else:
         data = response.json() 
-        # Handling errors by returning a simple error message or dict
         return {'data': data, 'error': 'Failed to fetch data', 'status_code': response.status_code}
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=default_header, json=body) as response:
-    #         if response.status == 201:
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 async def directions(token):
     url = f'https://{host}/v1/directions'
     default_header['Authorization'] = f'Bearer {token}'
-    # response = requests.get(url, headers=default_header)
-    # return response
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
-                data = await response.json()  # Read and parse the JSON response
+                data = await response.json()
                 return data
             else:
-                # Handling errors by returning a simple error message or dict
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-async def applicants(token,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None):
+async def applicants(token,is_transfer_student,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None):
     url = f"https://{host}/v1/applicants"
     headers = default_header.copy()
     headers['Authorization'] = f'Bearer {token}'
@@ -216,11 +204,9 @@ async def applicants(token,chat_id_user, degree_id, direction_id, education_lang
         'work_experience_document': work_experience_document,
         'bot_user_id': str(chat_id_user),
         'is_second_specialty': False,
-        'is_transfer_student': False
+        'is_transfer_student': is_transfer_student
     }
     ic(body)
-    # response = requests.post(url, json=body, headers=default_header)
-    # return response
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, json=body) as response:
             ic(173, response.status, response.text)
@@ -245,30 +231,20 @@ def update_applicant(token, degree_id, direction_id, education_language_id, educ
     }
     response = requests.patch(url, json=body, headers=headers)
     return response.json()
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.patch(url, json=body, headers=headers) as response:
-    #         if response.status == 200:
-    #             data = await response
-    #             return data
-    #         else:
-    #             return {'error': 'Failed to update applicant', 'status_code': response.status}
 
 async def my_applications(token):
     url = f"https://{host}/v1/applicants/my-application"
     default_header['Authorization'] = f'Bearer {token}'
-    # response = requests.get(url, headers=default_header)
-    # return response
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
                 content_type = response.headers.get('Content-Type', '')
                 if 'application/json' in content_type:
-                    data = await response.json()  # Read and parse the JSON response
+                    data = await response.json()
                 else:
-                    data = await response.text()  # Read the response as text
+                    data = await response.text()
                 return data
             else:
-                # Handling errors by returning a simple error message or dict
                 return {'error': 'Failed to fetch data', 'status_code': response.status, 'details': await response.text()}
  
 
@@ -280,14 +256,6 @@ def reset_password(phone, token):
     }
     response = requests.post(url, json=body, headers=default_header)
     return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=default_header, json=body) as response:
-    #         if response.status == 201:
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 def educations(token):
     url = f"https://{host}/v1/application-forms/educations/"
@@ -303,16 +271,6 @@ def educations(token):
     #             # Handling errors by returning a simple error message or dict
     #             return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-"""
-    {
-        "id": 1,
-        "name_uz": "Maktab",
-        "name_ru": "Школа",
-        "name_en": "School",
-        "created_at": "2024-02-28T15:08:51.352Z",
-        "updated_at": "2024-02-28T15:08:51.352Z"
-    },
-"""
 
 def regions(token):
     url = f"https://{host}/v1/application-forms/regions"
