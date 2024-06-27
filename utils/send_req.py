@@ -201,7 +201,7 @@ async def applicants(token,is_transfer_student,chat_id_user, degree_id, directio
         'direction_id': direction_id,
         'education_language_id': education_language_id,
         'education_type_id': education_type_id,
-        'work_experience_document': work_experience_document,
+        'work_experience_document': str(work_experience_document),
         'bot_user_id': str(chat_id_user),
         'is_second_specialty': False,
         'is_transfer_student': is_transfer_student

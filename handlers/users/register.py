@@ -1455,11 +1455,24 @@ async def has_sertificate(message: types.Message, state: FSMContext):
 
 
     elif text == "Yo'q, mavjud emas":
-        await message.answer("Ta'lim ma'lumotlarini to'ldirishni istasangiz davom etish tugmasini bosing", reply_markup=enter_button)
+        await message.answer("Ariza topshirishni istasangiz davom etish tugmasini bosing", reply_markup=enter_button)
 
         await EducationData.degree_id.set()
+    elif text == "Bekor qilish":
+        await message.answer("Fayl yuklash bekor qilindi.", reply_markup=ReplyKeyboardRemove())
+        await message.answer("Ariza topshirishni davom etishni istasangiz davom etish tugmasini bosing:", reply_markup=enter_button)
+        await EducationData.degree_id.set()
         
+# @dp.message_handler(Text(equals="Bekor qilish"), state="*")
+# async def cancel_upload(message: types.Message, state: FSMContext):
+#     # Remove the current keyboard
+#     await message.answer("Fayl yuklash bekor qilindi.", reply_markup=ReplyKeyboardRemove())
     
+#     # Send a new message with the new keyboard
+#     await message.answer("Ariza topshirishni istasangiz davom etish tugmasini bosing:", reply_markup=enter_button)
+    
+#     # Set the state to get_certificate
+#     await EducationData.get_certificate.set()
 
 @dp.callback_query_handler(lambda c: c.data.startswith('type_'), state=EducationData.certificate_type)
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
@@ -1476,7 +1489,7 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
             {'id': 5, 'type': 'GMAT'},
             {'id': 6, 'type': 'GRE'},
             {'id': 7, 'type': 'Boshqa'}
-        ] 
+        ]
     cert_types = [item['type'] for item in cert_types if item['id'] == int(certificate_type)]
     ic(cert_types)
     if certificate_type and len(cert_types) > 0:
@@ -1494,10 +1507,7 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
                             reply_markup=ReplyKeyboardRemove())
     
 
-@dp.message_handler(Text(equals="Bekor qilish"), state='*')
-async def cancel_upload(message: types.Message, state: FSMContext):
-    await message.answer("Fayl yuklash bekor qilindi.", reply_markup=enter_button)
-    await EducationData.get_certificate.set()
+
     
 @dp.message_handler(content_types=['document', 'photo'], state=EducationData.get_certificate)
 async def get_sertificate(message: types.Message, state: FSMContext):

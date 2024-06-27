@@ -76,8 +76,10 @@ async def my_menu(message: Message, state: FSMContext):
     if token:
         ic('token mavjud, shaxsiy ma\'lumotlarni ko\'rish', token)
         personal_info = await send_req.application_forms_me(token)
-        
-        photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
+        # ic(personal_info['photo'])
+        photo = "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small_2x/default-avatar-profile-icon-of-social-media-user-vector.jpg"
+        if personal_info['photo']:
+            photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
         ic(photo)
         
         first_name = personal_info['first_name'] if personal_info['first_name'] else 'ism topilmadi'
