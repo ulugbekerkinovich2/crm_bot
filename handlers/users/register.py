@@ -527,10 +527,14 @@ async def birth_date(message: types.Message, state: FSMContext):
             check_is_not_duplicate = await check_is_not_duplicate_future
             if check_is_not_duplicate.get('status_code') == 200:
                 await bot.edit_message_text("Ma'lumotlar topildi!", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="HTML")
-                check_is_not_duplicate_future.done()
-                check_is_not_duplicate = await check_is_not_duplicate_future
+                break
+            elif check_is_not_duplicate.get('status_code') == 409:
+                ress_mess = check_is_not_duplicate['data']
+                ic(ress_mess)
+                await bot.edit_message_text(ress_mess, chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="HTML")
                 break
             elif check_is_not_duplicate.get('status_code') in [500, 404, 400, 406, 408]:
+                await bot.edit_message_text("Xatolik yuz berdi, iltimos qayta urinib ko'ring.", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="HTML")
                 break
 
         # Update the message with the remaining time
@@ -559,6 +563,7 @@ async def birth_date(message: types.Message, state: FSMContext):
         await ManualPersonalInfo.personal_info.set()
     elif status_code_ == 409:
         error_mes = check_is_not_duplicate.get('data')
+        ic(error_mes)
         start_button = KeyboardButton('/start')  # The text on the button
         start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
         

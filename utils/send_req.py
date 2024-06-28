@@ -123,7 +123,8 @@ async def application_form_info(birth_date, document, token):
                 json_data = await response.json() 
                 return {'data': json_data , 'status_code': response.status} 
             else:
-                return {'error': "Failed to verify", 'status_code': response.status, 'data': response}
+                error_data = await response.json()
+                return {'error': "Failed to verify", 'status_code': response.status, 'data': error_data}
                 # response = requests.post(url, json=body, headers=default_header)
     # pprint(response.json())
     # return response
