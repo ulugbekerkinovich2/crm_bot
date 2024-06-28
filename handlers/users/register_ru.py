@@ -1147,7 +1147,7 @@ async def upload_file(message: types.Message, state: FSMContext):
                                                     src
                                                     )
     await state.update_data(me_data=res_data_app_forms_for_edu.json())
-    await message.answer("<b>Sizda chet tili sertifikati mavjudmi?</b>", parse_mode='HTML', reply_markup=yes_no)
+    await message.answer("<b>Есть ли у вас сертификат иностранного языка??</b>", parse_mode='HTML', reply_markup=yes_no_ru)
     # ic(res_data_app_forms_for_edu.json())
 
     await EducationDataRU.has_sertificate.set()
@@ -1185,7 +1185,10 @@ async def has_sertificate(message: types.Message, state: FSMContext):
         await message.answer("Если вы хотите заполнить образовательную информацию, нажмите кнопку «Продолжить».", reply_markup=enter_button_ru)
 
         await EducationDataRU.degree_id.set()
-        
+    elif text == 'Отмена':
+        await message.answer("Загрузка файла отменена", reply_markup=enter_button_ru)
+
+        await EducationDataRU.degree_id.set()
     
 
 @dp.callback_query_handler(lambda c: c.data.startswith('type_'), state=EducationDataRU.certificate_type)
