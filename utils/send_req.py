@@ -211,8 +211,7 @@ async def applicants(token,is_transfer_student,chat_id_user, degree_id, directio
         async with session.post(url, headers=headers, json=body) as response:
             ic(173, response.status, response.text)
             if response.status == 201:
-                data = await response.json()  # Read and parse the JSON response
-                return data
+                return response.status, response.text
             else:
                 # Handling errors by returning a simple error message or dict
                 return {'error': response.message, 'status_code': response.status}

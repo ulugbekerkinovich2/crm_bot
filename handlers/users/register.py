@@ -1429,7 +1429,7 @@ async def upload_file4(message: types.Message, state: FSMContext):
                                                     )
     await state.update_data(me_data=res_data_app_forms_for_edu.json())
     await message.answer("<b>Sizda chet tili sertifikati mavjudmi?</b>", parse_mode='HTML', reply_markup=yes_no)
-    # ic(res_data_app_forms_for_edu.json())
+    ic(res_data_app_forms_for_edu.json())
 
     await EducationData.has_sertificate.set()
 
@@ -2224,17 +2224,34 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     education_language_id = int(new_state_data.get('education_lang_id'))
     education_type_id = int(new_state_data.get('education_type'))
     token_ = new_state_data.get('token')
-    file_work_experience = new_state_data.get('file_certificate', None)
-    chat_id_user = callback_query.message.chat.id
+    if education_type_id == 2:
+        file_work_experience = new_state_data.get('file_certificate', None)
+    chat_id_user = str(callback_query.message.chat.id)
     data_states = await state.get_data()
     transfer_user = data_states.get('transfer_user')
     ic(transfer_user)
     is_second_specialty = False
     ic(chat_id_user)
-    applicant = await send_req.applicants(token_,transfer_user,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=file_work_experience)
-    ic(applicant)
-    if applicant is not None:
+    if (education_type_id != 2):
+        applicant_status, applicant_mess = await send_req.applicants(token_,
+                                                                 transfer_user,
+                                                                 chat_id_user, 
+                                                                 degree_id, 
+                                                                 direction_id,
+                                                                education_language_id, 
+                                                                education_type_id)
+    if (education_type_id == 2):
+        applicant_status, applicant_mess = await send_req.applicants(token_,
+                                                                 transfer_user,
+                                                                 chat_id_user, 
+                                                                 degree_id, 
+                                                                 direction_id,
+                                                                education_language_id, 
+                                                                education_type_id,
+                                                                file_work_experience)
+    ic(applicant_status, applicant_mess)
+    if applicant_status == 201:
         await callback_query.message.answer(application_submited, reply_markup=menu)
         await EducationData.menu.set()
     else:
-        await callback_query.message.answer("Xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring")
+        await callback_query.message.answer("Ariza topshirishda xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring, botni qayta ishga tushirib ariza topshiring.", reply_markup=menu)
