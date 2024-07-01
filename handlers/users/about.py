@@ -2,9 +2,10 @@ from loader import dp
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton,ReplyKeyboardRemove
 from data.config import web_app_url
+from aiogram.dispatcher import FSMContext
 
-@dp.message_handler(commands=['about', 'Открыть страницу университета', 'Universitet sahifasini ochish'])
-async def send_about_info(message: types.Message):
+@dp.message_handler(commands=['about', 'Открыть страницу университета', 'Universitet sahifasini ochish'],state="*")
+async def send_about_info(message: types.Message, state: FSMContext):
     keyboard = InlineKeyboardMarkup()
     web_app_button = InlineKeyboardButton(
         text="Universitet haqida",
