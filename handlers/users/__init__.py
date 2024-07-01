@@ -4,6 +4,8 @@ from . import register
 from . import manualdata
 from . import manualdataru
 from . import menu
+from . import about
+from . import web_server
 from . import menu_ru
 from . import help
 from . import echo

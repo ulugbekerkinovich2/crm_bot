@@ -72,6 +72,7 @@ menu_full = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Akkauntdan chiqish"),
+            KeyboardButton(text="Universitet sahifasini ochish"),
         ]
     ],
     resize_keyboard=True
@@ -88,6 +89,8 @@ menu_ru = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Выйти из аккаунта"),
+            KeyboardButton(text="Открыть страницу университета"),
+
         ]
     ],
     resize_keyboard=True
