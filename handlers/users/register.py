@@ -40,7 +40,7 @@ accepted_document = "🟢Passport seriyasi qabul qilindi"
 example_document = "Passport seriyangizni yuboring\nNamuna: AB1234567"
 error_document = "🔴Passport seriya noto'g'ri kiritildi"
 error_secret_code = "🔴Tasdiqlash kodi noto'g'ri kiritildi"
-error_type_edu_name = 'Talim dargoh nomini kiriting, bu majburiy.\nNamuna: 12-maktab'
+error_type_edu_name = 'Talim dargoh nomini kiriting, bu majburiy.\nNamuna: Toshkent davlat iqtisodiyot universiteti'
 error_document = "Passport seriyasi 2 ta harfdan  va 7 raqamdan iborat bo'lishi kerak.\nQayta passport seriyangizni kiriting"
 select_region = "Ta'lim dargohi joylashgan shahar yoki viloyatni tanlang:"
 select_degree = "<b>*Daraja tanlang:</b>"
@@ -49,7 +49,7 @@ select_edu_type = "Ta'lim shaklini tanglang:"
 select_edu_language = "Ta'lim tilini tanlang:"
 select_type_certificate = "Sertifikat turini tanlang:"
 select_country = "Ta’lim dargohi joylashgan davlatni tanlang:"
-type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: 12-maktab"
+type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: Ташкентский государственный экономический университет"
 wait_file_is_loading = "<b>Kuting, fayl yuklanmoqda.</b>"
 retype_secret_code = "Tasdiqlash kodini qayta kiriting"
 application_submited = 'Ariza muvaffaqiyatli topshirildi'
@@ -744,7 +744,7 @@ async def info(message: types.Message, state: FSMContext):
         await state.update_data(**data_obj_applications)
         # await message.answer("Ta'lim malumotlarini kiriting")
 
-        await message.answer("Ta'lim ma'lumotlarini to'ldirish uchun davom etish tugmasini bosing", reply_markup=enter_button)
+        await message.answer("Ta'lim ma'lumotlarini saqlash uchun davom etish tugmasini bosing", reply_markup=enter_button)
         ic('davom etish bosildi', 540)
         get_current_user = send_req.get_user_profile(chat_id=message.chat.id, university_id=UNIVERSITY_ID)
         chat_id_user = get_current_user['chat_id_user']
@@ -2238,7 +2238,7 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     is_second_specialty = False
     ic(chat_id_user)
     if (education_type_id != 2):
-        applicant_status, applicant_mess = await send_req.applicants(token_,
+        applicant_status = await send_req.applicants(token_,
                                                                  transfer_user,
                                                                  chat_id_user, 
                                                                  degree_id, 
@@ -2280,7 +2280,7 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
         # # Send the message using the bot
         # await bot.send_message(chat_id=-1002234078162, text=formatted_message, parse_mode="Markdown")
     if (education_type_id == 2):
-        applicant_status, applicant_mess = await send_req.applicants(token_,
+        applicant_status = await send_req.applicants(token_,
                                                                  transfer_user,
                                                                  chat_id_user, 
                                                                  degree_id, 
