@@ -55,6 +55,7 @@ menu = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Akkauntdan chiqish"),
+            KeyboardButton(text="Universitet sahifasini ochish"),
         ]
     ],
     resize_keyboard=True
