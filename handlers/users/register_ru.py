@@ -1625,7 +1625,8 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
         f"✅ <b>Цена выбранного направления</b>\n"
         f"--------------------------------\n"
         f"💵 <i>Цена:</i> <b>{all_state_data['tuition_fee']}</b> сум\n",
-        parse_mode='HTML'
+        parse_mode='HTML',
+        reply_markup=menu_ru
     )
     new_state_data = await state.get_data()
     ic(all_state_data.get('degree_id'), new_state_data.get('direction_id'), all_state_data.get('education_type'), new_state_data.get('education_lang_id'))
@@ -1639,7 +1640,16 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     is_second_specialty = False
     ic(chat_id_user)
     applicant = await send_req.applicants(token_,is_second_specialty,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None)
-    # ic(applicant)
+    if (education_type_id == 2):
+        applicant_status = await send_req.applicants(token_,
+                                                    transfer_user,
+                                                    chat_id_user, 
+                                                    degree_id, 
+                                                    direction_id,
+                                                education_language_id, 
+                                                education_type_id,
+                                                file_work_experience)
+        # from aiogram import Bot, Dispatcher
     
     if applicant is not None:
         await callback_query.message.answer(application_submited_ru, reply_markup=menu_ru)
