@@ -847,7 +847,7 @@ async def my_application(message: Message, state: FSMContext):
         f" {color} Izoh: {comment}"
     )
     ic(response_message, 549)
-    await message.answer(response_message, parse_mode='HTML')
+    await message.answer(response_message, parse_mode='HTML', reply_markup=menu)
 
 @dp.message_handler(state=PersonalData.country_search)
 async def process_country_search(message: types.Message, state: FSMContext):
@@ -2409,6 +2409,6 @@ async def my_application(message: Message, state: FSMContext):
             f"{color} *Izoh:* {escape_markdown(comment)}\n"
         )
         ic(response_message, 1558)
-    await message.answer(response_message, parse_mode='Markdown')
+    await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
 
 
