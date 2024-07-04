@@ -2107,7 +2107,7 @@ async def my_application(message: Message, state: FSMContext):
         f"Izoh vaqti {send_req.convert_time(comment_time)}"
         f" {color} Izoh: {escape_markdown(comment)}\n"
     )
-    await message.answer(response_message, parse_mode='HTML')
+    await message.answer(response_message, parse_mode='HTML', reply_markup=menu)
 
 @dp.message_handler(Text(equals=["📃Imtihon natijalari"]), state="*")
 async def my_application_exam(message: Message, state: FSMContext):
