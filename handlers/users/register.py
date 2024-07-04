@@ -49,7 +49,7 @@ select_edu_type = "Ta'lim shaklini tanglang:"
 select_edu_language = "Ta'lim tilini tanlang:"
 select_type_certificate = "Sertifikat turini tanlang:"
 select_country = "Ta’lim dargohi joylashgan davlatni tanlang:"
-type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: Ташкентский государственный экономический университет"
+type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: Toshkent davlat iqtisodiyot universiteti"
 wait_file_is_loading = "<b>Kuting, fayl yuklanmoqda.</b>"
 retype_secret_code = "Tasdiqlash kodini qayta kiriting"
 application_submited = 'Ariza muvaffaqiyatli topshirildi'
@@ -367,6 +367,7 @@ async def secret_code(message: types.Message, state: FSMContext):
                 ic(err)
 
             get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
+            
             # ic(get_this_user, 323)
             # except Exception as err:
             #     ic(err)
@@ -2201,96 +2202,119 @@ async def get_work_experience_certificate(message: types.Message, state: FSMCont
     languageMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
     await message.answer(select_edu_language, reply_markup=languageMenu)
     
+# @dp.callback_query_handler(lambda c: c.data.startswith('_'), state=EducationData.education_lang_id)
+# async def after_select_lang(callback_query: types.CallbackQuery, state: FSMContext):
+#     parts = callback_query.data[1:].split('_')
+
+#     if len(parts) < 2:
+#         await callback_query.message.answer("Invalid callback data format.")
+#         return
+
+#     education_lang_id, education_tuition_fee = parts
+#     await state.update_data(education_lang_id=education_lang_id, tuition_fee=education_tuition_fee)
+
+#     all_state_data = await state.get_data()
+#     await callback_query.answer()
+#     await EducationData.menu.set()
+#     await callback_query.message.answer(saved_message, parse_mode="HTML")
+#     await callback_query.message.answer(
+#         f"✅ <b>Tanlangan Yo'nalish Narxi</b>\n"
+#         f"--------------------------------\n"
+#         f"💵 <i>Narxi:</i> <b>{all_state_data['tuition_fee']}</b> so'm\n",
+#         parse_mode='HTML'
+#     )
+
+#     new_state_data = await state.get_data()
+#     degree_id = int(new_state_data.get('degree_id'))
+#     direction_id = int(new_state_data.get('direction_id'))
+#     education_language_id = int(new_state_data.get('education_lang_id'))
+#     education_type_id = int(new_state_data.get('education_type'))
+#     token_ = new_state_data.get('token')
+#     if education_type_id == 2:
+#         file_work_experience = new_state_data.get('file_certificate', None)
+#     chat_id_user = str(callback_query.message.chat.id)
+#     data_states = await state.get_data()
+#     transfer_user = data_states.get('transfer_user')
+#     ic(transfer_user)
+#     is_second_specialty = False
+#     ic(chat_id_user)
+#     if (education_type_id != 2):
+#         applicant_status = await send_req.applicants(token_,
+#                                                                  transfer_user,
+#                                                                  chat_id_user, 
+#                                                                  degree_id, 
+#                                                                  direction_id,
+#                                                                 education_language_id, 
+#                                                                 education_type_id)
+#     if (education_type_id == 2):
+#         applicant_status = await send_req.applicants(token_,
+#                                                                  transfer_user,
+#                                                                  chat_id_user, 
+#                                                                  degree_id, 
+#                                                                  direction_id,
+#                                                                 education_language_id, 
+#                                                                 education_type_id,
+#                                                                 file_work_experience)
+
+
+#     if applicant_status == 201:
+#         await callback_query.message.answer(application_submited, reply_markup=menu)
+#         await EducationData.menu.set()
+#     else:
+#         await callback_query.message.answer("Ariza topshirishda xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring, botni qayta ishga tushirib ariza topshiring.", reply_markup=menu)
+
 @dp.callback_query_handler(lambda c: c.data.startswith('_'), state=EducationData.education_lang_id)
 async def after_select_lang(callback_query: types.CallbackQuery, state: FSMContext):
+    # Parse callback data
     parts = callback_query.data[1:].split('_')
-
     if len(parts) < 2:
         await callback_query.message.answer("Invalid callback data format.")
         return
 
+    # Update state with parsed data
     education_lang_id, education_tuition_fee = parts
     await state.update_data(education_lang_id=education_lang_id, tuition_fee=education_tuition_fee)
 
+    # Fetch state data
     all_state_data = await state.get_data()
+    token_ = all_state_data.get('token')
+    degree_id = int(all_state_data.get('degree_id'))
+    direction_id = int(all_state_data.get('direction_id'))
+    education_type_id = int(all_state_data.get('education_type'))
+    transfer_user = all_state_data.get('transfer_user')
+    chat_id_user = str(callback_query.message.chat.id)
+    file_work_experience = all_state_data.get('file_certificate', None)
+
+    # Respond to callback query
     await callback_query.answer()
     await EducationData.menu.set()
     await callback_query.message.answer(saved_message, parse_mode="HTML")
     await callback_query.message.answer(
         f"✅ <b>Tanlangan Yo'nalish Narxi</b>\n"
         f"--------------------------------\n"
-        f"💵 <i>Narxi:</i> <b>{all_state_data['tuition_fee']}</b> so'm\n",
+        f"💵 <i>Narxi:</i> <b>{education_tuition_fee}</b> so'm\n",
         parse_mode='HTML'
     )
 
-    new_state_data = await state.get_data()
-    degree_id = int(new_state_data.get('degree_id'))
-    direction_id = int(new_state_data.get('direction_id'))
-    education_language_id = int(new_state_data.get('education_lang_id'))
-    education_type_id = int(new_state_data.get('education_type'))
-    token_ = new_state_data.get('token')
-    if education_type_id == 2:
-        file_work_experience = new_state_data.get('file_certificate', None)
-    chat_id_user = str(callback_query.message.chat.id)
-    data_states = await state.get_data()
-    transfer_user = data_states.get('transfer_user')
-    ic(transfer_user)
-    is_second_specialty = False
-    ic(chat_id_user)
-    if (education_type_id != 2):
-        applicant_status = await send_req.applicants(token_,
-                                                                 transfer_user,
-                                                                 chat_id_user, 
-                                                                 degree_id, 
-                                                                 direction_id,
-                                                                education_language_id, 
-                                                                education_type_id)
+    # Send applicant data based on education type
+    applicant_status = await send_applicant_data(token_, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience)
 
-    if (education_type_id == 2):
-        applicant_status = await send_req.applicants(token_,
-                                                                 transfer_user,
-                                                                 chat_id_user, 
-                                                                 degree_id, 
-                                                                 direction_id,
-                                                                education_language_id, 
-                                                                education_type_id,
-                                                                file_work_experience)
-        # from aiogram import Bot, Dispatcher
-        # import logging,asyncio
-        # from data.config import BOT_TOKEN 
-        # bot = Bot(token=BOT_TOKEN)
-        # dp = Dispatcher(bot) 
-        # import json
-        # data = await state.get_data()
-        # education_id = data.get('education_id')
-        # region_id = data.get('region_id')
-        # district_id = data.get('district_id')
-        # institution_name = data.get('institution_name')
-        # payload = {
-        #     'token_': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQ5LCJmaXJzdF9uYW1lIjoiVUxVR-KAmEJFSyIsImxhc3RfbmFtZSI6IkVSS0lOT1YiLCJiaXJ0aF9kYXRlIjpudWxsLCJwaG9uZSI6Iis5OTg5OTgzNTkwMTUiLCJyb2xlIjoidXNlciIsImF2YXRhciI6ImF2YXRhci84ZjUwMDA0Yi04ZDk1LTQ2OWQtOTdjYS1mMTA3MDg4OWZlZWMuanBnIiwiZW1haWwiOiJ1bHVnYmVrOTAxNXVAZ21haWwuY29tIiwiaXNfdmVyaWZ5Ijp0cnVlLCJjcmVhdGVkX2F0IjoiMjAyNC0wMy0xOVQwNDo0MDo1My4zOTFaIiwidXBkYXRlZF9hdCI6IjIwMjQtMDMtMTlUMDQ6NDA6NTMuMzkxWiIsImF1dGhfa2V5IjoiNmx4eGRwc3FKWjJMZXh5Tk5FRmRSNDJtVXlLS1dZVzMiLCJ0aGlyZF9uYW1lIjpudWxsLCJhZG1pbl90eXBlIjpudWxsLCJyZWdpc3RyYXRpb25fdHlwZSI6InBob25lIiwidG90YWxfY2FsbCI6bnVsbCwidW5pdmVyc2l0eUlkIjoyLCJpYXQiOjE3MTk1NzI3MjYsImV4cCI6MTcxOTYxNTkyNn0.1rj_xCaNZeUPD1yxFQrjw1YhDIk5wXqkpnqkdV005TU',
-        #     'transfer_user': False,
-        #     'chat_id_user': '935920479',
-        #     'degree_id': 1,
-        #     'direction_id': 10,
-        #     'education_language_id': 1,
-        #     'education_type_id': 2,
-        #     'institution_name': institution_name,
-        #     'region_id': region_id,
-        #     'district_id': district_id,
-        #     'education_id': education_id
-        # }
-
-        # Convert the payload to a pretty-printed JSON string
-        # pretty_payload = json.dumps(payload, indent=4)
-
-        # Format the message with triple backticks for code block
-        # formatted_message = f"```\n{pretty_payload}\n```"
-
-        # Send the message using the bot
-        # await bot.send_message(chat_id=-1002234078162, text=formatted_message, parse_mode="Markdown")
-
+    # Respond based on applicant status
     if applicant_status == 201:
         await callback_query.message.answer(application_submited, reply_markup=menu)
         await EducationData.menu.set()
     else:
-        await callback_query.message.answer("Ariza topshirishda xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring, botni qayta ishga tushirib ariza topshiring.", reply_markup=menu)
+        await callback_query.message.answer(
+            "Ariza topshirishda xatolik yuz berdi, admin ogohlantirildi keyinroq urinib ko'ring, botni qayta ishga tushirib ariza topshiring.",
+            reply_markup=menu
+        )
+
+async def send_applicant_data(token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience=None):
+    if education_type_id == 2:
+        return await send_req.applicants(
+            token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience
+        )
+    else:
+        return await send_req.applicants(
+            token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id
+        )

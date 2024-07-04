@@ -161,3 +161,33 @@ edit_user_education_transfer_inline_ru = InlineKeyboardMarkup(
         ]
     ]
 )
+
+
+update_application_inline = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Familiya", callback_data='lastname'),
+        ],
+        [
+            InlineKeyboardButton(text="Ism", callback_data='firstname'),
+        ],
+        [
+            InlineKeyboardButton(text="Otangizni ismi", callback_data='thirdname'),
+        ],
+        [
+            InlineKeyboardButton(text="Passport/ID karta seriya va raqami", callback_data='passport'),
+        ],
+        [
+            InlineKeyboardButton(text="Tug'ilgan kun", callback_data='birthdate'),
+        ],
+        [
+            InlineKeyboardButton(text="Jins", callback_data='gender'),
+        ],
+        [
+            InlineKeyboardButton(text="Tug'ilgan joyi", callback_data='birthplace'),
+        ],
+        [
+            InlineKeyboardButton(text="Qo'shimcha telefon raqami", callback_data='extra_phone'),
+        ]
+    ]
+)

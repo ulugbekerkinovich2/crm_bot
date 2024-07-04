@@ -187,7 +187,8 @@ update_application = ReplyKeyboardMarkup(
         [
         KeyboardButton(text="📄Arizani ko'rish"),
         ]
-    ]
+    ],
+    resize_keyboard=True
 )
 update_application_ru = ReplyKeyboardMarkup(
     keyboard=[

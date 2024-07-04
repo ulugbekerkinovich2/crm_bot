@@ -4,6 +4,7 @@ from . import register
 from . import manualdata
 from . import manualdataru
 from . import menu
+from . import update_application
 from . import about
 from . import web_server
 from . import menu_ru

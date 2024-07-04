@@ -200,7 +200,7 @@ async def applicants(token,is_transfer_student,chat_id_user, degree_id, directio
     body = {
         'degree_id': degree_id,
         'direction_id': direction_id,
-        'education_language_id': education_language_id,
+        'education_language_id': int(education_language_id),
         'education_type_id': education_type_id,
         'work_experience_document': str(work_experience_document),
         'bot_user_id': str(chat_id_user),
@@ -215,10 +215,10 @@ async def applicants(token,is_transfer_student,chat_id_user, degree_id, directio
                 return response.status
             else:
                 # Handling errors by returning a simple error message or dict
-                return {'error': response.message, 'status_code': response.status}
+                return {'error': response.text, 'status_code': response.status}
 
 def update_applicant(token, degree_id, direction_id, education_language_id, education_type_id, applicant_id):
-    url = f"https://{host}/v1/applicants/{applicant_id}"  # Assuming you need to specify which applicant to update
+    url = f"https://{host}/v1/applicants/{applicant_id}"
     headers = {
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json'
@@ -458,10 +458,10 @@ async def return_token_use_refresh(refreshToken):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, body=body, headers=default_header) as response:
             if response.status == 201:
-                data = await response
+                data = await response.json()
                 return data
             else:
-                return {'error': 'Failed to refresh token', 'status_code': response.status}
+                return {'error': response.text, 'status_code': response.status}
 
 def upload_sertificate(token, filename, f_type):
     url = f"https://{host}/v1/certifications/"
