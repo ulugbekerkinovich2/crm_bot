@@ -202,27 +202,27 @@ async def application_form_info(birth_date, document, token):
             ic(111, response)
             # json_data = await response.json() 
             if response.status == 200:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_form_info',
-                    'details': {
-                        'status_code': response.status,
-                        'data': await response.json()
-                    }
-                }
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_form_info',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
                 log_to_json(log_data)
                 json_data = await response.json() 
                 return {'data': json_data , 'status_code': response.status} 
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_form_info',
-                    'details': {
-                        'status_code': response.status,
-                        'data': await response.json()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_form_info',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 error_data = await response.json()
                 return {'error': "Failed to verify", 'status_code': response.status, 'data': error_data}
                 # response = requests.post(url, json=body, headers=default_header)
@@ -251,25 +251,25 @@ def application_form(token,birth_date,birth_place,citizenship,extra_phone,first_
             'src': src,
             'third_name': third_name
         }
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'application_form',
-            'details': {
-                'body': body
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_form',
+        #     'details': {
+        #         'body': body
+        #     }
+        # }
+        # log_to_json(log_data)
         response = requests.post(url, headers=default_header, json=body)
         return response
     except:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'application_form',
-            'details': {
-                'body': body
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_form',
+        #     'details': {
+        #         'body': body
+        #     }
+        # }
+        # log_to_json(log_data)
         response = requests.post(url, headers=default_header, json=body)
         return response
 
@@ -306,14 +306,14 @@ def application_form_manual(token,birth_date,birth_place,email,extra_phone,first
         data = response.json()
         return {'data': data, 'status_code': response.status_code}
     else:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'application_form_manual',
-            'details': {
-                'body': body
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_form_manual',
+        #     'details': {
+        #         'body': body
+        #     }
+        # }
+        # log_to_json(log_data)
         data = response.json() 
         return {'data': data, 'error': 'Failed to fetch data', 'status_code': response.status_code}
 
@@ -323,24 +323,24 @@ async def directions(token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'directions',
-                    'details': {
-                        'status_code': response.status,
-                        'data': await response.json()
-                    }
-                }
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'directions',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
                 data = await response.json()
                 return data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'directions',
-                    'details': {
-                        'status_code': response.status
-                    }
-                }
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'directions',
+                #     'details': {
+                #         'status_code': response.status
+                #     }
+                # }
                 log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
@@ -363,27 +363,27 @@ async def applicants(token,is_transfer_student,chat_id_user, degree_id, directio
         async with session.post(url, headers=headers, json=body) as response:
             # ic(173, response.status, response.text)
             if response.status == 201:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'applicants',
-                    'details': {
-                        'body': body,
-                        'status_code': response.status,
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'applicants',
+                #     'details': {
+                #         'body': body,
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return response.status
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'applicants',
-                    'details': {
-                        'body': body,
-                        'status_code': response.status
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'applicants',
+                #     'details': {
+                #         'body': body,
+                #         'status_code': response.status
+                #     }
+                # }
+                # log_to_json(log_data)
                 # Handling errors by returning a simple error message or dict
                 return {'error': response.text, 'status_code': response.status}
 
@@ -401,28 +401,28 @@ def update_applicant(token, degree_id, direction_id, education_language_id, educ
             'education_type_id': education_type_id
         }
         response = requests.patch(url, json=body, headers=headers)
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'update_applicant',
-            'details': {
-                'body': body,
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'update_applicant',
+        #     'details': {
+        #         'body': body,
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response.json()
     except:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'update_applicant',
-            'details': {
-                'body': body,
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'update_applicant',
+        #     'details': {
+        #         'body': body,
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 async def my_applications(token):
@@ -434,27 +434,27 @@ async def my_applications(token):
                 content_type = response.headers.get('Content-Type', '')
                 if 'application/json' in content_type:
                     data = await response.json()
-                    log_data = {
-                        'time': datetime.utcnow().isoformat(),
-                        'event': 'my_applications',
-                        'details': {
-                            'status_code': response.status,
-                            'data': data,
-                            'token': token
-                        }
-                    }
-                    log_to_json(log_data)
+                    # log_data = {
+                    #     'time': datetime.utcnow().isoformat(),
+                    #     'event': 'my_applications',
+                    #     'details': {
+                    #         'status_code': response.status,
+                    #         'data': data,
+                    #         'token': token
+                    #     }
+                    # }
+                    # log_to_json(log_data)
                 else:
                     data = await response.text()
-                    log_data = {
-                        'time': datetime.utcnow().isoformat(),
-                        'event': 'my_applications',
-                        'details': {
-                            'status_code': response.status,
-                            'data': data
-                        }
-                    }
-                    log_to_json(log_data)
+                    # log_data = {
+                    #     'time': datetime.utcnow().isoformat(),
+                    #     'event': 'my_applications',
+                    #     'details': {
+                    #         'status_code': response.status,
+                    #         'data': data
+                    #     }
+                    # }
+                    # log_to_json(log_data)
                 return data
             else:
                 return {'error': 'Failed to fetch data', 'status_code': response.status, 'details': await response.text()}
@@ -468,28 +468,28 @@ def reset_password(phone, token):
             'phone': phone
         }
         response = requests.post(url, json=body, headers=default_header)
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'reset_password',
-            'details': {
-                'body': body,
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'reset_password',
+        #     'details': {
+        #         'body': body,
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response
     except:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'reset_password',
-            'details': {
-                'body': body,
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'reset_password',
+        #     'details': {
+        #         'body': body,
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 def educations(token):
@@ -497,26 +497,26 @@ def educations(token):
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     if response.status_code == 200:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'educations',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'educations',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response
     else:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'educations',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'educations',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
     return response
 
 
@@ -536,27 +536,27 @@ def regions(token):
     url = f"https://{host}/v1/application-forms/regions"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
-    if response.status_code == 200:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'regions',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+    # if response.status_code == 200:
+    #     log_data = {
+    #         'time': datetime.utcnow().isoformat(),
+    #         'event': 'regions',
+    #         'details': {
+    #             'status_code': response.status_code,
+    #             'data': response.json()
+    #         }
+    #     }
+    #     log_to_json(log_data)
         return response
     else:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'regions',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'regions',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response
 
     # async with aiohttp.ClientSession() as session:
@@ -574,26 +574,26 @@ def districts(token, district_id):
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     if response.status_code == 200:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'districts',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'districts',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response
     else:
         log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'districts',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'districts',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response
 
     # async with aiohttp.ClientSession() as session:
@@ -680,29 +680,29 @@ async def application_forms(token,birth_date,birth_place,citizenship,extra_phone
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 201:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_forms',
-                    'details': {
-                        'status_code': response.status,
-                        'data': response.json(),
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json(),
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 data = await response.json()
                 return data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_forms',
-                    'details': {
-                        'status_code': response.status,
-                        'data': response.json(),
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json(),
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
@@ -725,29 +725,29 @@ async def application_forms_transfer(token,country_id, direction_name,
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 201:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_forms',
-                    'details': {
-                        'status_code': response.status,
-                        'data': response.json(),
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json(),
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 data = await response.json()
                 return data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_forms',
-                    'details': {
-                        'status_code': response.status,
-                        'data': response.json(),
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json(),
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
@@ -761,27 +761,27 @@ async def application_forms_me(token):
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
                 data = await response.json()
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_forms_me',
-                    'details': {
-                        'status_code': response.status,
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms_me',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
                 data = await response.json()
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_forms_me',
-                    'details': {
-                        'status_code': response.status,
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms_me',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 async def application_forms_me_new(token):
@@ -794,26 +794,26 @@ async def application_forms_me_new(token):
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
                 data = await response.json()
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_forms_me_new',
-                    'details': {
-                        'status_code': response.status,
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms_me_new',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'data': data, 'status_code': response.status} #data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'application_forms_me',
-                    'details': {
-                        'status_code': response.status,
-                        'token': token
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms_me',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
@@ -866,25 +866,25 @@ async def return_token_use_refresh(refreshToken):
         async with session.post(url, body=body, headers=default_header) as response:
             if response.status == 201:
                 data = await response.json()
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'return_token_use_refresh',
-                    'details': {
-                        'status_code': response.status,
-                        'data': data
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'return_token_use_refresh',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'return_token_use_refresh',
-                    'details': {
-                        'status_code': response.status,
-                        'data': response.text
-                    }
-                }
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'return_token_use_refresh',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.text
+                #     }
+                # }
                 log_to_json(log_data)
                 return {'error': response.text, 'status_code': response.status}
 
@@ -954,26 +954,26 @@ def application_forms_for_edu(token,  district_id, education_id, file_, institut
     }
     response = requests.post(url, json=body, headers=default_header)
     if response.status == 201:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'application_forms_for_edu',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_forms_for_edu',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response
     else:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'application_forms_for_edu',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_forms_for_edu',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return {'error': 'Failed to create application', 'status_code': response.status}
 
     # async with aiohttp.ClientSession() as session:
@@ -1002,26 +1002,26 @@ def application_forms_for_personal_data(token,  birth_date, birth_place, citizen
             'third_name': third_name
         }
         response = requests.post(url, json=body, headers=default_header)
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'application_forms_for_personal_data',
-            'details': {
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_forms_for_personal_data',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response
     except:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'application_forms_for_personal_data',
-            'details': {
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_forms_for_personal_data',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return {'error': 'Failed to create application', 'status_code': 500}
 
 
@@ -1038,26 +1038,26 @@ async def djtoken(username, password):
         async with session.post(url, json=body) as response:
             if response.status == 200:
                 data = await response.json()
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'djtoken',
-                    'details': {
-                        'status_code': response.status,
-                        # 'data': data
-                    }
-                }
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'djtoken',
+                #     'details': {
+                #         'status_code': response.status,
+                #         # 'data': data
+                #     }
+                # }
                 log_to_json(log_data)
                 return data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'djtoken',
-                    'details': {
-                        'status_code': response.status,
-                        # 'data': response.json()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'djtoken',
+                #     'details': {
+                #         'status_code': response.status,
+                #         # 'data': response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to get token', 'status_code': response.status}
 
 def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,university_name):
@@ -1077,25 +1077,25 @@ def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,uni
     # ic(body)
     response = requests.post(url, json=body, headers=header)
     if response.status_code == 201:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'create_user_profile',
-            'details': {
-                'status_code': response.status_code,
-                # 'data': response.json()
-            }
-        }
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'create_user_profile',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         # 'data': response.json()
+        #     }
+        # }
         return response.json()
     else:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'create_user_profile',
-            'details': {
-                'status_code': response.status_code,
-                # 'data': response.text
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'create_user_profile',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         # 'data': response.text
+        #     }
+        # }
+        # log_to_json(log_data)
         return {'error': 'Failed to create user profile', 'status_code': response.status_code}
 
 def update_user_profile(university_id, chat_id, phone, first_name, last_name, pin, username,date):
@@ -1114,25 +1114,25 @@ def update_user_profile(university_id, chat_id, phone, first_name, last_name, pi
     # ic(body)
     response = requests.put(url, json=body)
     if response.status_code == 200:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'update_user_profile',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'update_user_profile',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
         return response.json()
     else:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'update_user_profile',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'update_user_profile',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response.json()
 
 
@@ -1148,26 +1148,26 @@ async def get_all_ser_profile(token):
         async with session.get(url, headers=header) as response:
             if response.status == 200:
                 data = await response.json()
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'get_all_ser_profile',
-                    'details': {
-                        'status_code': response.status,
-                        'data': data
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'get_all_ser_profile',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'get_all_ser_profile',
-                    'details': {
-                        'status_code': response.status,
-                        'data': response.json()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'get_all_ser_profile',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 def get_user_profile(chat_id,university_id):
@@ -1175,26 +1175,26 @@ def get_user_profile(chat_id,university_id):
     response = requests.get(url)
     # ic(response.status_code, response.json())
     if response.status_code == 200:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'get_user_profile',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'get_user_profile',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response.json()
     else:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'get_user_profile',
-            'details': {
-                'status_code': response.status_code,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'get_user_profile',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return {'error': 'Failed to fetch data', 'status_code': response.status_code}
     
 
@@ -1213,26 +1213,26 @@ async def bot_usage(token, start_time, end_time):
         async with session.post(url, json=body, headers=header) as response:
             if response.status == 200:
                 data = await response.json()
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'bot_usage',
-                    'details': {
-                        'status_code': response.status,
-                        'data': data
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'bot_usage',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'bot_usage',
-                    'details': {
-                        'status_code': response.status,
-                        'data': response.json()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'bot_usage',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 
