@@ -633,15 +633,15 @@ def upload_file(token, file_name, associated_with, usage):
     #     'usage': (None, f'{usage}')
     #     }
         response = requests.post(url, headers=default_header, files=files)
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'upload_file',
-            'details': {
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'upload_file',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
     # file1.close()
     # print(response.json())
     # a = response.json()
@@ -909,27 +909,27 @@ def upload_sertificate(token, filename, f_type):
         #         else:
         #             return {'error': 'Failed to upload sertificate', 'status_code': response.status}
         response = requests.post(url, json=body, headers=headers)
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'upload_sertificate',
-            'details': {
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'upload_sertificate',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return response.json()
 
     except:
-        log_data = {
-            'time': datetime.utcnow().isoformat(),
-            'event': 'upload_sertificate',
-            'details': {
-                'status_code': response.status,
-                'data': response.json()
-            }
-        }
-        log_to_json(log_data)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'upload_sertificate',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
         return {'error': 'Failed to upload sertificate', 'status_code': 500}
 # u_s = upload_sertificate("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQ5LCJmaXJzdF9uYW1lIjoiVUxVR-KAmEJFSyIsImxhc3RfbmFtZSI6IkVSS0lOT1YiLCJiaXJ0aF9kYXRlIjpudWxsLCJwaG9uZSI6Iis5OTg5OTgzNTkwMTUiLCJyb2xlIjoidXNlciIsImF2YXRhciI6ImF2YXRhci9jMjU3MmI1NS02MzA3LTQ3YTEtOGYzNy03NjZjMGFiYTE3ZjIuanBnIiwiZW1haWwiOm51bGwsImlzX3ZlcmlmeSI6dHJ1ZSwiY3JlYXRlZF9hdCI6IjIwMjQtMDMtMTlUMDQ6NDA6NTMuMzkxWiIsInVwZGF0ZWRfYXQiOiIyMDI0LTAzLTE5VDA0OjQwOjUzLjM5MVoiLCJ1bml2ZXJzaXR5SWQiOjIsImlhdCI6MTcxMzAyMjI3OCwiZXhwIjoxNzEzMDQzODc4fQ.v5vh5-y6W8jjdVS8jcUpTW1PO5YUBTTRDzWvt9qOxHE",
 #                         'certificate/3b2167c7-28d2-4d0b-b69d-87da4d4db3c1.jpg',
