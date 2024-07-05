@@ -517,7 +517,7 @@ def educations(token):
         #     }
         # }
         # log_to_json(log_data)
-    return response
+        return 
 
 
 
@@ -536,7 +536,7 @@ def regions(token):
     url = f"https://{host}/v1/application-forms/regions"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
-    # if response.status_code == 200:
+    if response.status_code == 200:
     #     log_data = {
     #         'time': datetime.utcnow().isoformat(),
     #         'event': 'regions',
@@ -546,7 +546,7 @@ def regions(token):
     #         }
     #     }
     #     log_to_json(log_data)
-        return response
+        return 
     else:
         # log_data = {
         #     'time': datetime.utcnow().isoformat(),
@@ -557,7 +557,7 @@ def regions(token):
         #     }
         # }
         # log_to_json(log_data)
-        return response
+        return 
 
     # async with aiohttp.ClientSession() as session:
     #     async with session.get(url, headers=default_header) as response:
@@ -585,7 +585,7 @@ def districts(token, district_id):
         # log_to_json(log_data)
         return response
     else:
-        log_data = {
+        # log_data = {
         #     'time': datetime.utcnow().isoformat(),
         #     'event': 'districts',
         #     'details': {
@@ -594,7 +594,7 @@ def districts(token, district_id):
         #     }
         # }
         # log_to_json(log_data)
-        return response
+        return 
 
     # async with aiohttp.ClientSession() as session:
     #     async with session.get(url, headers=default_header) as response:
