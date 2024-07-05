@@ -35,29 +35,29 @@ async def check_number(phone):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=data) as response:
             if response.status == 201:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'check_number',
-                    'details': {
-                        'phone': phone,
-                        'status_code': response.status,
-                        'data': await response.text()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'check_number',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': await response.text()
+                #     }
+                # }
+                # log_to_json(log_data)
                 json_data = await response.text()
                 return json_data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'check_number',
-                    'details': {
-                        'phone': phone,
-                        'status_code': response.status,
-                        'data': await response.text()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'check_number',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': await response.text()
+                #     }
+                # }
+                # log_to_json(log_data)
                 error_message = await response.json()
                 return {'error': f'Failed to check number, status_code: {response.status}, details: {error_message}'}
 
@@ -77,29 +77,29 @@ async def user_register(number):
         async with session.post(url, json=body, headers=default_header) as response:
             # ic(response.status)
             if response.status == 201:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'user_register',
-                    'details': {
-                        'phone': number,
-                        'status_code': response.status,
-                        'data': await response.json()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_register',
+                #     'details': {
+                #         'phone': number,
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 json_data = await response.json()
                 return json_data
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'user_register',
-                    'details': {
-                        'phone': number,
-                        'status_code': response.status,
-                        'data': await response.json()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_register',
+                #     'details': {
+                #         'phone': number,
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 error_message = await response.json()
                 return {'error': f'Failed to user register, status_code: {response.status}, details: {error_message}'}
 
@@ -118,29 +118,29 @@ async def user_verify(secret_code, phone):
             data = await response.json()
             # ic(data)
             if response.status == 200:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'user_verify',
-                    'details': {
-                        'phone': phone,
-                        'status_code': response.status,
-                        'data': data
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_verify',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 json_data = await response.json()  # This should be a dictionary
                 return {'data': json_data, 'status_code': response.status}  # Return a dictionary
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'user_verify',
-                    'details': {
-                        'phone': phone,
-                        'status_code': response.status,
-                        'data': data
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_verify',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': "Failed to verify", 'status_code': response.status}
 
 
@@ -159,29 +159,29 @@ async def user_login(phone):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 200:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'user_login',
-                    'details': {
-                        'phone': phone,
-                        'status_code': response.status,
-                        'data': await response.json()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_login',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 json_data = await response.json() 
                 return {'data': json_data, 'status_code': response.status} 
             else:
-                log_data = {
-                    'time': datetime.utcnow().isoformat(),
-                    'event': 'user_login',
-                    'details': {
-                        'phone': phone,
-                        'status_code': response.status,
-                        'data': await response.json()
-                    }
-                }
-                log_to_json(log_data)
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_login',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': "Failed to verify", 'status_code': response.status}
             
 # user_login('+998998359015')
