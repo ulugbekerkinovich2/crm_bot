@@ -830,26 +830,26 @@ async def delete_profile(token):
             if response.status == 200:
                 try:
                     # Attempt to decode JSON regardless of Content-Type header
-                    log_data = {
-                        'time': datetime.utcnow().isoformat(),
-                        'event': 'delete_profile',
-                        'details': {
-                            'status_code': response.status,
-                            'data': response.json()
-                        }
-                    }
-                    log_to_json(log_data)
+                    # log_data = {
+                    #     'time': datetime.utcnow().isoformat(),
+                    #     'event': 'delete_profile',
+                    #     'details': {
+                    #         'status_code': response.status,
+                    #         'data': response.json()
+                    #     }
+                    # }
+                    # log_to_json(log_data)
                     return response.status
                 except aiohttp.client_exceptions.ContentTypeError:
-                    log_data = {
-                        'time': datetime.utcnow().isoformat(),
-                        'event': 'delete_profile',
-                        'details': {
-                            'status_code': response.status,
-                            'data': response.text
-                        }
-                    }
-                    log_to_json(log_data)
+                    # log_data = {
+                    #     'time': datetime.utcnow().isoformat(),
+                    #     'event': 'delete_profile',
+                    #     'details': {
+                    #         'status_code': response.status,
+                    #         'data': response.text
+                    #     }
+                    # }
+                    # log_to_json(log_data)
                     # Handle the case where JSON decoding fails
                     return {'error': 'Response content type is not application/json', 'status_code': response.status}
             else:
