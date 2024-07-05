@@ -1046,7 +1046,7 @@ async def djtoken(username, password):
                 #         # 'data': data
                 #     }
                 # }
-                log_to_json(log_data)
+                # log_to_json(log_data)
                 return data
             else:
                 # log_data = {
