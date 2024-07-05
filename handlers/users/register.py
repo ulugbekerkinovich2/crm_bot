@@ -45,7 +45,7 @@ error_document = "Passport seriyasi 2 ta harfdan  va 7 raqamdan iborat bo'lishi 
 select_region = "Ta'lim dargohi joylashgan shahar yoki viloyatni tanlang:"
 select_degree = "<b>*Daraja tanlang:</b>"
 select_direction = "Yo'nalish yoki mutaxassislikni tanlang:"
-select_edu_type = "Ta'lim shaklini tanglang:"
+select_edu_type = "Ta'lim shaklini tanlang:"
 select_edu_language = "Ta'lim tilini tanlang:"
 select_type_certificate = "Sertifikat turini tanlang:"
 select_country = "Ta’lim dargohi joylashgan davlatni tanlang:"
@@ -2298,7 +2298,7 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
 
     # Send applicant data based on education type
     applicant_status = await send_applicant_data(token_, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience)
-
+    ic(applicant_status)
     # Respond based on applicant status
     if applicant_status == 201:
         await callback_query.message.answer(application_submited, reply_markup=menu)

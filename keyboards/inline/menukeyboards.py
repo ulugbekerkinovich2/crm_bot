@@ -166,28 +166,16 @@ edit_user_education_transfer_inline_ru = InlineKeyboardMarkup(
 update_application_inline = InlineKeyboardMarkup(
     inline_keyboard=[
         [
-            InlineKeyboardButton(text="Familiya", callback_data='lastname'),
+            InlineKeyboardButton(text="Daraja", callback_data='degree'),
         ],
         [
-            InlineKeyboardButton(text="Ism", callback_data='firstname'),
+            InlineKeyboardButton(text="Yo'nalish yoki mutaxassislik", callback_data='direction'),
         ],
         [
-            InlineKeyboardButton(text="Otangizni ismi", callback_data='thirdname'),
+            InlineKeyboardButton(text="Ta'lim shakli", callback_data='education_type'),
         ],
         [
-            InlineKeyboardButton(text="Passport/ID karta seriya va raqami", callback_data='passport'),
-        ],
-        [
-            InlineKeyboardButton(text="Tug'ilgan kun", callback_data='birthdate'),
-        ],
-        [
-            InlineKeyboardButton(text="Jins", callback_data='gender'),
-        ],
-        [
-            InlineKeyboardButton(text="Tug'ilgan joyi", callback_data='birthplace'),
-        ],
-        [
-            InlineKeyboardButton(text="Qo'shimcha telefon raqami", callback_data='extra_phone'),
+            InlineKeyboardButton(text="Ta'lim tili", callback_data='education_language'),
         ]
     ]
 )
