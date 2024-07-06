@@ -297,14 +297,14 @@ async def get_email(message: types.Message, state: FSMContext):
     ic(update_user_profile_response)
     # except Exception as e:
     #     ic(490,'my_dj_error', e)
-    try:
-        ic(gender, birthdate, birthplace, extranumber)
-        res_app_forms = send_req.application_form_manual(token, birthdate,birthplace,email_,extranumber,firstname,
-                                            gender,lastname,phone,image,pinfl,document,
-                                        src_,thirdname)
-        ic(res_app_forms)
-    except Exception as e:
-        return await message.answer(res_app_forms['data']['message'])
+    # try:
+    ic(gender, birthdate, birthplace, extranumber)
+    res_app_forms = send_req.application_form_manual(token, birthdate,birthplace,email_,extranumber,firstname,
+                                        gender,lastname,phone,image,pinfl,document,
+                                    src_,thirdname)
+    #     ic(res_app_forms)
+    # except Exception as e:
+    #     return await message.answer(res_app_forms['data']['message'])
     # ic(res_app_forms.get('status_code'))
     if res_app_forms.get('status_code') == 201:
         ic(res_app_forms.get('status_code'))

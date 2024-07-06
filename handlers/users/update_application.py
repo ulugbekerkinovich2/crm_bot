@@ -18,11 +18,11 @@ async def menu(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Text(equals="📝Arizani tahrirlash"), state="*")
 async def menu(message: types.Message, state: FSMContext):
-    try:
+    # try:
         # data = await state.get_data()
         # token = data.get('token')
         # refreshToken = data.get('refreshToken')
         # my_app = await send_req.my_applications(token=token)
-        await message.answer("Arizangizni faqat kutilmoqda statusida tahrirlay olasiz", reply_markup=menu)
-    except:
-        pass
+    await message.answer("Arizangizni faqat kutilmoqda statusida tahrirlay olasiz", reply_markup=menu)
+    # except:
+    #     pass
