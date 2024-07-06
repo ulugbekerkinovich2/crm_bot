@@ -305,7 +305,7 @@ async def get_email(message: types.Message, state: FSMContext):
         ic(res_app_forms)
     except Exception as e:
         return await message.answer(res_app_forms['data']['message'])
-    ic(res_app_forms.get('status_code'))
+    # ic(res_app_forms.get('status_code'))
     if res_app_forms.get('status_code') == 201:
         ic(res_app_forms.get('status_code'))
         await message.answer("Ma'lumotlaringiz saqlandi", reply_markup=enter_button)
