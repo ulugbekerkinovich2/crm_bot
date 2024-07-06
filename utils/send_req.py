@@ -210,7 +210,7 @@ async def application_form_info(birth_date, document, token):
                 #         'data': await response.json()
                 #     }
                 # }
-                log_to_json(log_data)
+                # log_to_json(log_data)
                 json_data = await response.json() 
                 return {'data': json_data , 'status_code': response.status} 
             else:
