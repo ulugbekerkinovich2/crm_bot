@@ -532,7 +532,6 @@ def educations(token):
 
 
 def regions(token):
-
     url = f"https://{host}/v1/application-forms/regions"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
@@ -546,7 +545,7 @@ def regions(token):
     #         }
     #     }
     #     log_to_json(log_data)
-        return 
+        return response
     else:
         # log_data = {
         #     'time': datetime.utcnow().isoformat(),
@@ -953,7 +952,7 @@ def application_forms_for_edu(token,  district_id, education_id, file_, institut
         }
     }
     response = requests.post(url, json=body, headers=default_header)
-    if response.status == 201:
+    if response.status_code == 201:
         # log_data = {
         #     'time': datetime.utcnow().isoformat(),
         #     'event': 'application_forms_for_edu',
