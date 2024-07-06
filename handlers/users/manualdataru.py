@@ -258,7 +258,7 @@ async def get_email(message: types.Message, state: FSMContext):
     #     await message.answer("Email не является допустимым. Пожалуйста, введите действительный адрес электронной почты. Адрес электронной почты должен содержать строчные буквы.")
     #     return  # Ask for the email again or handle differently
     if not "@gmail.com" in email:
-        await message.answer("Email yaroqli emas. Iltimos yaroqli email kiriting. Email kichik harflardan tashkil topgan bo'lishi kerak.")
+        await message.answer("Email не является допустимым. Введите, пожалуйста, действительный адрес электронной почты. Электронная почта должна быть написана строчными буквами.")
 
     await state.update_data(email=email.lower())
     data_obj = await state.get_data()

@@ -250,9 +250,8 @@ async def get_email(message: types.Message, state: FSMContext):
     # Debug prints can be removed or handled via logging
     # Logging example: logger.debug(f"Received email: {email}")
     
-    if not re.match(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$', email):
+    if not "@gmail.com" in email:
         await message.answer("Email yaroqli emas. Iltimos yaroqli email kiriting. Email kichik harflardan tashkil topgan bo'lishi kerak.")
-        return
     
 
     await state.update_data(email=email)
