@@ -319,7 +319,7 @@ async def get_email(message: types.Message, state: FSMContext):
             elif user_education_src is not None:
                 await EducationData.degree_id.set()
     else:
-        await message.answer("Ma'lumotlaringiz saqlanmadi")
-        await message.answer(res_app_forms)
-        # return
+        await message.answer("Ma'lumotlaringiz saqlanmadi, qayta email kiriting.")
+        # await message.answer(res_app_forms)
+        return
 
