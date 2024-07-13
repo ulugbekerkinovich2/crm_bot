@@ -32,7 +32,7 @@ async def send_photo_from_message(message: types.Message, photo_url: str, captio
 @dp.message_handler(state=ManualPersonalInfoRU.personal_info)
 async def send_welcome(message: types.Message, state: FSMContext):
     # await message.reply("PNFL orqali ma'lumotlarni olishni imkoni bo'lmadi", reply_markup=ReplyKeyboardRemove())
-    photo_url = "https://api.mentalaba.uz/logo/20fb9b17-4807-410d-8933-b611a63f5efd.png"
+    photo_url = "https://api.mentalaba.uz/logo/40765367-0927-4e4a-9ce2-d9ef417a071e.webp"
     caption = "Присылайте свою фотографию в формате 3х4. в формате jpg,png"
     await send_photo_from_message(message, photo_url, caption)
     await ManualPersonalInfoRU.image.set()

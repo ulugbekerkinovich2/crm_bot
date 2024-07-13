@@ -197,32 +197,13 @@ async def application_form_info(birth_date, document, token):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
-            ic(body, default_header)
+            ic(body)
             ic(response.status, 'info')
             ic(111, response)
-            # json_data = await response.json() 
             if response.status == 200:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_form_info',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': await response.json()
-                #     }
-                # }
-                # log_to_json(log_data)
                 json_data = await response.json() 
                 return {'data': json_data , 'status_code': response.status} 
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_form_info',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': await response.json()
-                #     }
-                # }
-                # log_to_json(log_data)
                 error_data = await response.json()
                 return {'error': "Failed to verify", 'status_code': response.status, 'data': error_data}
                 # response = requests.post(url, json=body, headers=default_header)
@@ -323,25 +304,9 @@ async def directions(token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'directions',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': await response.json()
-                #     }
-                # }
                 data = await response.json()
                 return data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'directions',
-                #     'details': {
-                #         'status_code': response.status
-                #     }
-                # }
-                log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 async def applicants(token,is_transfer_student,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None):

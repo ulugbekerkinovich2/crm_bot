@@ -292,6 +292,13 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                     else:
                         # await message.answer("935920479","severda xatolik 107")
                         await message.answer("Вы должны зарегистрироваться")
+                        await state.update_data(phone=f"+{custom_phone}")
+                        user_register = await send_req.user_register(f"+{custom_phone}")
+                        ic('user_register', user_register)
+                        if user_register.get('status') == 200:
+                            await message.answer(accepted_phone_ru, reply_markup=ReplyKeyboardRemove())
+                            # await message.answer("Telefon raqamingizga yuborilgan kodni yuboring")
+                            await PersonalDataRU.secret_code.set()
 
                 elif str(check_user) == 'false':
                     await state.update_data(phone=custom_phone)

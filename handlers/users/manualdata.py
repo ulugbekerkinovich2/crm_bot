@@ -31,7 +31,7 @@ async def send_photo_from_message(message: types.Message, photo_url: str, captio
 # @dp.message_handler(Text(equals="ok"), state=None)
 @dp.message_handler(state=ManualPersonalInfo.personal_info)
 async def send_welcome(message: types.Message, state: FSMContext):
-    photo_url = "https://api.mentalaba.uz/logo/20fb9b17-4807-410d-8933-b611a63f5efd.png"
+    photo_url = "https://api.mentalaba.uz/logo/40765367-0927-4e4a-9ce2-d9ef417a071e.webp"
     caption = "Rasmingizni yuboring 3x4 formatda. jpg, png formatda"
     await send_photo_from_message(message, photo_url, caption)
     await ManualPersonalInfo.image.set()

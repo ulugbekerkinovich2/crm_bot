@@ -2008,8 +2008,8 @@ async def send_education_files(message, user_education, pinfl_user_education, ce
     if diploma_file is not None:
         await send_document(message, diploma_file, "Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
 
-    if pinfl_user_education:
-        await send_document(message, pinfl_user_education.get('file', []), "Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+    # if pinfl_user_education:
+    #     await send_document(message, pinfl_user_education.get('file', []), "Diplom1, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
 
     for certification in certifications:
         if certification.get('file'):

@@ -240,7 +240,7 @@ async def handle_start(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Text(equals='/restart'), state='*')
 async def bot_restart(message: types.Message, state: FSMContext):
-    await message.answer("Bot qayta ishga tushdi")
+    # await message.answer("Bot qayta ishga tushdi")
     await state.finish()
     await handle_start(message, state)
 
@@ -253,3 +253,8 @@ async def admin_command(message: types.Message):
 "Qo'llab-quvvatlash xizmati boti orqali texnik yordam va hujjat topshirishda yordam olishingiz mumkin. Qo\'shimcha ma\'lumot uchun administratorga murojaat qiling: <a href='https://t.me/universittet_qabul_admin_bot'>Admin</a>"
 , parse_mode='HTML')
     
+
+# @dp.message_handler(state='*')
+# async def default_message_handler(message: types.Message, state: FSMContext):
+#     await state.finish()
+#     await handle_start(message, state)
