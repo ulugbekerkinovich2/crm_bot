@@ -11,7 +11,7 @@ ADMINS = env.list("ADMINS")  # adminlar ro'yxati
 IP = env.str("ip")  # Xosting ip manzili
 throttling_time = env.str("throttling_time")
 domain_name = env.str("domain_name")
-
+GROUP_CHAT_ID = env.str("GROUP_CHAT_ID")
 
 # origin= env.str("origin") if env.str("origin") == "qabul.aifu.uz" else "qabul.aifu.uz"
 origin= env.str("origin") if env.str("origin") == "admission.tiiu.uz" else "admission.tiiu.uz"
@@ -30,3 +30,4 @@ university_id = 1
 web_app_url = env.str("web_app_url")
 port= env.int("port")
 university_site_url=env.str("university_site_url")
+exam_link=env.str("exam_link")

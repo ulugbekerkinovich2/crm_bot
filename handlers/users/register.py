@@ -1975,10 +1975,10 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
         parse_mode='HTML'
     )
 
-    # Send applicant data based on education type
+
     applicant_status = await send_applicant_data(token_, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience)
     ic(applicant_status)
-    # Respond based on applicant status
+
     if applicant_status == 201:
         await callback_query.message.answer(application_submited, reply_markup=menu)
         await EducationData.menu.set()
