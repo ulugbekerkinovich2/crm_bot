@@ -2131,8 +2131,11 @@ async def my_application_exam(message: Message, state: FSMContext):
     exam = my_app.get('exam', None)
     ic(exam, 1547)
     if exam != {}:
-        exam_result = exam.get('exam_result', None)
-        first_subject_name = exam_result.get('first_subject_name', None)
+        exam_result = exam['exam_result']
+        # exam_result = exam.get('exam_result', None)
+        exam_result = exam_result[0]
+        first_subject_name = exam_result['first_subject_name']
+        # first_subject_name = exam_result.get('first_subject_name', None)
         first_name_uz = first_subject_name['name_uz'] if first_subject_name['name_uz'] else None
         first_subject_score = exam_result.get('first_subject_score', 0)
         first_subject_mark = exam_result.get('first_subject_mark', 0)
@@ -2193,31 +2196,31 @@ async def my_application_exam(message: Message, state: FSMContext):
         ic(1562, 'ok')
         
         response_exam = (
-            f"*Imtihon natijasi*\n"
-                f"Imtihonga chaqirilgan\n"
-                f"Imtihon sanasi: {send_req.convert_time(time_when_started)}\n\n"
-                f"*Imtihon fanlari*\n"
-                f"{escape_markdown(first_name_uz)} - {first_subject_score}/20 -  {first_subject_mark} ball\n"
-                f"{escape_markdown(second_name_uz)} - {second_subject_score}/20 - {second_subject_mark} ball\n"
-                f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball\n\n"
-                f"Jami ball: {total_mark} ball\n\n"
-                "Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
-                "           Aloqa markazi: +99878 113 17 17\n"
-                f"[Shartnomani yuklab olish]({Shartnoma})"
-            )
+            f"📝 *Imtihon natijasi*\n"
+            f"✉️ Imtihonga chaqirilgan\n"
+            f"📅 Imtihon sanasi: {send_req.convert_time(time_when_started)}\n\n"
+            f"📚 *Imtihon fanlari*\n"
+            f"{escape_markdown(first_name_uz)} - {first_subject_score}/20 -  {first_subject_mark} ball 📊\n"
+            f"{escape_markdown(second_name_uz)} - {second_subject_score}/20 - {second_subject_mark} ball 📊\n"
+            f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball 📊\n\n"
+            f"🏆 Jami ball: {total_mark} ball\n\n"
+            f"📞 Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
+            f"🔗 Aloqa markazi: +998781131717\n"
+            f"[📄 Shartnomani yuklab olish]({Shartnoma})"
+        )
         await message.answer(response_exam, parse_mode='Markdown')
     if (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/") and exam is not None and contract_id is None:
         response_exam = (
-            f"*Imtihon natijasi*\n"
-                f"Imtihonga chaqirilgan\n"
-                f"Imtihon sanasi: {send_req.convert_time(time_when_started)}\n\n"
-                f"*Imtihon fanlari*\n"
+            f"📝 *Imtihon natijasi*\n"
+                f"✉️ Imtihonga chaqirilgan\n"
+                f"📅 Imtihon sanasi: {send_req.convert_time(time_when_started)}\n\n"
+                f"📚 *Imtihon fanlari*\n"
                 f"{escape_markdown(first_name_uz)} - {first_subject_score}/20 -  {first_subject_mark} ball\n"
                 f"{escape_markdown(second_name_uz)} - {second_subject_score}/20 - {second_subject_mark} ball\n"
                 f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball\n\n"
-                f"Jami ball: {total_mark} ball\n\n"
-                "Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
-                "           Aloqa markazi: +99878 113 17 17\n"
+                f"🏆 Jami ball: {total_mark} ball\n\n"
+                "📞 Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
+                "🔗         Aloqa markazi: +998781131717\n"
             )
         await message.answer(response_exam, parse_mode='Markdown')
 
@@ -2330,84 +2333,93 @@ async def my_application(message: Message, state: FSMContext):
     elif color == 'red':
         color = "🔴" 
     ic('------>', online_exam_link)
-    
+    ic('---------------------------->', online_exam_link, exam_link)
     response_message = "ma'lumot topilmadi"
-    if (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam_result is None:
+    if (online_exam_link == f"https://{exam_link}" or \
+        online_exam_link == f"https://{exam_link}/" or \
+            online_exam_link == f"https://{exam_link}/" or \
+                online_exam_link == f"https://{exam_link}") and exam_result == []:
+        
         online_exam_link = f"https://{exam_link}/test-start?{token}"
         ic('*************--->', online_exam_link, 1552)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {convert_time(comment_time)}\n"
-            f"{color} *Izoh:* {escape_markdown(comment)}\n"
-            f"*Online imtihon topshirish:* [Online imtihon topshirish]({(online_exam_link)})"
+        f"📄 *Ariza Tafsilotlari:*\n"
+        f"🕒 Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
+        f"📊 Holati: *{escape_markdown(status_name)}*\n"
+        f"🔀 Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
+        f"🎓 Darajasi: {escape_markdown(degree_name_uz)}\n"
+        f"🏫 Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
+        f"🗣️ Ta'lim tili: {escape_markdown(education_language_name_uz)}\n"
+        f"💵 Ta'lim narxi: {formatted_fee} so'm\n\n"
+        f"⏰ Izoh vaqti: {convert_time(comment_time)}\n"
+        f"{color} *Izoh:* {escape_markdown(comment)}\n"
+        f"🖥️ *Online imtihon topshirish:* [Online imtihon topshirish]({online_exam_link})"
         )
+
         ic(response_message, 1852)
     elif (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam_result is not None:
         ic(1765)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {convert_time(comment_time)}\n"
-            f"{color} *Izoh:* {escape_markdown(comment)}\n"
+        f"📝 *Ariza Tafsilotlari:*\n"
+        f"🕗 Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
+        f"📌 Holati: *{escape_markdown(status_name)}*\n"
+        f"🧭 Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
+        f"🎓 Darajasi: {escape_markdown(degree_name_uz)}\n"
+        f"🏫 Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
+        f"🗣️ Ta'lim tili: {escape_markdown(education_language_name_uz)}\n"
+        f"💰 Ta'lim narxi: {formatted_fee} so'm\n\n"
+        f"⏳ Izoh vaqti: {convert_time(comment_time)}\n"
+        f"{color} *Izoh:* {escape_markdown(comment)}\n"
         )
+
         ic(response_message, 1867)
     elif (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam == {}:
         ic(1805)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {send_req.convert_time(comment_time)}\n"
+            f"📝 *Ariza Tafsilotlari:*\n"
+            f"🕗 Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
+            f"📌 Holati: *{escape_markdown(status_name)}*\n"
+            f"🧭 Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
+            f"🎓 Darajasi: {escape_markdown(degree_name_uz)}\n"
+            f"🏫 Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
+            f"🗣️ Ta'lim tili: {escape_markdown(education_language_name_uz)}\n"
+            f"💰 Ta'lim narxi: {formatted_fee} so'm\n\n"
+            f"⏰ Izoh vaqti: {send_req.convert_time(comment_time)}\n"
             f"{color} *Izoh:* {escape_markdown(comment)}\n"
         )
+
         ic(response_message, 1882)
     elif (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam != {}:
         ic(1792)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {send_req.convert_time(comment_time)}\n"
-            f"{color} *Izoh:* {escape_markdown(comment)}\n"
+            "📄 *Ariza Tafsilotlari:*\n"
+            f"🕒 Yaratilgan vaqti: `{send_req.convert_time(human_readable_date)}`\n"
+            f"📌 Holati: *{escape_markdown(status_name)}*\n"
+            f"🧭 Yo'nalishi: `{escape_markdown(direction_name_uz)}`\n"
+            f"🎓 Darajasi: `{escape_markdown(degree_name_uz)}`\n"
+            f"🏫 Ta'lim turi: `{escape_markdown(education_type_name_uz)}`\n"
+            f"🗣️ Ta'lim tili: `{escape_markdown(education_language_name_uz)}`\n"
+            f"💰 Ta'lim narxi: `{formatted_fee} so'm`\n\n"
+            f"⏰ Izoh vaqti: `{send_req.convert_time(comment_time)}`\n"
+            f"{color} *Izoh:* `{escape_markdown(comment)}`\n"
         )
+
         ic(response_message, 1896)
     elif  exam == {}:
         ic(1832)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {send_req.convert_time(comment_time)}\n"
-            f"{color} *Izoh:* {escape_markdown(comment)}\n"
+            "📝 *Ariza Tafsilotlari:*\n"
+            f"🕒 Yaratilgan vaqti: `{send_req.convert_time(human_readable_date)}`\n"
+            f"📊 Holati: *{escape_markdown(status_name)}*\n"
+            f"🧭 Yo'nalishi: `{escape_markdown(direction_name_uz)}`\n"
+            f"🎓 Darajasi: `{escape_markdown(degree_name_uz)}`\n"
+            f"🏫 Ta'lim turi: `{escape_markdown(education_type_name_uz)}`\n"
+            f"🗣️ Ta'lim tili: `{escape_markdown(education_language_name_uz)}`\n"
+            f"💵 Ta'lim narxi: `{formatted_fee} so'm`\n\n"
+            f"⏰ Izoh vaqti: `{send_req.convert_time(comment_time)}`\n"
+            f"{color} *Izoh:* `{escape_markdown(comment)}`\n"
         )
+
         ic(response_message, 1558)
     await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
 

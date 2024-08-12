@@ -181,9 +181,9 @@ update_education_info_ru = ReplyKeyboardMarkup(
 
 update_application = ReplyKeyboardMarkup(
     keyboard=[
-        [
-        KeyboardButton(text="📝Arizani tahrirlash"),
-        ],
+        # [
+        # KeyboardButton(text="📝Arizani tahrirlash"),
+        # ],
         [
         KeyboardButton(text="📄Arizani ko'rish"),
         ]

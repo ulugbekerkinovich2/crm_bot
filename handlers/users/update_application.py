@@ -3,11 +3,11 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from icecream import ic
 from aiogram.dispatcher.filters import Command, Text
-from keyboards.default.registerKeyBoardButton import update_application
+from keyboards.default.registerKeyBoardButton import update_application, menu
 from utils import send_req
 
 @dp.message_handler(Text(equals="📁Arizam"), state="*")
-async def menu(message: types.Message, state: FSMContext):
+async def menu1(message: types.Message, state: FSMContext):
     try:
         data = await state.get_data()
         ic(data)
@@ -17,7 +17,7 @@ async def menu(message: types.Message, state: FSMContext):
         await message.answer("Xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko'ring.")
 
 @dp.message_handler(Text(equals="📝Arizani tahrirlash"), state="*")
-async def menu(message: types.Message, state: FSMContext):
+async def menu2(message: types.Message, state: FSMContext):
     # try:
         # data = await state.get_data()
         # token = data.get('token')
