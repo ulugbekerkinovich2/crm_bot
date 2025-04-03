@@ -9,12 +9,35 @@ reset_password = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+branch_uz = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Toshkent shahar, Qorasaroy filiali'),
+            KeyboardButton(text='Toshkent viloyati, Chirchiq filiali'),
+        ],
+    ],
+    resize_keyboard=True
+)
 
+
+branch_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Город Ташкент, Карасарайский филиал'),
+            KeyboardButton(text='Ташкентская область, Чирчикский филиал'),
+        ],
+    ],
+    resize_keyboard=True
+)
 
 register = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="🧾Abiturient"),
+            KeyboardButton(text='🧑‍🎓 Bakalavriat'),
+            KeyboardButton(text='👨🏼‍🎓 Magistratura'),
+        ],
+        [
+            KeyboardButton(text="🧑‍🎓 Ikkinchi mutaxassislik"),
             KeyboardButton(text="🔄O'qishni ko'chirish"),
         ],
     ],
@@ -24,8 +47,12 @@ register = ReplyKeyboardMarkup(
 register_ru = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="🧾 Абитуриент"),
+            KeyboardButton(text='🧑‍🎓 Бакалавриат'),
+            KeyboardButton(text='👨🏼‍🎓 Магистратура'),
+        ],
+        [
             KeyboardButton(text="🔄Трансферное обучение"),
+            KeyboardButton(text="🧑‍🎓 Вторая специальность"),
         ],
     ],
     resize_keyboard=True
