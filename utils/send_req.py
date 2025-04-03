@@ -15,8 +15,8 @@ ic(origin, 'oldin')
 # origin = 'admission.uess.uz'
 # origin = 'admission.tiiu.uz'
 # ic(origin, 'keyingi')
-# host = 'crmapi.mentalaba.uz'
-
+host = 'crmapi.mentalaba.uz'
+origin = 'qabul.aifu.uz'
 # username = 'ulugbek'
 # crm_django_domain = 'alfa.misterdev.uz'
 # password = '998359015a@'
@@ -35,29 +35,9 @@ async def check_number(phone):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=data) as response:
             if response.status == 201:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'check_number',
-                #     'details': {
-                #         'phone': phone,
-                #         'status_code': response.status,
-                #         'data': await response.text()
-                #     }
-                # }
-                # log_to_json(log_data)
                 json_data = await response.text()
                 return json_data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'check_number',
-                #     'details': {
-                #         'phone': phone,
-                #         'status_code': response.status,
-                #         'data': await response.text()
-                #     }
-                # }
-                # log_to_json(log_data)
                 error_message = await response.json()
                 return {'error': f'Failed to check number, status_code: {response.status}, details: {error_message}'}
 
@@ -309,21 +289,27 @@ async def directions(token):
             else:
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-async def applicants(token,is_transfer_student,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None):
+async def applicants(token,is_transfer_student,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None,
+                     is_second_specialty=False, branch=None,is_master=None, referral_source='telegram'):
+
+    # print(token,is_transfer_student,chat_id_user,degree_id, direction_id, education_language_id, education_type_id, work_experience_document,branch,is_master,is_second_specialty, referral_source)
     url = f"https://{host}/v1/applicants"
     headers = default_header.copy()
     headers['Authorization'] = f'Bearer {token}'
     body = {
+        'branch': branch,
         'degree_id': int(degree_id),
         'direction_id': int(direction_id),
         'education_language_id': int(education_language_id),
         'education_type_id': int(education_type_id),
-        'work_experience_document': str(work_experience_document),
+        # 'work_experience_document': str(work_experience_document),
         'bot_user_id': str(chat_id_user),
+        'is_master': is_master,
         'is_second_specialty': False,
-        'is_transfer_student': is_transfer_student
+        'is_transfer_student': is_transfer_student,
+        'referral_source': referral_source
     }
-    # ic(body)
+    ic(body, headers)
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, json=body) as response:
             # ic(173, response.status, response.text)

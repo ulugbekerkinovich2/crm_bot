@@ -2243,6 +2243,7 @@ async def my_application(message: Message, state: FSMContext):
     education_language_name_uz = my_app.get('education_language_name_uz', 'Talim tili topilmadi')
     tuition_fee = my_app.get('tuition_fee', 'Narxi topilmadi')
     comments = my_app.get('comment', [])
+    branch = my_app.get('branch', 'branch not found')
     # try:
     exam = my_app.get('exam', None)
     exam_result = exam.get('exam_result', None)
@@ -2335,7 +2336,8 @@ async def my_application(message: Message, state: FSMContext):
     ic('------>', online_exam_link)
     ic('---------------------------->', online_exam_link, exam_link)
     response_message = "ma'lumot topilmadi"
-    if (online_exam_link == f"https://{exam_link}" or \
+    if (branch or
+        online_exam_link == f"https://{exam_link}" or \
         online_exam_link == f"https://{exam_link}/" or \
             online_exam_link == f"https://{exam_link}/" or \
                 online_exam_link == f"https://{exam_link}") and exam_result == []:
@@ -2353,11 +2355,12 @@ async def my_application(message: Message, state: FSMContext):
         f"💵 Ta'lim narxi: {formatted_fee} so'm\n\n"
         f"⏰ Izoh vaqti: {convert_time(comment_time)}\n"
         f"{color} *Izoh:* {escape_markdown(comment)}\n"
-        f"🖥️ *Online imtihon topshirish:* [Online imtihon topshirish]({online_exam_link})"
+        # f"🖥️ *Online imtihon topshirish:* [Online imtihon topshirish]({online_exam_link})"
         )
 
         ic(response_message, 1852)
-    elif (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam_result is not None:
+    elif (branch or
+        online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam_result is not None:
         ic(1765)
         response_message = (
         f"📝 *Ariza Tafsilotlari:*\n"
@@ -2373,7 +2376,8 @@ async def my_application(message: Message, state: FSMContext):
         )
 
         ic(response_message, 1867)
-    elif (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam == {}:
+    elif (branch or
+        online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam == {}:
         ic(1805)
         response_message = (
             f"📝 *Ariza Tafsilotlari:*\n"
@@ -2389,7 +2393,8 @@ async def my_application(message: Message, state: FSMContext):
         )
 
         ic(response_message, 1882)
-    elif (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam != {}:
+    elif (branch or
+        online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam != {}:
         ic(1792)
         response_message = (
             "📄 *Ariza Tafsilotlari:*\n"

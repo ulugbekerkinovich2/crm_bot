@@ -18,7 +18,7 @@ import aiofiles.os
 from icecream import ic
 import json
 from keyboards.default.registerKeyBoardButton import yes_no,update_education_info
-from keyboards.default.registerKeyBoardButton import enter_button, menu,register, menu_full
+from keyboards.default.registerKeyBoardButton import enter_button, menu,register, menu_full,branch_uz,branch_ru
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
 from data.config import university_id as UNIVERSITY_ID
@@ -65,67 +65,211 @@ select_one = "Quyidagi mamlakatdan birini tanlang:"
 @dp.message_handler(text="🇺🇿O'zbek tili")
 async def uz_lang(message: types.Message, state: FSMContext):
     await state.update_data(language_uz=True, language_ru=False) 
-    await message.answer("2024-2025-o'quv yili uchun ariza topshirish", reply_markup=register)
+    await message.answer("Filiali tanlang:", reply_markup=branch_uz)
+
+branch_options = {
+    "Toshkent shahar, Qorasaroy filiali": "aifu",
+    "Toshkent viloyati, Chirchiq filiali": "aifuchb"
+}
+
+@dp.message_handler(lambda msg: msg.text in branch_options)
+async def select_branch(message: types.Message, state: FSMContext):
+    branch_id = branch_options[message.text]
+    await state.update_data(pre_selected_branch_id=branch_id)
+    await message.answer("2025-2026-o'quv yili uchun ariza topshirish", reply_markup=register)
 
 
-@dp.message_handler(text="🔄O'qishni ko'chirish")
-async def transfer_edu(message: types.Message, state: FSMContext):
+# @dp.message_handler(text="🧑‍🎓 Bakalavriat")
+# async def bachelor_degree(message: types.Message, state: FSMContext):
+#     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+#     ic('uzb tanlandi')
+#     await state.update_state(pre_selected_degree_id=1)
+#     all_data_state = await state.get_data() 
+#     token = all_data_state.get('token', None)
+#     ic('token72', token)
+#     if token is None:
+#         button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+#         keyboard.add(button_phone)
+#         await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
+#         await state.update_data(register_user=False, transfer_user=True)
+#         await PersonalData.phone.set()
+#     elif token is not None:
+#         check_token = await send_req.application_forms_me(token)
+#         check_exam = await send_req.my_applications(token)
+#         exam_status = check_exam.get('status')
+#         status_code = check_token.get('status_code')
+#         if status_code  == 200 and exam_status != 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+#         elif status_code  == 200 and exam_status == 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
+#         elif status_code != 200:
+#             refreshToken = all_data_state.get('refresh_token')
+#             if refreshToken is not None:
+#                 new_token = await send_req.return_token_use_refresh(refreshToken)
+#                 ic(new_token)
+
+# @dp.message_handler(text="👨🏼‍🎓 Magistratura")
+# async def bachelor_degree(message: types.Message, state: FSMContext):
+#     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+#     ic('uzb tanlandi')
+#     await state.update_state(pre_selected_degree_id=2)
+#     all_data_state = await state.get_data() 
+#     token = all_data_state.get('token', None)
+#     ic('token72', token)
+#     if token is None:
+#         button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+#         keyboard.add(button_phone)
+#         await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
+#         await state.update_data(register_user=False, transfer_user=True)
+#         await PersonalData.phone.set()
+#     elif token is not None:
+#         check_token = await send_req.application_forms_me(token)
+#         check_exam = await send_req.my_applications(token)
+#         exam_status = check_exam.get('status')
+#         status_code = check_token.get('status_code')
+#         if status_code  == 200 and exam_status != 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+#         elif status_code  == 200 and exam_status == 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
+#         elif status_code != 200:
+#             refreshToken = all_data_state.get('refresh_token')
+#             if refreshToken is not None:
+#                 new_token = await send_req.return_token_use_refresh(refreshToken)
+#                 ic(new_token)
+
+
+# @dp.message_handler(text="🧑‍🎓 Ikkinchi mutaxassislik")
+# async def bachelor_degree(message: types.Message, state: FSMContext):
+#     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+#     ic('uzb tanlandi')
+#     await state.update_state(pre_selected_is_second_specialty=True)
+#     all_data_state = await state.get_data() 
+#     token = all_data_state.get('token', None)
+#     ic('token72', token)
+#     if token is None:
+#         button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+#         keyboard.add(button_phone)
+#         await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
+#         await state.update_data(register_user=False, transfer_user=True)
+#         await PersonalData.phone.set()
+#     elif token is not None:
+#         check_token = await send_req.application_forms_me(token)
+#         check_exam = await send_req.my_applications(token)
+#         exam_status = check_exam.get('status')
+#         status_code = check_token.get('status_code')
+#         if status_code  == 200 and exam_status != 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+#         elif status_code  == 200 and exam_status == 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
+#         elif status_code != 200:
+#             refreshToken = all_data_state.get('refresh_token')
+#             if refreshToken is not None:
+#                 new_token = await send_req.return_token_use_refresh(refreshToken)
+#                 ic(new_token)
+
+# @dp.message_handler(text="🔄O'qishni ko'chirish")
+# async def transfer_edu(message: types.Message, state: FSMContext):
+#     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+#     ic('uzb tanlandi')
+
+#     all_data_state = await state.get_data() 
+#     token = all_data_state.get('token', None)
+#     ic('token72', token)
+#     if token is None:
+#         button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+#         keyboard.add(button_phone)
+#         await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
+#         await state.update_data(register_user=False, transfer_user=True)
+#         await PersonalData.phone.set()
+#     elif token is not None:
+#         check_token = await send_req.application_forms_me(token)
+#         check_exam = await send_req.my_applications(token)
+#         exam_status = check_exam.get('status')
+#         status_code = check_token.get('status_code')
+#         if status_code  == 200 and exam_status != 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+#         elif status_code  == 200 and exam_status == 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
+#         elif status_code != 200:
+#             refreshToken = all_data_state.get('refresh_token')
+#             if refreshToken is not None:
+#                 new_token = await send_req.return_token_use_refresh(refreshToken)
+#                 ic(new_token)
+degree_options = {
+    "🧑‍🎓 Bakalavriat": {"degree_id": 1},
+    "👨🏼‍🎓 Magistratura": {"degree_id": 2},
+    "🧑‍🎓 Ikkinchi mutaxassislik": {"is_second_specialty": True},
+    "🔄O'qishni ko'chirish": {"transfer": True}
+}
+
+@dp.message_handler(Text(equals=list(degree_options.keys())))
+async def handle_degree_selection(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     ic('uzb tanlandi')
 
-    all_data_state = await state.get_data() 
-    token = all_data_state.get('token', None)
+    # Parametrni aniqlab olamiz
+    option = degree_options.get(message.text, {})
+    if "degree_id" in option:
+        await state.update_data(pre_selected_degree_id=option["degree_id"])
+    if option.get("is_second_specialty"):
+        await state.update_data(pre_selected_is_second_specialty=True)
+    if option.get("transfer"):
+        await state.update_data(transfer_user=True)
+
+    all_data_state = await state.get_data()
+    token = all_data_state.get("token")
     ic('token72', token)
+
     if token is None:
-        button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+        button_phone = types.KeyboardButton(text="📲 Telefon raqamni yuborish", request_contact=True)
         keyboard.add(button_phone)
-        await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
-        await state.update_data(register_user=False, transfer_user=True)
+        await message.answer(example_phone, parse_mode="HTML", reply_markup=keyboard)
+        await state.update_data(register_user=False)
         await PersonalData.phone.set()
-    elif token is not None:
+    else:
         check_token = await send_req.application_forms_me(token)
         check_exam = await send_req.my_applications(token)
-        exam_status = check_exam.get('status')
-        status_code = check_token.get('status_code')
-        if status_code  == 200 and exam_status != 'came-exam':
+        exam_status = check_exam.get("status")
+        status_code = check_token.get("status_code")
+
+        if status_code == 200 and exam_status != "came-exam":
             await message.answer("🏠Asosiy sahifa", reply_markup=menu)
-        elif status_code  == 200 and exam_status == 'came-exam':
+        elif status_code == 200 and exam_status == "came-exam":
             await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
         elif status_code != 200:
-            refreshToken = all_data_state.get('refresh_token')
-            if refreshToken is not None:
-                new_token = await send_req.return_token_use_refresh(refreshToken)
+            refresh_token = all_data_state.get("refresh_token")
+            if refresh_token:
+                new_token = await send_req.return_token_use_refresh(refresh_token)
                 ic(new_token)
 
+# @dp.message_handler(Text(equals="🧾Abiturient"))
+# async def my_application(message: types.Message, state: FSMContext):
+#     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+#     ic('uzb tanlandi')
 
-@dp.message_handler(Text(equals="🧾Abiturient"))
-async def my_application(message: types.Message, state: FSMContext):
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    ic('uzb tanlandi')
-
-    all_data_state = await state.get_data() 
-    token = all_data_state.get('token', None)
-    ic('token72', token)
-    if token is None:
-        button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
-        keyboard.add(button_phone)
-        await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
-        await state.update_data(register_user=True, transfer_user=False)
-        await PersonalData.phone.set()
-    elif token is not None:
-        check_token = await send_req.application_forms_me(token)
-        status_code = check_token.get('status_code')
-        check_exam = await send_req.my_applications(token)
-        exam_status = check_exam.get('status')
-        if status_code  == 200 and exam_status != 'came-exam':
-            await message.answer("🏠Asosiy sahifa", reply_markup=menu)
-        elif status_code  == 200 and exam_status == 'came-exam':
-            await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
-        elif status_code != 200:
-            refreshToken = all_data_state.get('refresh_token')
-            if refreshToken is not None:
-                new_token = await send_req.return_token_use_refresh(refreshToken)
-                ic(new_token)
+#     all_data_state = await state.get_data() 
+#     token = all_data_state.get('token', None)
+#     ic('token72', token)
+#     if token is None:
+#         button_phone = types.KeyboardButton(text='📲 Telefon raqamni yuborish', request_contact=True)
+#         keyboard.add(button_phone)
+#         await message.answer(example_phone, parse_mode="HTML",reply_markup=keyboard)
+#         await state.update_data(register_user=True, transfer_user=False)
+#         await PersonalData.phone.set()
+#     elif token is not None:
+#         check_token = await send_req.application_forms_me(token)
+#         status_code = check_token.get('status_code')
+#         check_exam = await send_req.my_applications(token)
+#         exam_status = check_exam.get('status')
+#         if status_code  == 200 and exam_status != 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu)
+#         elif status_code  == 200 and exam_status == 'came-exam':
+#             await message.answer("🏠Asosiy sahifa", reply_markup=menu_full)
+#         elif status_code != 200:
+#             refreshToken = all_data_state.get('refresh_token')
+#             if refreshToken is not None:
+#                 new_token = await send_req.return_token_use_refresh(refreshToken)
+#                 ic(new_token)
 
 @dp.message_handler(state=PersonalData.phone, content_types=types.ContentTypes.CONTACT | types.ContentTypes.TEXT)
 async def phone_contact_received(message: types.Message, state: FSMContext):
@@ -806,9 +950,12 @@ async def education_id_handler(message: types.Message, state: FSMContext, page: 
     token = data.get('token')
     register_user = data.get('register_user')
     transfer_user = data.get('transfer_user')
-    ic('register_user', register_user, 'transfer_user', transfer_user)
+    pre_selected_degree_id = data.get('pre_selected_degree_id')
+    pre_selected_is_second_specialty = data.get('pre_selected_is_second_specialty')
 
-    if register_user:
+    ic('register_user', register_user, 'transfer_user', transfer_user, 'pre_selected_degree_id', pre_selected_degree_id, 'pre_selected_is_second_specialty', pre_selected_is_second_specialty)
+
+    if register_user or pre_selected_degree_id or pre_selected_is_second_specialty:
         educations_response = send_req.educations(token)
         educations = educations_response.json()
         
@@ -1588,29 +1735,33 @@ async def get_sertificate(message: types.Message, state: FSMContext):
 
         await message.answer("Fayl yuklandi.")
     ic('boshlandi1')
-    await EducationData.degree_id.set()
-    ic('yakunlandi')
-    await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
-    ic('started')
-    my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
-    data = await state.get_data()
-    token = data['token']
-    directions_response = await send_req.directions(token)
-    directions = directions_response
-    unique_degrees = []
-    ic('ok')
-    for obj in directions:
-        degree_id = obj['degree_id']
-        if not any(d['id'] == degree_id for d in unique_degrees):
-            unique_degrees.append({
-                'id': degree_id,
-                'type_degree': my_degree[degree_id]})
-    ic(unique_degrees)
-    buttons = [[InlineKeyboardButton(text=item['type_degree'], 
-                                     callback_data=f"degree_{item['id']}") for item in unique_degrees]]
-    degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-    ic('keldi')
-    await message.answer(select_degree, parse_mode='HTML', reply_markup=degreeMenu)
+    full_data_state = await state.get_data()
+    pre_selected_degree_id = full_data_state['pre_selected_degree_id']
+    if pre_selected_degree_id not in [1, 2]:
+        await EducationData.degree_id.set()
+
+    # ic('yakunlandi')
+    # await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
+    # ic('started')
+    # my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
+    # data = await state.get_data()
+    # token = data['token']
+    # directions_response = await send_req.directions(token)
+    # directions = directions_response
+    # unique_degrees = []
+    # ic('ok')
+    # for obj in directions:
+    #     degree_id = obj['degree_id']
+    #     if not any(d['id'] == degree_id for d in unique_degrees):
+    #         unique_degrees.append({
+    #             'id': degree_id,
+    #             'type_degree': my_degree[degree_id]})
+    # ic(unique_degrees)
+    # buttons = [[InlineKeyboardButton(text=item['type_degree'], 
+    #                                  callback_data=f"degree_{item['id']}") for item in unique_degrees]]
+    # degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    # ic('keldi')
+    # await message.answer(select_degree, parse_mode='HTML', reply_markup=degreeMenu)
 
 
 @dp.message_handler(state=EducationData.degree_id)
@@ -1906,6 +2057,10 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     _, education_lang_id, education_tuition_fee = parts
     ic(education_lang_id, education_tuition_fee)
     data_state = await state.get_data()
+    pre_selected_branch_id = data_state.get('pre_selected_branch_id', None)
+    is_master = data_state.get('is_master', False)
+    is_second_specialty = data_state.get('is_second_specialty', False)
+    referral_source = "telegram"
     directions = data_state.get('directions')
     def get_education_language_name(directions, direction_id, education_lang_id):
         for obj in directions:
@@ -1929,7 +2084,7 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     degree_id = int(all_state_data.get('degree_id'))
     direction_id = int(all_state_data.get('direction_id'))
     education_type_id = int(all_state_data.get('education_type'))
-    transfer_user = all_state_data.get('transfer_user')
+    transfer_user = all_state_data.get('transfer_user', False)
     chat_id_user = str(callback_query.message.chat.id)
     file_work_experience = all_state_data.get('file_certificate', None)
     phone = all_state_data.get('phone')
@@ -1975,8 +2130,33 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
         parse_mode='HTML'
     )
 
-
-    applicant_status = await send_applicant_data(token_, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience)
+    # body = {
+    #     'branch': branch,
+    #     'degree_id': int(degree_id),
+    #     'direction_id': int(direction_id),
+    #     'education_language_id': int(education_language_id),
+    #     'education_type_id': int(education_type_id),
+    #     'work_experience_document': str(work_experience_document),
+    #     'bot_user_id': str(chat_id_user),
+    #     'is_master': is_master,
+    #     'is_second_specialty': False,
+    #     'is_transfer_student': is_transfer_student,
+    #     'referral_source': referral_source
+    # }
+    applicant_status = await send_applicant_data(
+        token_, 
+        transfer_user, 
+        chat_id_user, 
+        degree_id, 
+        direction_id, 
+        education_lang_id, 
+        education_type_id, 
+        file_work_experience,
+        pre_selected_branch_id,
+        is_master,
+        is_second_specialty,
+        referral_source
+        )
     ic(applicant_status)
 
     if applicant_status == 201:
@@ -1988,12 +2168,14 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
             reply_markup=menu
         )
 
-async def send_applicant_data(token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience=None):
-    if education_type_id == 2:
+async def send_applicant_data(token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience=None, pre_selected_branch_id=None, is_master=False,
+                              is_second_specialty=False,referral_source='telegram'):
+    # ic(token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience,pre_selected_branch_id, is_master,referral_source)
+    if not is_second_specialty:
         return await send_req.applicants(
-            token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience
+            token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience,is_second_specialty, pre_selected_branch_id, is_master,referral_source
         )
-    else:
+    elif is_second_specialty:
         return await send_req.applicants(
-            token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id
+            token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id,is_second_specialty, pre_selected_branch_id, is_master,referral_source
         )
