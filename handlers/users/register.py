@@ -1109,7 +1109,7 @@ async def upload_file1(message: types.Message, state: FSMContext):
 
     local_file_path = os.path.join(download_dir, file_name)
     await send_req.download_file(file_url, local_file_path)
-    await message.answer("Please wait while the file is being uploaded...", parse_mode='HTML')
+    await message.answer("Iltimos, fayl yuklanguncha kuting...", parse_mode='HTML')
     
     res_file = upload.upload_new_file_transcript(token=token_, filename=local_file_path)
     
@@ -1221,7 +1221,7 @@ async def upload_file2(message: types.Message, state: FSMContext):
 
     local_file_path = os.path.join(download_dir, file_name)
     await send_req.download_file(file_url, local_file_path)
-    await message.answer("Please wait while the file is being uploaded...", parse_mode='HTML')
+    await message.answer("Iltimos, fayl yuklanguncha kuting...", parse_mode='HTML')
     
     res_file = upload.upload_new_file_transcript(token=token_, filename=local_file_path)
     
@@ -1258,7 +1258,7 @@ async def upload_file2(message: types.Message, state: FSMContext):
             int(selected_course)
         )
         ic(res_data)
-        await message.answer("Data has been saved successfully.", reply_markup=enter_button)
+        await message.answer("Fayl muvaffaqiyatli yuklandi..", reply_markup=enter_button)
         await state.update_data(file_diploma_transkript=path)
         
     except Exception as e:
@@ -1737,31 +1737,37 @@ async def get_sertificate(message: types.Message, state: FSMContext):
     ic('boshlandi1')
     full_data_state = await state.get_data()
     pre_selected_degree_id = full_data_state['pre_selected_degree_id']
-    if pre_selected_degree_id not in [1, 2]:
-        await EducationData.degree_id.set()
+    ic(pre_selected_degree_id)
+    await EducationData.degree_id.set()
+    # if pre_selected_degree_id not in [1, 2]:
 
     # ic('yakunlandi')
-    # await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
-    # ic('started')
-    # my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
-    # data = await state.get_data()
-    # token = data['token']
-    # directions_response = await send_req.directions(token)
-    # directions = directions_response
-    # unique_degrees = []
-    # ic('ok')
-    # for obj in directions:
-    #     degree_id = obj['degree_id']
-    #     if not any(d['id'] == degree_id for d in unique_degrees):
-    #         unique_degrees.append({
-    #             'id': degree_id,
-    #             'type_degree': my_degree[degree_id]})
-    # ic(unique_degrees)
-    # buttons = [[InlineKeyboardButton(text=item['type_degree'], 
-    #                                  callback_data=f"degree_{item['id']}") for item in unique_degrees]]
-    # degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-    # ic('keldi')
-    # await message.answer(select_degree, parse_mode='HTML', reply_markup=degreeMenu)
+    await message.answer("<b>Universitetga ariza topshirish</b>", parse_mode="HTML")
+    ic('started')
+    my_degree = {1: 'Bakalavr',2: 'Magistratura',3: 'Doktorantura'}
+    data = await state.get_data()
+    token = data['token']
+    directions_response = await send_req.directions(token)
+    directions = directions_response
+    unique_degrees = []
+    ic('ok')
+    for obj in directions:
+        degree_id = obj['degree_id']
+        if not any(d['id'] == degree_id for d in unique_degrees):
+            unique_degrees.append({
+                'id': degree_id,
+                'type_degree': my_degree[degree_id]})
+    ic(unique_degrees)
+    buttons = [[
+        InlineKeyboardButton(
+            text=item['type_degree'],
+            callback_data=f"degree:{item['id']}:{item['type_degree']}"
+        )
+    ] for item in unique_degrees]
+
+    degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
+    ic('keldi')
+    await message.answer(select_degree, parse_mode='HTML', reply_markup=degreeMenu)
 
 
 @dp.message_handler(state=EducationData.degree_id)
@@ -1782,8 +1788,13 @@ async def has_application_start(message: types.Message, state: FSMContext):
                 'id': degree_id,
                 'type_degree': my_degree[degree_id]})
     ic(unique_degrees)
-    buttons = [[InlineKeyboardButton(text=item['type_degree'], 
-                                     callback_data=f"degree_{item['id']}degree_{item['type_degree']}") for item in unique_degrees]]
+    buttons = [[
+        InlineKeyboardButton(
+            text=item['type_degree'],
+            callback_data=f"degree:{item['id']}:{item['type_degree']}"
+        )
+    ] for item in unique_degrees]
+
     degreeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
     ic('keldi')
     await message.answer(select_degree, parse_mode='HTML', reply_markup=degreeMenu)
@@ -1791,40 +1802,39 @@ async def has_application_start(message: types.Message, state: FSMContext):
 
 
 
-@dp.callback_query_handler(lambda c: c.data.startswith('degree_'), state=EducationData.degree_id)
+@dp.callback_query_handler(lambda c: c.data.startswith('degree:'), state=EducationData.degree_id)
 async def has_application(callback_query: types.CallbackQuery, state: FSMContext):
     from aiogram import Bot
     from data.config import BOT_TOKEN 
 
     bot = Bot(token=BOT_TOKEN)
-    _, degree_id, degree_name = callback_query.data.split('degree_')
     ic(callback_query.data)
-    ic(degree_id)
-    ic(1644, degree_name)
-    await state.update_data(degree_id=int(degree_id), degree_name=degree_name)
+    try:
+        _, degree_id, degree_name = callback_query.data.split(":")
+        degree_id = int(degree_id)
+    except Exception as e:
+        return await callback_query.answer("❌ Noto‘g‘ri format!")
     
-    
+    await state.update_data(degree_id=degree_id, degree_name=degree_name)
+
     select_mess = f"Tanlangan {degree_name}"
-    ic(select_mess)
-    await bot.send_message(callback_query.from_user.id, saved_message+"\n"+select_mess, reply_markup=ReplyKeyboardRemove(),
-                           parse_mode="HTML")
+    await bot.send_message(callback_query.from_user.id, saved_message + "\n" + select_mess, reply_markup=ReplyKeyboardRemove(), parse_mode="HTML")
+
     data = await state.get_data()
     token = data['token']
-    direction_response = await send_req.directions(token) 
+    direction_response = await send_req.directions(token)
     await state.update_data(directions=direction_response)
-    ic(direction_response)
-    # regions = region_response
-    selected_degree_id = data['degree_id']
-    ic(degree_id)
-    buttons = [[InlineKeyboardButton(text=item['direction_name_uz'], 
-                                     callback_data=f"d_{item['direction_id']}")] 
-                                     for item in direction_response
-                                       if item['degree_id'] == int(selected_degree_id)]
-    ic(buttons)
+
+    # Filter directions by degree
+    buttons = [[
+        InlineKeyboardButton(text=item['direction_name_uz'], callback_data=f"d_{item['direction_id']}")
+    ] for item in direction_response if item['degree_id'] == degree_id]
+
     directionMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
     await callback_query.answer()
     await bot.send_message(callback_query.from_user.id, select_direction, reply_markup=directionMenu)
     await EducationData.direction_id.set()
+
 
 @dp.callback_query_handler(lambda c: c.data.startswith('d_'), state=EducationData.direction_id)
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
