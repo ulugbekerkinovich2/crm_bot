@@ -63,6 +63,9 @@ language = ReplyKeyboardMarkup(
         [
             KeyboardButton(text="🇺🇿O'zbek tili"),
         ],
+        [
+            KeyboardButton(text="📃Test natijasini bilish"),
+        ]
         # [
         #     KeyboardButton(text="🇷🇺Русский язык")
         # ]

@@ -8,6 +8,7 @@ from . import update_application
 from . import about
 from . import web_server
 from . import menu_ru
+from . import check_test
 from . import help
 from . import echo
 from . import update_menu
