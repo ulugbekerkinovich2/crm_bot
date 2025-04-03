@@ -54,6 +54,9 @@ register_ru = ReplyKeyboardMarkup(
             KeyboardButton(text="🔄Трансферное обучение"),
             KeyboardButton(text="🧑‍🎓 Вторая специальность"),
         ],
+        [
+            KeyboardButton(text="📃Test natijasini bilish"),
+        ]
     ],
     resize_keyboard=True
 )
@@ -63,9 +66,6 @@ language = ReplyKeyboardMarkup(
         [
             KeyboardButton(text="🇺🇿O'zbek tili"),
         ],
-        [
-            KeyboardButton(text="📃Test natijasini bilish"),
-        ]
         # [
         #     KeyboardButton(text="🇷🇺Русский язык")
         # ]
