@@ -1736,7 +1736,8 @@ async def get_sertificate(message: types.Message, state: FSMContext):
         await message.answer("Fayl yuklandi.")
     ic('boshlandi1')
     full_data_state = await state.get_data()
-    pre_selected_degree_id = full_data_state['pre_selected_degree_id']
+    pre_selected_degree_id = full_data_state.get('pre_selected_degree_id')
+
     ic(pre_selected_degree_id)
     await EducationData.degree_id.set()
     # if pre_selected_degree_id not in [1, 2]:
@@ -2106,6 +2107,7 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
  
     birth_date_new = all_state_data.get('birth_date_new')
     document_new = all_state_data.get('document_new')
+    pre_selected_branch_id = all_state_data.get('pre_selected_branch_id')
     ic(birth_date_new, document_new)
     # application_form_info = await send_req.application_form_info(birth_date_new,document_new,token_)
 
