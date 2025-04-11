@@ -93,6 +93,10 @@ async def check_result(message: types.Message):
             f"📙 <b>Majburiy fanlar:</b>\n"
             f"📎 Ona tili, Adabiyot, Tarix : {r['mandatory_correct']}/30 = {r['mandatory_score']}/33\n"
             f"—" + "–" * 90 + "\n"
-            f"🏁 <b>Umumiy natija:</b> {r['overall']}/189"
+            f"🏁 <b>Umumiy natija:</b> {r['overall']}/189\n\n"
+            f"📢 <b>Rasman a'zo bo‘ling va yangiliklardan xabardor bo‘ling:</b>\n"
+            f"🌐 <a href='https://aifu.uz'>🌍 aifu.uz</a>\n"
+            f"📝 <a href='https://qabul.aifu.uz'>📥 qabul.aifu.uz</a>\n"
+            f"🤖 <a href='https://t.me/aifu_qabul_bot'>@aifu_qabul_bot</a>"
         )
         await message.answer(msg, parse_mode="HTML")
