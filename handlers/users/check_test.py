@@ -91,7 +91,7 @@ async def check_result(message: types.Message):
             f"➊ {r['subject_1']} : {r['subject_1_corrects']}/30 = {r['subject_1_score']}/93\n"
             f"➋ {r['subject_2']} : {r['subject_2_corrects']}/30 = {r['subject_2_score']}/63\n"
             f"📙 <b>Majburiy fanlar:</b>\n"
-            f"📎 Ona tili, Adabiyot, Tarix : {r['mandatory_correct']}/30 = {r['mandatory_score']}/33\n"
+            f"📎 Ona tili, O'zbekiston Tarixi, Matematika : {r['mandatory_correct']}/30 = {r['mandatory_score']}/33\n"
             f"—" + "–" * 90 + "\n"
             f"🏁 <b>Umumiy natija:</b> {r['overall']}/189\n\n"
             f"📢 <b>Rasman a'zo bo‘ling va yangiliklardan xabardor bo‘ling:</b>\n"
