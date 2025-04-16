@@ -5,6 +5,75 @@ from aiogram.types import ContentType, InputFile
 import os
 import pandas as pd
 import json
+import qrcode
+from PIL import Image, ImageDraw, ImageFont
+import requests
+
+
+import os
+from PIL import Image, ImageDraw, ImageFont
+
+
+
+def generate_certificate(user_name, score, output_path, qr_url):
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        template_path = os.path.join(base_dir, "new_image.png")
+
+        img = Image.open(template_path)
+        draw = ImageDraw.Draw(img)
+
+        # font_path = "/System/Library/Fonts/Supplemental/Arial.ttf"
+        font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+        font = ImageFont.truetype(font_path, size=120)
+        font_ = ImageFont.truetype(font_path, size=80)
+
+        draw.text((1200, 970), user_name, fill="black", font=font)
+        draw.text((1300, 750), str(score), fill="black", font=font_)
+
+        qr = qrcode.make(qr_url).resize((360, 360))
+        img.paste(qr, (1900, 1800))
+
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        img.save(output_path)
+
+        print(f"✅ Sertifikat saqlandi: {output_path}")
+        return os.path.abspath(output_path)
+    except Exception as e:
+        print(f"❌ Xatolik: {e}")
+        return None
+
+
+
+
+
+
+def upload_certificate(png_path, final_filename):
+    try:
+        pdf_path = os.path.join("output", f"{final_filename}.pdf")
+        img = Image.open(png_path).convert("RGB")
+        img.save(pdf_path)
+
+        url = "https://qr.misterdev.uz/api/upload/"
+        with open(pdf_path, "rb") as f:
+            files = {"files": (f"{final_filename}.pdf", f, "application/pdf")}
+            response = requests.post(url, files=files)
+
+        if response.status_code == 201:
+            file_url = f"https://qr.misterdev.uz/media/files/{final_filename}.pdf"
+            return {
+                "pdf_path": pdf_path,
+                "qr_url": file_url
+            }
+        else:
+            raise Exception(f"API error: {response.status_code}, {response.text}")
+    except Exception as e:
+        print(f"❌ Yuklash xatoligi: {e}")
+        return None
+
+
+
+
 
 # 📌 Faqat quyidagi adminlarga yuklash ruxsati
 ALLOWED_ADMINS = [7432861733, 935920479]
@@ -64,6 +133,9 @@ async def handle_xlsx(message: types.Message):
             added += 1
 
     await message.answer(f"✅ {added} ta yangi natija muvaffaqiyatli qo‘shildi.")
+def generate_filename(full_name):
+    clean = full_name.replace(" ", "_").replace("'", "")
+    return f"{clean}_sertifikat"
 
 # 📱 User telefon raqamini yuborsa
 @dp.message_handler(lambda msg: msg.text.isdigit() and len(msg.text) >= 7)
@@ -82,7 +154,8 @@ async def check_result(message: types.Message):
         return await message.answer("❌ Siz kiritgan raqam bo‘yicha natija topilmadi.")
 
     for r in results:
-        msg = (
+        # 🟢 Natija xabari
+        msg_text = (
             f"📊 <b>Natijangiz</b>\n"
             f"👤 <b>F.I.SH:</b> {r['full_name']}\n"
             f"📚 <b>Yo’nalish:</b> {r['direction']}\n"
@@ -99,4 +172,27 @@ async def check_result(message: types.Message):
             f"📝 <a href='https://qabul.aifu.uz'>📥 qabul.aifu.uz</a>\n"
             f"🤖 <a href='https://t.me/aifu_qabul_bot'>@aifu_qabul_bot</a>"
         )
-        await message.answer(msg, parse_mode="HTML")
+        await message.answer(msg_text, parse_mode="HTML")
+
+        # 🎓 Sertifikat faqat 70+ bo‘lganlar uchun
+        if float(r['overall']) >= 70:
+            await message.answer("🎉 Tabriklaymiz, siz sertifikat taqdim etildi!")
+
+            filename = generate_filename(r['full_name'])  # ex: Ulugbek_Erkinov_sertifikat
+            png_path = f"output/{filename}.png"
+            pdf_url = f"https://qr.misterdev.uz/media/files/{filename}.pdf"
+
+            # QR asosida sertifikat yaratish
+            generated_path = generate_certificate(r['full_name'], r['overall'], png_path, pdf_url)
+            if not generated_path:
+                return await message.answer("❌ Sertifikat yaratishda xatolik.")
+
+            # Yuklash
+            upload_result = upload_certificate(png_path, filename)
+            if upload_result:
+                await message.answer_document(InputFile(upload_result["pdf_path"]))
+                # await message.answer(f"📎 QR havola: {upload_result['qr_url']}")
+            else:
+                await message.answer("❌ Yuklashda xatolik.")
+
+        # JSONdan o‘chirish
