@@ -25,11 +25,11 @@ def generate_certificate(user_name, score, output_path, qr_url):
 
         # font_path = "/System/Library/Fonts/Supplemental/Arial.ttf"
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-        font = ImageFont.truetype(font_path, size=120)
-        font_ = ImageFont.truetype(font_path, size=80)
+        font = ImageFont.truetype(font_path, size=100)
+        font_ = ImageFont.truetype(font_path, size=66)
 
-        draw.text((1200, 970), user_name, fill="black", font=font)
-        draw.text((1300, 750), str(score), fill="black", font=font_)
+        draw.text((950, 1000), user_name, fill="black", font=font)
+        draw.text((1270, 760), f'{score} ball', fill="black", font=font_)
 
         qr = qrcode.make(qr_url).resize((360, 360))
         img.paste(qr, (1900, 1800))
@@ -176,7 +176,7 @@ async def check_result(message: types.Message):
 
         # 🎓 Sertifikat faqat 70+ bo‘lganlar uchun
         if float(r['overall']) >= 70:
-            await message.answer("🎉 Tabriklaymiz, siz sertifikat taqdim etildi!")
+            await message.answer("🎉 Tabriklaymiz, sizga sertifikat taqdim etildi!")
 
             filename = generate_filename(r['full_name'])  # ex: Ulugbek_Erkinov_sertifikat
             png_path = f"output/{filename}.png"
