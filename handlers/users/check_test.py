@@ -23,8 +23,8 @@ def generate_certificate(user_name, score, output_path, qr_url):
         img = Image.open(template_path)
         draw = ImageDraw.Draw(img)
 
-        font_path = "/System/Library/Fonts/Supplemental/Arial.ttf"
-        # font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+        # font_path = "/System/Library/Fonts/Supplemental/Arial.ttf"
+        font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
         font = ImageFont.truetype(font_path, size=100)
         font_ = ImageFont.truetype(font_path, size=62)
 
