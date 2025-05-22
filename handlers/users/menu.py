@@ -253,7 +253,7 @@ async def my_menu(message: Message, state: FSMContext):
     try:
         data = await state.get_data()
         token = data.get('token')
-
+        ic(255, token)
         if not token:
             refreshToken = data.get('refreshToken')
             new_token = await send_req.return_token_use_refresh(refreshToken)
@@ -262,6 +262,7 @@ async def my_menu(message: Message, state: FSMContext):
 
         if token:
             personal_info = await send_req.application_forms_me(token)
+            ic(265, personal_info)
             info_message, photo = format_personal_info(personal_info)
             await update_user_profile(message, personal_info, token)
 
@@ -277,7 +278,7 @@ async def my_menu(message: Message, state: FSMContext):
             await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
     except Exception as e:
-        ic(e)
+        ic(280, e)
         await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
 def format_personal_info(personal_info):
@@ -299,7 +300,11 @@ def format_personal_info(personal_info):
     citizenship = personal_info.get('citizenship', "O'zbekiston Respublikasi")
     birth_place = personal_info.get('birth_place', 'tug\'ilgan joyi topilmadi')
     phone = personal_info.get('phone', 'telefon raqami topilmadi')
-    extra_phone = personal_info.get('extra_phone', 'qo\'shimcha telefon raqami topilmadi').replace(" ", "")
+    extra_phone = personal_info.get('extra_phone', 'qo\'shimcha telefon raqami topilmadi')
+    if extra_phone is not None:
+        extra_phone = extra_phone.replace(" ", "")
+    if extra_phone is None:
+        extra_phone = 'qo\'shimcha telefon raqami topilmadi'
 
     info_message = (
         "<b>Shaxsiy Ma'lumotlar:</b>\n\n"
@@ -2130,7 +2135,7 @@ async def my_application_exam(message: Message, state: FSMContext):
     comments = my_app.get('comment', [])
     exam = my_app.get('exam', None)
     ic(exam, 1547)
-    if exam != {}:
+    if exam != {} and exam != {'exam_result': []}:
         exam_result = exam['exam_result']
         # exam_result = exam.get('exam_result', None)
         exam_result = exam_result[0]
@@ -2405,7 +2410,7 @@ async def my_application(message: Message, state: FSMContext):
         )
 
         ic(response_message, 1896)
-    elif  exam == {}:
+    elif  exam == {} or exam == {'exam_result': []}:
         ic(1832)
         response_message = (
             "📝 *Ariza Tafsilotlari:*\n"
