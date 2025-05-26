@@ -703,7 +703,7 @@ async def birth_date(message: types.Message, state: FSMContext):
     
     
     ic(check_is_not_duplicate)
-
+    await state.update_data(check_is_not_duplicate=check_is_not_duplicate)
     ic(check_is_not_duplicate.get('status_code'), type(check_is_not_duplicate.get('status_code')))
     status_code_ = check_is_not_duplicate.get('status_code')
     ic(473)
@@ -741,6 +741,7 @@ async def info(message: types.Message, state: FSMContext):
     extra_phone = message.text.strip()
     # ic('extra_phone', extra_phone)
     data = await state.get_data()
+    data_state=data
     ic('state ga saqlanganlar-->', data)
     formatted_birth_date = data.get('formatted_birth_date')
     document = data.get('document')
@@ -754,17 +755,20 @@ async def info(message: types.Message, state: FSMContext):
     ic(formatted_birth_date)
     date_obj = datetime.strptime(formatted_birth_date, "%Y-%m-%d")
     formatted_date_str = date_obj.strftime("%Y-%m-%d")
-
+    
     ic('-->',formatted_date_str,document)
-    response = await send_req.application_form_info(formatted_date_str,document,token)
-    await state.update_data(application_form_info=response)
-    data = response['data']
-    ic(response)
-    ic(data)
+    # response = await send_req.application_form_info(formatted_date_str,document,token)
+    # await state.update_data(application_form_info=response)
+    # data = response['data']
+    # ic(response)
+    # ic(data)
+    ic(data_state)
     # if response.get('status_code') == 409:
     #     await message.answer(response.get('message'))
     #     await state.finish()
     # else:
+    check_is_not_duplicate_ = data_state.get('check_is_not_duplicate')
+    data = check_is_not_duplicate_.get('data')
     data_res = data.get('passport', {})
     first_name = data_res.get('first_name', '')
     last_name = data_res.get('last_name', '')
@@ -834,7 +838,7 @@ async def info(message: types.Message, state: FSMContext):
                                                         src,
                                                         third_name
                                                         )
-    # ic(response_application_form.json())
+    ic(response_application_form.json())
     ic('keldi2022')
     data_me = await collect_data.collect_me_data(token, field_name=None)
     # ic(data_me)

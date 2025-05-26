@@ -252,16 +252,18 @@ async def my_menu(message: Message, state: FSMContext):
 async def my_menu(message: Message, state: FSMContext):
     try:
         data = await state.get_data()
+        print(255, data)
         token = data.get('token')
-
+        print(256, token)
         if not token:
             refreshToken = data.get('refreshToken')
             new_token = await send_req.return_token_use_refresh(refreshToken)
             ic("bu yangi token1")
             token = new_token.get('token')
-
+        print(262, token)
         if token:
             personal_info = await send_req.application_forms_me(token)
+            print(265, personal_info)
             info_message, photo = format_personal_info(personal_info)
             await update_user_profile(message, personal_info, token)
 
@@ -277,7 +279,7 @@ async def my_menu(message: Message, state: FSMContext):
             await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
     except Exception as e:
-        ic(e)
+        ic(280, e)
         await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
 def format_personal_info(personal_info):
@@ -299,7 +301,7 @@ def format_personal_info(personal_info):
     citizenship = personal_info.get('citizenship', "O'zbekiston Respublikasi")
     birth_place = personal_info.get('birth_place', 'tug\'ilgan joyi topilmadi')
     phone = personal_info.get('phone', 'telefon raqami topilmadi')
-    extra_phone = personal_info.get('extra_phone', 'qo\'shimcha telefon raqami topilmadi').replace(" ", "")
+    extra_phone = personal_info.get('extra_phone', 'qo\'shimcha telefon raqami topilmadi')
 
     info_message = (
         "<b>Shaxsiy Ma'lumotlar:</b>\n\n"
@@ -331,7 +333,7 @@ async def update_user_profile(message, personal_info, token):
             date=date_now
         )
     except Exception as e:
-        ic(e)
+        ic(334, e)
         await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
 @dp.message_handler(Text(equals="📝Shaxsiy ma'lumotlarni tahrirlash"), state="*")
@@ -1099,7 +1101,7 @@ async def upload_file(message: types.Message, state: FSMContext):
         await state.update_data(file_diploma_transkript=path)
         
     except Exception as e:
-        ic(e)
+        ic(1102,e)
         await message.answer(e)
         return e
     await PersonalData.country_search.set()

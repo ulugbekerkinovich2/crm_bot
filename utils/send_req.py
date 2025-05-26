@@ -171,7 +171,8 @@ async def application_form_info(birth_date, document, token):
     default_header['Authorization'] = f'Bearer {token}'
     body = {
         'birth_date': str(birth_date),
-        'document': str(document)
+        'document': str(document),
+        'type': 'all'
     }
     ic(104, 'keldi')
 
