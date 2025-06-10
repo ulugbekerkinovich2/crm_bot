@@ -65,7 +65,7 @@ select_one = "Quyidagi mamlakatdan birini tanlang:"
 @dp.message_handler(text="🇺🇿O'zbek tili")
 async def uz_lang(message: types.Message, state: FSMContext):
     await state.update_data(language_uz=True, language_ru=False) 
-    await message.answer("2024-2025-o'quv yili uchun ariza topshirish", reply_markup=register)
+    await message.answer("2025-2026-o'quv yili uchun ariza topshirish", reply_markup=register)
 
 
 @dp.message_handler(text="🔄O'qishni ko'chirish")
