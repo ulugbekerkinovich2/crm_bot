@@ -32,5 +32,5 @@ web_app_url = env.str("web_app_url")
 port= env.int("port")
 university_site_url=env.str("university_site_url")
 # exam_link=env.str("exam_link")
-exam_link='imtihon.aifu.uz'
+exam_link='imtihon.aifu-university.uz'
 print(35505050, exam_link)
