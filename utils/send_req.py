@@ -386,27 +386,8 @@ async def my_applications(token):
                 content_type = response.headers.get('Content-Type', '')
                 if 'application/json' in content_type:
                     data = await response.json()
-                    # log_data = {
-                    #     'time': datetime.utcnow().isoformat(),
-                    #     'event': 'my_applications',
-                    #     'details': {
-                    #         'status_code': response.status,
-                    #         'data': data,
-                    #         'token': token
-                    #     }
-                    # }
-                    # log_to_json(log_data)
                 else:
                     data = await response.text()
-                    # log_data = {
-                    #     'time': datetime.utcnow().isoformat(),
-                    #     'event': 'my_applications',
-                    #     'details': {
-                    #         'status_code': response.status,
-                    #         'data': data
-                    #     }
-                    # }
-                    # log_to_json(log_data)
                 return data
             else:
                 return {'error': 'Failed to fetch data', 'status_code': response.status, 'details': await response.text()}

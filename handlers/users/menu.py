@@ -2162,7 +2162,8 @@ async def my_application_exam(message: Message, state: FSMContext):
             time_when_started = when_started
     ic(exam)
     online_exam_link = exam.get('online_exam_link', 'Link topilmadi')
-    ic(online_exam_link)
+    ic(2165, online_exam_link)
+    ic(2166, exam_link)
     date_obj = datetime.fromisoformat(created_at.rstrip("Z"))
     utc_timezone = pytz.timezone('UTC')
     desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
@@ -2194,7 +2195,7 @@ async def my_application_exam(message: Message, state: FSMContext):
     if status == "came-exam":
         status_name = "Imtihonga chaqirilgan"
 
-    if (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/")  and exam is not None and contract_id is not None:
+    if exam != {}:
         ic(1562, 'ok')
         
         response_exam = (
@@ -2208,7 +2209,7 @@ async def my_application_exam(message: Message, state: FSMContext):
             f"🏆 Jami ball: {total_mark} ball\n\n"
             f"📞 Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
             f"🔗 Aloqa markazi: +998781131717\n"
-            f"[📄 Shartnomani yuklab olish]({Shartnoma})"
+            # f"[📄 Shartnomani yuklab olish]({Shartnoma})"
         )
         await message.answer(response_exam, parse_mode='Markdown')
     if (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/") and exam is not None and contract_id is None:
