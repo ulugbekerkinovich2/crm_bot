@@ -1,9 +1,10 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command,Text
+import aiohttp
 from utils import send_req
 from utils.send_group import send_group
-from loader import dp
+from loader import dp, bot
 from states.personalData import PersonalData, EducationData
 from states.personalData import ManualPersonalInfo
 from aiogram.utils.exceptions import Throttled
@@ -22,7 +23,7 @@ from keyboards.default.registerKeyBoardButton import enter_button, menu,register
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
 from data.config import university_id as UNIVERSITY_ID
-
+from utils.converter_files import convert_heic_to_jpg
 
 saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
 error_message_birthday = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: yyyy-oo-kk\nTug'ilgan kunni qayta kiriting"
@@ -493,14 +494,14 @@ async def secret_code(message: types.Message, state: FSMContext):
             try:
                 phone_number = await state.get_data('phone')
                 ic(phone_number['phone'], '<----------------->\n<----------------->\n<----------------->')
-                save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                save_chat_id =await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                                     first_name=message.from_user.first_name,
                                                                     last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username,
                                                                     university_name=int(UNIVERSITY_ID))
                 # ic(save_chat_id)
 
-                send_req.update_user_profile(university_id=UNIVERSITY_ID, 
+                await send_req.update_user_profile(university_id=UNIVERSITY_ID, 
                                             chat_id=user_chat_id,
                                             phone=phone_number, 
                                             pin=1,
@@ -512,7 +513,7 @@ async def secret_code(message: types.Message, state: FSMContext):
             except Exception as err:
                 ic(err)
 
-            get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
+            # get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
             
             # ic(get_this_user, 323)
             # except Exception as err:
@@ -625,9 +626,10 @@ async def document(message: types.Message, state: FSMContext):
 async def birth_date(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     import logging,asyncio
-    from data.config import BOT_TOKEN 
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot) 
+    from loader import dp, bot
+    # from data.config import BOT_TOKEN 
+    # bot = Bot(token=BOT_TOKEN)
+    # dp = Dispatcher(bot) 
     ic('birth date')
     birth_date = message.text.strip()
     await state.update_data(birth_date=birth_date)
@@ -913,7 +915,7 @@ async def info(message: types.Message, state: FSMContext):
         ic('django')
         ic(id_user, phone, chat_id_user,first_name, last_name)
         try:
-            update_user_profile_response = send_req.update_user_profile(university_id=UNIVERSITY_ID, 
+            update_user_profile_response =await send_req.update_user_profile(university_id=UNIVERSITY_ID, 
                                                                         chat_id=chat_id_user, 
                                                                         phone=phone, 
                                                                         first_name=first_name, 
@@ -1058,8 +1060,8 @@ async def upload_file1(message: types.Message, state: FSMContext):
     from data.config import BOT_TOKEN
     import aiofiles
     import os
-    
-    bot = Bot(token=BOT_TOKEN)
+    # 
+    # bot = Bot(token=BOT_TOKEN)
     ic(820, message)
     if message.photo:
         try:
@@ -1171,7 +1173,7 @@ async def upload_file2(message: types.Message, state: FSMContext):
     import aiofiles
     import os
     
-    bot = Bot(token=BOT_TOKEN)
+    # bot = Bot(token=BOT_TOKEN)
     ic(903, message)
     if message.photo:
         try:
@@ -1282,8 +1284,8 @@ async def upload_file3(message: types.Message, state: FSMContext):
     ic(message.document.file_name)
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot) 
+    # bot = Bot(token=BOT_TOKEN)
+    # dp = Dispatcher(bot) 
 
     data = await state.get_data()
     ic(data)
@@ -1384,9 +1386,10 @@ async def upload_file3(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(lambda c: c.data.startswith('edu_'), state=EducationData.education_id)
 async def education_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     from aiogram import Bot, Dispatcher, types
-    from data.config import BOT_TOKEN 
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot)
+    # from data.config import BOT_TOKEN 
+    # bot = Bot(token=BOT_TOKEN)
+    # dp = Dispatcher(bot)
+    from loader import dp, bot
     # from loader import dp
     education_id = callback_query.data.split('edu_')[1]
     await state.update_data(education_id=education_id)
@@ -1435,17 +1438,18 @@ async def district_selection_handler(callback_query: types.CallbackQuery, state:
     await callback_query.answer()
     await EducationData.institution_name.set()  # Prepare for the next step
     from aiogram import Bot, Dispatcher, types
-    from data.config import BOT_TOKEN 
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot) 
+    
+    # from data.config import BOT_TOKEN 
+    # bot = Bot(token=BOT_TOKEN)
+    # dp = Dispatcher(bot) 
     await bot.send_message(callback_query.from_user.id, type_your_edu_name)
 
 @dp.message_handler(state=EducationData.institution_name)
 async def type_institution_name_handler(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
-    from data.config import BOT_TOKEN 
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot) 
+    # from data.config import BOT_TOKEN 
+    # bot = Bot(token=BOT_TOKEN)
+    # dp = Dispatcher(bot) 
     institution_name = message.text.strip()
 
     if institution_name.lower() != 'davom etish':
@@ -1468,8 +1472,8 @@ async def type_institution_name_handler(message: types.Message, state: FSMContex
 async def upload_file4(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot) 
+    # bot = Bot(token=BOT_TOKEN)
+    # dp = Dispatcher(bot) 
     if message.photo:
         try:
             data = await state.get_data()
@@ -1529,10 +1533,6 @@ async def upload_file4(message: types.Message, state: FSMContext):
             return 'Fayl topilmadi'
         await state.update_data(file_size=file_size)
         await message.answer("Fayl yuklandi.")
-    
-    # ic(all_state)
-    # print(res_file.status_code)
-    # print(res_file)
         try:
             data1 = res_file.json()
             ic(data1['path'])
@@ -1617,8 +1617,8 @@ async def has_sertificate(message: types.Message, state: FSMContext):
 async def region_selection_handler(callback_query: types.CallbackQuery, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot) 
+    # bot = Bot(token=BOT_TOKEN)
+    # dp = Dispatcher(bot) 
     certificate_type = callback_query.data.split('type_')[1]
     cert_types = [
             {'id': 1, 'type': 'IELTS'},
@@ -1649,64 +1649,79 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
 
     
 @dp.message_handler(content_types=['document', 'photo'], state=EducationData.get_certificate)
-async def get_sertificate(message: types.Message, state: FSMContext):
-    from aiogram import Bot, Dispatcher
-    from data.config import BOT_TOKEN 
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot) 
+async def get_certificate(message: types.Message, state: FSMContext):
+    from data.config import BOT_TOKEN
+
+    data = await state.get_data()
+    token_ = data.get('token')
+
+    # Agar PHOTO bo‘lsa
     if message.photo:
+        largest_photo = message.photo[-1]
+        file_id = largest_photo.file_id
+        file_info = await bot.get_file(file_id)
+        file_path = file_info.file_path
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+
+        # Faylni saqlash joyi
+        download_dir = 'diploma_files'
+        os.makedirs(download_dir, exist_ok=True)
+        file_name = os.path.basename(file_path)
+        local_file_path = os.path.join(download_dir, file_name)
+
+        # Rasmni yuklab olish
+        async with aiohttp.ClientSession() as session:
+            async with session.get(file_url) as resp:
+                if resp.status == 200:
+                    f = await aiofiles.open(local_file_path, mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
+
+        ext = os.path.splitext(local_file_path)[-1].lower()
+        if ext == '.heic':
+            local_file_path = convert_heic_to_jpg(local_file_path)
+
         try:
-            data = await state.get_data()
-            token_ = data['token'] if data['token'] else None
-            largest_photo = message.photo[-1] 
-            ic(largest_photo)
-            file_id = largest_photo.file_id
-            file_info = await bot.get_file(file_id)
-            file_path = file_info.file_path
-            ic(file_path)
-            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
-            # await message.answer(file_url)
-            download_dir = 'diploma_files'
-            local_file_path = os.path.join(download_dir, file_path) 
-            await bot.download_file(file_path, local_file_path)
-            try:
-                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
-                data1 = res_file.json()
-                ic(1290, data1)
-                await state.update_data(file_size_sertificate=data1['path'])
-            except Exception as e:
-                ic(e)
-                await message.reply(f"Xatolik yuz berdi: {str(e)}")
-            await message.reply("Rasm qabul qilindi")
-            src_ = 'src' 
-            src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
-            if src_res is not None or src_res is not False:
-                await state.update_data(src=src_res)
+            res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+            data1 = res_file.json()
+            ic(1290, data1)
+            await state.update_data(file_size_sertificate=data1['path'])
         except Exception as e:
-            await message.reply("Rasmni qaytadan yuboring")
-    if not message.photo:
-        from aiogram import Bot, Dispatcher
-        from data.config import BOT_TOKEN
-        bot = Bot(token=BOT_TOKEN)
-        dp = Dispatcher(bot)
-        
-        data = await state.get_data()
-        token_ = data['token'] if data['token'] else None
+            ic(e)
+            await message.reply(f"Xatolik yuz berdi: {str(e)}")
+            return
 
+        await message.reply("Rasm qabul qilindi ✅")
+        src_ = 'src'
+        src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+        if src_res:
+            await state.update_data(src=src_res)
+        return
+
+    # Agar DOCUMENT bo‘lsa
+    if message.document:
         document = message.document
-        file_path = await bot.get_file(document.file_id)
-        ic(file_path)
-        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+        file_info = await bot.get_file(document.file_id)
+        file_path = file_info.file_path
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+
         download_dir = 'sertificate_files'
-        # await message.answer(file_url)
-        await aiofiles.os.makedirs(download_dir, exist_ok=True)
+        os.makedirs(download_dir, exist_ok=True)
+        file_name = os.path.basename(document.file_name)
+        local_file_path = os.path.join(download_dir, file_name)
 
-        local_file_path = os.path.join(download_dir, document.file_name)
-        ic(local_file_path)
-        await send_req.download_file(file_url, local_file_path)
-        await message.answer(wait_file_is_loading, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
-        # ic(local_file_path)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(file_url) as resp:
+                if resp.status == 200:
+                    f = await aiofiles.open(local_file_path, mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
 
+        ext = os.path.splitext(local_file_path)[-1].lower()
+        if ext == '.heic':
+            local_file_path = convert_heic_to_jpg(local_file_path)
+
+        await message.answer("Fayl yuklanmoqda...", parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
         res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
         ic(731, res_file)
         try:
@@ -1812,7 +1827,7 @@ async def has_application(callback_query: types.CallbackQuery, state: FSMContext
     from aiogram import Bot
     from data.config import BOT_TOKEN 
 
-    bot = Bot(token=BOT_TOKEN)
+    # bot = Bot(token=BOT_TOKEN)
     ic(callback_query.data)
     try:
         _, degree_id, degree_name = callback_query.data.split(":")
@@ -1977,7 +1992,7 @@ async def get_work_experience_certificate(message: types.Message, state: FSMCont
     import aiofiles
     import os
     
-    bot = Bot(token=BOT_TOKEN)
+    # bot = Bot(token=BOT_TOKEN)
     ic('keldi ++++++++++++++++++++++++++\n++++++++++++++++++++++++++\n++++++++++++++++++++++++++')
     data = await state.get_data()
     token_ = data['token'] if 'token' in data else None

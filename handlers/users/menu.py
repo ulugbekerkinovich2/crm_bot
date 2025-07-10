@@ -322,7 +322,7 @@ def format_personal_info(personal_info):
 async def update_user_profile(message, personal_info, token):
     date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     try:
-        send_req.update_user_profile(
+        await send_req.update_user_profile(
             university_id=UNIVERSITY_ID,
             chat_id=message.from_user.id,
             phone=personal_info.get('phone', 'telefon raqami topilmadi'),
@@ -348,7 +348,7 @@ async def my_menu(message: Message, state: FSMContext):
     ic(date)
     username = message.from_user.username or message.from_user.full_name
     ic(username)
-    save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+    save_chat_id = await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                         first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                         pin=1,date=date, username=username,
                                                         university_name=int(UNIVERSITY_ID))
@@ -495,7 +495,7 @@ async def create_or_update_user_profile(access, user_chat_id, message, date, use
     ic(user_chat_id)
     ic(date)
     ic(username)
-    save_chat_id = send_req.create_user_profile(
+    save_chat_id = await send_req.create_user_profile(
         token=access,
         chat_id=user_chat_id, 
         first_name=message.from_user.first_name,
@@ -2149,10 +2149,10 @@ async def my_application_exam(message: Message, state: FSMContext):
         second_subject_score = exam_result.get('second_subject_score', 0)
         second_subject_mark = exam_result.get('second_subject_mark', 0)
 
-        third_subject_name = exam_result.get('third_subject_name', None)
-        third_name_uz = third_subject_name['name_uz'] if third_subject_name['name_uz'] else None
-        third_subject_score = exam_result.get('third_subject_score', 0)
-        third_subject_mark = exam_result.get('third_subject_mark', 0)
+        # third_subject_name = exam_result.get('third_subject_name', None)
+        # third_name_uz = third_subject_name['name_uz'] if third_subject_name['name_uz'] else None
+        # third_subject_score = exam_result.get('third_subject_score', 0)
+        # third_subject_mark = exam_result.get('third_subject_mark', 0)
 
         total_mark = exam_result.get('total_mark', 0)
         when_started = exam_result.get('when_started', None)
@@ -2204,7 +2204,7 @@ async def my_application_exam(message: Message, state: FSMContext):
             f"📚 *Imtihon fanlari*\n"
             f"{escape_markdown(first_name_uz)} - {first_subject_score}/20 -  {first_subject_mark} ball 📊\n"
             f"{escape_markdown(second_name_uz)} - {second_subject_score}/20 - {second_subject_mark} ball 📊\n"
-            f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball 📊\n\n"
+            # f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball 📊\n\n"
             f"🏆 Jami ball: {total_mark} ball\n\n"
             f"📞 Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
             f"🔗 Aloqa markazi: +998781131717\n"
@@ -2219,7 +2219,7 @@ async def my_application_exam(message: Message, state: FSMContext):
                 f"📚 *Imtihon fanlari*\n"
                 f"{escape_markdown(first_name_uz)} - {first_subject_score}/20 -  {first_subject_mark} ball\n"
                 f"{escape_markdown(second_name_uz)} - {second_subject_score}/20 - {second_subject_mark} ball\n"
-                f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball\n\n"
+                # f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball\n\n"
                 f"🏆 Jami ball: {total_mark} ball\n\n"
                 "📞 Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
                 "🔗         Aloqa markazi: +998781131717\n"
@@ -2357,7 +2357,7 @@ async def my_application(message: Message, state: FSMContext):
         f"💵 Ta'lim narxi: {formatted_fee} so'm\n\n"
         f"⏰ Izoh vaqti: {convert_time(comment_time)}\n"
         f"{color} *Izoh:* {escape_markdown(comment)}\n"
-        # f"🖥️ *Online imtihon topshirish:* [Online imtihon topshirish]({online_exam_link})"
+        f"🖥️ *Online imtihon topshirish:* [Online imtihon topshirish]({online_exam_link})"
         )
 
         ic(response_message, 1852)

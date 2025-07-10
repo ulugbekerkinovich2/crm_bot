@@ -18,7 +18,7 @@ ic(origin, 'oldin')
 host = 'crmapi.mentalaba.uz'
 origin = 'qabul.aifu.uz'
 # username = 'ulugbek'
-# crm_django_domain = 'alfa.misterdev.uz'
+crm_django_domain = 'global.misterdev.uz'
 # password = '998359015a@'
 # ic.disable()
 default_header = {
@@ -987,6 +987,7 @@ async def djtoken(username, password):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=body) as response:
+            ic(response.status)
             if response.status == 200:
                 data = await response.json()
                 # log_data = {
@@ -1011,11 +1012,53 @@ async def djtoken(username, password):
                 # log_to_json(log_data)
                 return {'error': 'Failed to get token', 'status_code': response.status}
 
-def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,university_name):
+# def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,university_name):
+#     url = f"https://{crm_django_domain}/create-user-profile/"
+#     header = {
+#         'Authorization': f'Bearer {token}'
+#     } 
+#     body = {
+#         'chat_id_user': chat_id,
+#         'first_name_user': first_name,
+#         'last_name_user': last_name,
+#         'pin': pin,
+#         'username': username,
+#         'date': date,
+#         "university_name": university_name
+#     }
+#     # ic(body)
+#     response = requests.post(url, json=body, headers=header)
+#     if response.status_code == 201:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'create_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         # 'data': response.json()
+#         #     }
+#         # }
+#         return response.json()
+#     else:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'create_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         # 'data': response.text
+#         #     }
+#         # }
+#         # log_to_json(log_data)
+#         return {'error': 'Failed to create user profile', 'status_code': response.status_code}
+
+import aiohttp
+import asyncio
+
+async def create_user_profile(token, chat_id, first_name, last_name, pin, date, username, university_name):
     url = f"https://{crm_django_domain}/create-user-profile/"
-    header = {
-        'Authorization': f'Bearer {token}'
-    } 
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
     body = {
         'chat_id_user': chat_id,
         'first_name_user': first_name,
@@ -1023,35 +1066,73 @@ def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,uni
         'pin': pin,
         'username': username,
         'date': date,
-        "university_name": university_name
+        'university_name': university_name
     }
-    # ic(body)
-    response = requests.post(url, json=body, headers=header)
-    if response.status_code == 201:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'create_user_profile',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         # 'data': response.json()
-        #     }
-        # }
-        return response.json()
-    else:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'create_user_profile',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         # 'data': response.text
-        #     }
-        # }
-        # log_to_json(log_data)
-        return {'error': 'Failed to create user profile', 'status_code': response.status_code}
 
-def update_user_profile(university_id, chat_id, phone, first_name, last_name, pin, username,date):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=body, headers=headers, timeout=30) as response:
+                if response.status == 201:
+                    return await response.json()
+                else:
+                    return {
+                        'error': 'Failed to create user profile',
+                        'status_code': response.status,
+                        'detail': await response.text()
+                    }
+
+    except aiohttp.ClientError as e:
+        return {
+            'error': 'Request exception',
+            'detail': str(e)
+        }
+
+
+# def update_user_profile(university_id, chat_id, phone, first_name, last_name, pin, username,date):
+#     url = f"https://{crm_django_domain}/update-user-profile/{chat_id}/{university_id}/"
+#     # ic(url)
+#     body = {
+#         'chat_id_user': chat_id,
+#         'phone': phone,
+#         'first_name_user': first_name,
+#         'last_name_user': last_name if last_name else 'None',
+#         'pin': pin,
+#         'username': username,
+#         'date': date,
+#         'university_name': university_id
+#     }
+#     # ic(body)
+#     response = requests.put(url, json=body)
+#     if response.status_code == 200:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'update_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         'data': response.json()
+#         #     }
+#         # }
+#         return response.json()
+#     else:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'update_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         'data': response.json()
+#         #     }
+#         # }
+#         # log_to_json(log_data)
+#         return response.json()
+
+import aiohttp
+import asyncio
+
+async def update_user_profile(university_id, chat_id, phone, first_name, last_name, pin, username, date):
     url = f"https://{crm_django_domain}/update-user-profile/{chat_id}/{university_id}/"
-    # ic(url)
+    headers = {
+        'Content-Type': 'application/json'
+    }
     body = {
         'chat_id_user': chat_id,
         'phone': phone,
@@ -1062,30 +1143,17 @@ def update_user_profile(university_id, chat_id, phone, first_name, last_name, pi
         'date': date,
         'university_name': university_id
     }
-    # ic(body)
-    response = requests.put(url, json=body)
-    if response.status_code == 200:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'update_user_profile',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        return response.json()
-    else:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'update_user_profile',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
-        return response.json()
 
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.put(url, json=body, headers=headers, timeout=20) as response:
+                response_data = await response.json()
+                return response_data
+    except aiohttp.ClientError as e:
+        return {
+            'error': 'Request exception',
+            'detail': str(e)
+        }
 
 # a = update_user_profile(3, "935920479", '998942559015', 'Erkinov', 'Abdulloh', '12341234')
 # ic(a)

@@ -123,7 +123,7 @@ async def my_menu(message: Message, state: FSMContext):
     ic(date)
     username = message.from_user.username or message.from_user.full_name
     ic(username)
-    save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+    save_chat_id = await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                         first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                         pin=1,date=date, username=username,
                                                         university_name=int(UNIVERSITY_ID))
@@ -231,7 +231,7 @@ async def education_menu(message: Message, state: FSMContext):
         ic(date)
         username = message.from_user.username or message.from_user.full_name
         ic(username)
-        save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+        save_chat_id =await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                             first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                             pin=1,date=date, username=username,
                                                             university_name=int(UNIVERSITY_ID))

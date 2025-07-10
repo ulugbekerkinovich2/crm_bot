@@ -7,7 +7,7 @@ env.read_env()
 
 # .env fayl ichidan quyidagilarni o'qiymiz
 BOT_TOKEN = env.str("BOT_TOKEN")  # Bot token
-print(BOT_TOKEN)
+print(10, BOT_TOKEN)
 ADMINS = env.list("ADMINS")  # adminlar ro'yxati
 IP = env.str("ip")  # Xosting ip manzili
 throttling_time = env.str("throttling_time")
@@ -31,4 +31,6 @@ university_id = int(env.str("university_id"))
 web_app_url = env.str("web_app_url")
 port= env.int("port")
 university_site_url=env.str("university_site_url")
-exam_link=env.str("exam_link")
+# exam_link=env.str("exam_link")
+exam_link='imtihon.aifu.uz'
+print(35505050, exam_link)

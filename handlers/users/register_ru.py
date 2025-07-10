@@ -3,6 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command,Text
 from utils import send_req
 from loader import dp
+import traceback
 from states.personalData import PersonalDataRU, EducationDataRU
 from states.personalData import ManualPersonalInfoRU
 from aiogram.utils.exceptions import Throttled
@@ -360,7 +361,7 @@ async def secret_code(message: types.Message, state: FSMContext):
                 ic(date)
                 username = message.from_user.username or message.from_user.full_name
                 ic(username)
-                save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                save_chat_id = await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                                     first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username,
                                                                     university_name=int(UNIVERSITY_ID))
@@ -370,6 +371,7 @@ async def secret_code(message: types.Message, state: FSMContext):
                 ic(get_this_user)
             except Exception as err:
                 ic(err)
+                traceback.print_exc()
             if haveApplicationForm is False and (haveEducation is False and  havePreviousEducation is False) and haveApplied is False:
                 await message.answer(example_document_ru, reply_markup=ReplyKeyboardRemove())
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
@@ -714,7 +716,7 @@ async def info(message: types.Message, state: FSMContext):
         ic('django')
         ic(id_user, phone, chat_id_user,first_name, last_name)
         try:
-            update_user_profile_response = send_req.update_user_profile(
+            update_user_profile_response = await send_req.update_user_profile(
                 university_id=UNIVERSITY_ID, 
                 chat_id=chat_id_user, 
                 phone=phone, 

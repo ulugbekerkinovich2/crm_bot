@@ -294,7 +294,7 @@ async def get_email(message: types.Message, state: FSMContext):
     ic(id_user, email, chat_id_user,firstname, lastname)
     # try: 
     date_now = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-    update_user_profile_response = send_req.update_user_profile(university_id=UNIVERSITY_ID, chat_id=chat_id_user, phone=phone, first_name=firstname, last_name=lastname, pin=pinfl,
+    update_user_profile_response =await send_req.update_user_profile(university_id=UNIVERSITY_ID, chat_id=chat_id_user, phone=phone, first_name=firstname, last_name=lastname, pin=pinfl,
                                                                 date=date_now, username=message.from_user.username)
     ic(update_user_profile_response)
     # except Exception as e:

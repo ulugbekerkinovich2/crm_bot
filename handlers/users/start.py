@@ -125,6 +125,7 @@ from aiogram.dispatcher.filters import Command, Text
 #         )
 @dp.message_handler(CommandStart(), state='*')
 async def bot_start(message: types.Message, state: FSMContext):
+    ic('started...')
     all_data_state = await state.get_data()
     token = all_data_state.get('token', None)
     start_count = all_data_state.get('start_count', 0) + 1
@@ -136,7 +137,7 @@ async def bot_start(message: types.Message, state: FSMContext):
     if (1 < start_count < 3 or start_count > 8) and language_uz:
         await message.answer(f"@{username} start tugmasini qayta qayta bosish shart emas😅")
         return
-
+    ic(140, token)
     if token:
         user_info = await send_req.application_forms_me(token=token)
         have_application_form = user_info.get('haveApplicationForm', False)
@@ -159,7 +160,7 @@ async def handle_authenticated_user(message, state, token, date, username):
     user_chat_id = message.from_user.id
 
     try:
-        send_req.create_user_profile(
+        await send_req.create_user_profile(
             token=access,
             chat_id=user_chat_id,
             first_name=message.from_user.first_name,
@@ -196,13 +197,15 @@ async def handle_authenticated_user(message, state, token, date, username):
 
 
 async def handle_new_user(message, state, date, username):
+    ic('handle_new_user')
     await state.finish()
     get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
     access = get_djtoken.get('access')
+    ic(204, access)
     await state.update_data(access=access)
     user_chat_id = message.from_user.id
 
-    send_req.create_user_profile(
+    await send_req.create_user_profile(
         token=access,
         chat_id=user_chat_id,
         first_name=message.from_user.first_name,
