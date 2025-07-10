@@ -2359,6 +2359,7 @@ async def my_application(message: Message, state: FSMContext):
         f"{color} *Izoh:* {escape_markdown(comment)}\n"
         f"🖥️ *Online imtihon topshirish:* [Online imtihon topshirish]({online_exam_link})"
         )
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu_full)
 
         ic(response_message, 1852)
     elif (branch or
@@ -2378,6 +2379,7 @@ async def my_application(message: Message, state: FSMContext):
         )
 
         ic(response_message, 1867)
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
     elif (branch or
         online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam == {}:
         ic(1805)
@@ -2395,6 +2397,7 @@ async def my_application(message: Message, state: FSMContext):
         )
 
         ic(response_message, 1882)
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
     elif (branch or
         online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam != {}:
         ic(1792)
@@ -2412,6 +2415,7 @@ async def my_application(message: Message, state: FSMContext):
         )
 
         ic(response_message, 1896)
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
     elif  exam == {}:
         ic(1832)
         response_message = (
@@ -2428,6 +2432,6 @@ async def my_application(message: Message, state: FSMContext):
         )
 
         ic(response_message, 1558)
-    await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
 
 
