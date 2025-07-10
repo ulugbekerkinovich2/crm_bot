@@ -172,11 +172,11 @@ async def handle_authenticated_user(message, state, token, date, username):
     except Exception as err:
         ic(err)
 
-    try:
-        get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
-        ic(get_this_user)
-    except Exception as err:
-        ic(err)
+    # try:
+        # get_this_user = await send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
+        # ic(get_this_user)
+    # except Exception as err:
+    #     ic(err)
 
     exam_info = await send_req.my_applications(token=token)
     exam = exam_info.get('exam', {})
@@ -213,7 +213,7 @@ async def handle_new_user(message, state, date, username):
         university_name=int(UNIVERSITY_ID)
     )
 
-    get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
+    # await send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
     data_user = await state.get_data()
     phone = data_user.get('phone', None)
 

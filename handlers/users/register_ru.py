@@ -360,13 +360,13 @@ async def secret_code(message: types.Message, state: FSMContext):
                 ic(date)
                 username = message.from_user.username or message.from_user.full_name
                 ic(username)
-                save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                save_chat_id = await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                                     first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username,
                                                                     university_name=int(UNIVERSITY_ID))
                 ic(save_chat_id)
 
-                get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=int(UNIVERSITY_ID))
+                get_this_user =await send_req.get_user_profile(chat_id=user_chat_id, university_id=int(UNIVERSITY_ID))
                 ic(get_this_user)
             except Exception as err:
                 ic(err)
@@ -705,7 +705,7 @@ async def info(message: types.Message, state: FSMContext):
 
         await message.answer("Нажмите «Продолжить», чтобы заполнить информацию об обучении.", reply_markup=enter_button_ru)
         ic('davom etish bosildi', 540)
-        get_current_user = send_req.get_user_profile(chat_id=message.chat.id, university_id=UNIVERSITY_ID)
+        get_current_user =await send_req.get_user_profile(chat_id=message.chat.id, university_id=UNIVERSITY_ID)
         chat_id_user = get_current_user['chat_id_user']
         id_user = get_current_user['id']
         await state.update_data(chat_id_user=chat_id_user, id_user=id_user)
@@ -714,7 +714,7 @@ async def info(message: types.Message, state: FSMContext):
         ic('django')
         ic(id_user, phone, chat_id_user,first_name, last_name)
         try:
-            update_user_profile_response = send_req.update_user_profile(
+            update_user_profile_response = await send_req.update_user_profile(
                 university_id=UNIVERSITY_ID, 
                 chat_id=chat_id_user, 
                 phone=phone, 

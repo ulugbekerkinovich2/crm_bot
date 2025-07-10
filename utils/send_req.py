@@ -1135,33 +1135,59 @@ async def get_all_ser_profile(token):
                 # log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-def get_user_profile(chat_id,university_id):
-    url = f"https://{crm_django_domain}/detail-user-profile/{int(chat_id)}/{int(university_id)}/"
-    response = requests.get(url)
-    # ic(response.status_code, response.json())
-    if response.status_code == 200:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'get_user_profile',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
-        return response.json()
-    else:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'get_user_profile',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
-        return {'error': 'Failed to fetch data', 'status_code': response.status_code}
+# def get_user_profile(chat_id,university_id):
+#     url = f"https://{crm_django_domain}/detail-user-profile/{int(chat_id)}/{int(university_id)}/"
+#     response = requests.get(url)
+#     # ic(response.status_code, response.json())
+#     if response.status_code == 200:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'get_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         'data': response.json()
+#         #     }
+#         # }
+#         # log_to_json(log_data)
+#         return response.json()
+#     else:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'get_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         'data': response.json()
+#         #     }
+#         # }
+#         # log_to_json(log_data)
+#         return {'error': 'Failed to fetch data', 'status_code': response.status_code}
     
+
+import aiohttp
+import asyncio
+
+async def get_user_profile(chat_id, university_id):
+    url = f"https://{crm_django_domain}/detail-user-profile/{int(chat_id)}/{int(university_id)}/"
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, timeout=20) as response:
+                if response.status == 200:
+                    return await response.json()
+                else:
+                    return {
+                        'error': 'Failed to fetch data',
+                        'status_code': response.status,
+                        'detail': await response.text()
+                    }
+    except aiohttp.ClientError as e:
+        return {
+            'error': 'Request exception',
+            'detail': str(e)
+        }
 
 
 
@@ -1178,26 +1204,8 @@ async def bot_usage(token, start_time, end_time):
         async with session.post(url, json=body, headers=header) as response:
             if response.status == 200:
                 data = await response.json()
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'bot_usage',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': data
-                #     }
-                # }
-                # log_to_json(log_data)
                 return data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'bot_usage',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': response.json()
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 
