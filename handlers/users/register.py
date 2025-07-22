@@ -208,15 +208,18 @@ async def handle_degree_selection(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     ic('uzb tanlandi')
 
-    # Parametrni aniqlab olamiz
     option = degree_options.get(message.text, {})
     if "degree_id" in option:
         await state.update_data(pre_selected_degree_id=option["degree_id"])
     if option.get("is_second_specialty"):
         await state.update_data(pre_selected_is_second_specialty=True)
+        pre_selected_is_second_specialty=True
+        ic(pre_selected_is_second_specialty)
     if option.get("transfer"):
         await state.update_data(transfer_user=True)
-
+        transfer_user = True
+        ic(transfer_user)
+    
     all_data_state = await state.get_data()
     token = all_data_state.get("token")
     ic('token72', token)
@@ -1666,6 +1669,7 @@ async def get_certificate(message: types.Message, state: FSMContext):
         # Faylni saqlash joyi
         download_dir = 'diploma_files'
         os.makedirs(download_dir, exist_ok=True)
+
         file_name = os.path.basename(file_path)
         local_file_path = os.path.join(download_dir, file_name)
 
@@ -1824,16 +1828,12 @@ async def has_application_start(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda c: c.data.startswith('degree:'), state=EducationData.degree_id)
 async def has_application(callback_query: types.CallbackQuery, state: FSMContext):
-    from aiogram import Bot
-    from data.config import BOT_TOKEN 
-
-    # bot = Bot(token=BOT_TOKEN)
     ic(callback_query.data)
     try:
         _, degree_id, degree_name = callback_query.data.split(":")
         degree_id = int(degree_id)
     except Exception as e:
-        return await callback_query.answer("❌ Noto‘g‘ri format!")
+        return await callback_query.answer("❌ Noto‘g   ‘ri format!")
     
     await state.update_data(degree_id=degree_id, degree_name=degree_name)
 
@@ -2089,7 +2089,10 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     data_state = await state.get_data()
     pre_selected_branch_id = data_state.get('pre_selected_branch_id', None)
     is_master = data_state.get('is_master', False)
+    pre_selected_is_second_specialty = data_state.get('pre_selected_is_second_specialty', None)
+    print(2090, pre_selected_is_second_specialty)
     is_second_specialty = data_state.get('is_second_specialty', False)
+    print(2092, is_second_specialty)
     referral_source = "telegram"
     directions = data_state.get('directions')
     def get_education_language_name(directions, direction_id, education_lang_id):
@@ -2107,7 +2110,6 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
 
     await state.update_data(education_lang_id=education_lang_id, tuition_fee=education_tuition_fee, edu_lang_name=education_language_name)
 
-    # Fetch state data
     ic(1924)
     all_state_data = await state.get_data()
     token_ = all_state_data.get('token')
@@ -2174,6 +2176,9 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     #     'is_transfer_student': is_transfer_student,
     #     'referral_source': referral_source
     # }
+    ic(2179, pre_selected_is_second_specialty)
+    if pre_selected_is_second_specialty is None:
+        pre_selected_is_second_specialty = False
     applicant_status = await send_applicant_data(
         token_, 
         transfer_user, 
@@ -2185,7 +2190,7 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
         file_work_experience,
         pre_selected_branch_id,
         is_master,
-        is_second_specialty,
+        pre_selected_is_second_specialty,
         referral_source
         )
     ic(applicant_status)
@@ -2199,14 +2204,58 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
             reply_markup=menu
         )
 
-async def send_applicant_data(token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience=None, pre_selected_branch_id=None, is_master=False,
-                              is_second_specialty=False,referral_source='telegram'):
+async def send_applicant_data(token, 
+                              transfer_user, 
+                              chat_id_user, 
+                              degree_id, 
+                              direction_id, 
+                              education_lang_id, 
+                              education_type_id, 
+                              file_work_experience=None, 
+                              pre_selected_branch_id=None, 
+                              is_master=False,
+                              pre_selected_is_second_specialty=False,
+                              referral_source='telegram'):
     # ic(token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience,pre_selected_branch_id, is_master,referral_source)
-    if not is_second_specialty:
-        return await send_req.applicants(
-            token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id, file_work_experience,is_second_specialty, pre_selected_branch_id, is_master,referral_source
-        )
-    elif is_second_specialty:
-        return await send_req.applicants(
-            token, transfer_user, chat_id_user, degree_id, direction_id, education_lang_id, education_type_id,is_second_specialty, pre_selected_branch_id, is_master,referral_source
-        )
+    return await send_req.applicants(
+        token=token,
+        is_transfer_student=transfer_user,
+        chat_id_user=chat_id_user,
+        degree_id=degree_id,
+        direction_id=direction_id,
+        education_language_id=education_lang_id,
+        education_type_id=education_type_id,
+        is_second_specialty=pre_selected_is_second_specialty,
+        branch=pre_selected_branch_id,
+        is_master=is_master,
+        referral_source=referral_source
+    )
+    # if not pre_selected_is_second_specialty:
+        # return await send_req.applicants(
+            # token,
+            # transfer_user, 
+            # chat_id_user, 
+            # degree_id, 
+            # direction_id, 
+            # education_lang_id, 
+            # education_type_id, 
+            # file_work_experience,
+            # pre_selected_is_second_specialty, 
+            # pre_selected_branch_id, 
+            # is_master,
+            # referral_source
+        # )
+    # elif pre_selected_is_second_specialty:
+
+            # token, 
+            # transfer_user, 
+            # chat_id_user, 
+            # degree_id, 
+            # direction_id, 
+            # education_lang_id, 
+            # education_type_id,
+            # pre_selected_is_second_specialty, 
+            # pre_selected_branch_id, 
+            # is_master,
+            # referral_source
+        # )
