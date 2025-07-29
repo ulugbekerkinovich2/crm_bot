@@ -36,7 +36,6 @@ async def on_startup(dispatcher):
     await on_startup_notify(dispatcher)
 
 
-
 if __name__ == '__main__':
     web_server_thread = threading.Thread(target=start_web_server)
     web_server_thread.start()

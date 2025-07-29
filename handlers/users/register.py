@@ -533,7 +533,7 @@ async def secret_code(message: types.Message, state: FSMContext):
             
             # ic(get_this_user, 323)
             # except Exception as err:
-            #     ic(err)
+            #     ic(err) gi
             if haveApplicationForm is False and (haveEducation is False and  havePreviousEducation is False) and haveApplied is False:
                 ic(338, 'keldi 1 chi if ga')
                 await message.answer(example_document, reply_markup=ReplyKeyboardRemove())
