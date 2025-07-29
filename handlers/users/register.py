@@ -527,7 +527,7 @@ async def secret_code(message: types.Message, state: FSMContext):
 # >>>>>>> aifu_bot
 
             except Exception as err:
-                ic(err)
+                print(err)
 
             # get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
             
