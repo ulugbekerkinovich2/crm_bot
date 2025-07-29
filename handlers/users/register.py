@@ -483,7 +483,6 @@ async def secret_code(message: types.Message, state: FSMContext):
             get_token = in_data.get('token')
             
             ic(get_token)
-            # try:
             await state.update_data(token=get_token)
             get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
             access = get_djtoken.get('access')
@@ -501,7 +500,7 @@ async def secret_code(message: types.Message, state: FSMContext):
 
                 #save_chat_id =await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
 
-                save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                send_req.create_user_profile(token=access, chat_id=user_chat_id, 
 
                                                                     first_name=message.from_user.first_name,
                                                                     last_name=message.from_user.last_name, 
@@ -511,20 +510,13 @@ async def secret_code(message: types.Message, state: FSMContext):
 
 
                 await send_req.update_user_profile(university_id=UNIVERSITY_ID, 
-
-                send_req.update_user_profile(id=save_chat_id, 
-
                                             chat_id=user_chat_id,
                                             phone=phone_number, 
                                             pin=1,
                                             first_name=message.from_user.first_name,
-# <<<<<<< added_functions
                                             last_name=message.from_user.last_name,
                                             date=date,
                                             username=username)
-# =======
-#                                             last_name=message.from_user.last_name)
-# >>>>>>> aifu_bot
 
             except Exception as err:
                 print(err)
