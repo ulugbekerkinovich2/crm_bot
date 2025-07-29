@@ -25,6 +25,7 @@ from data.config import password as PASSWORD
 from data.config import university_id as UNIVERSITY_ID
 from utils.converter_files import convert_heic_to_jpg
 
+
 saved_message = "✅ <b>Ma'lumot saqlandi!</b>"
 error_message_birthday = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Sana formati: yyyy-oo-kk\nTug'ilgan kunni qayta kiriting"
 error_date = "🔴 Tug'ilgan kun noto'g'ri kiritildi. Kiritilgan sana namunadagidek emas.\nTug'ilgan kunni qayta kiriting"
@@ -497,21 +498,33 @@ async def secret_code(message: types.Message, state: FSMContext):
             try:
                 phone_number = await state.get_data('phone')
                 ic(phone_number['phone'], '<----------------->\n<----------------->\n<----------------->')
-                save_chat_id =await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+
+                #save_chat_id =await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+
+                save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+
                                                                     first_name=message.from_user.first_name,
                                                                     last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username,
                                                                     university_name=int(UNIVERSITY_ID))
                 # ic(save_chat_id)
 
+
                 await send_req.update_user_profile(university_id=UNIVERSITY_ID, 
+
+                send_req.update_user_profile(id=save_chat_id, 
+
                                             chat_id=user_chat_id,
                                             phone=phone_number, 
                                             pin=1,
                                             first_name=message.from_user.first_name,
+# <<<<<<< added_functions
                                             last_name=message.from_user.last_name,
                                             date=date,
                                             username=username)
+# =======
+#                                             last_name=message.from_user.last_name)
+# >>>>>>> aifu_bot
 
             except Exception as err:
                 ic(err)
@@ -1382,6 +1395,86 @@ async def upload_file3(message: types.Message, state: FSMContext):
         await state.update_data(src=src_res)
     await EducationData.degree_id.set()
 
+
+@dp.message_handler(content_types=[ContentType.DOCUMENT, ContentType.PHOTO], state=EducationData.file_diploma_transkript)
+async def upload_file(message: types.Message, state: FSMContext):
+    if message.document:
+        document = message.document
+        file_id = document.file_id
+        file_name = document.file_name
+    elif message.photo:
+        photo = message.photo[-1]
+        file_id = photo.file_id
+        file_name = f"{file_id}.jpg"
+    
+    ic(file_name)
+    
+    data = await state.get_data()
+    ic(data)
+    token_id = data['token']
+    ic(token_id)
+    
+    token_ = data.get('token')
+    
+    file_path = await bot.get_file(file_id)
+    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+    ic(file_url)
+
+    download_dir = 'transcript_files'
+    os.makedirs(download_dir, exist_ok=True)
+
+    local_file_path = os.path.join(download_dir, file_name)
+    await send_req.download_file(file_url, local_file_path)
+    await message.answer("Please wait while the file is being uploaded...", parse_mode='HTML')
+    
+    res_file = upload.upload_new_file_transcript(token=token_, filename=local_file_path)
+    
+    try:
+        file_size = os.path.getsize(local_file_path)
+        file_size_kb = file_size / 1024
+        file_size_mb = file_size_kb / 1024
+        ic(f'size: {file_size_mb:.2f}')
+    except Exception as e:
+        ic(e)
+        await message.answer("File not found")
+        return
+
+    await state.update_data(file_size=file_size)
+    await message.answer("File has been uploaded successfully.")
+
+    try:
+        data1 = res_file.json()
+        path = data1['path']
+        ic(path)
+        data = await state.get_data()
+        file_diploma_transkript = path
+        country_id = data.get('country_id')
+        selected_course = data.get('selected_course')
+        transfer_direction_name = data.get('transfer_direction_name')
+        transfer_education_name = data.get('transfer_education_name')
+
+        res_data = await send_req.application_forms_transfer(
+            token_,
+            int(country_id),
+            transfer_direction_name,
+            transfer_education_name,
+            file_diploma_transkript,
+            int(selected_course)
+        )
+        ic(res_data)
+        await message.answer("Data has been saved successfully.", reply_markup=enter_button)
+        await state.update_data(file_diploma_transkript=path)
+        
+    except Exception as e:
+        ic(e)
+        await message.answer(f"An error occurred: {e}")
+        return
+    
+    src_ = 'src' 
+    src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+    if src_res is not None and src_res is not False:
+        await state.update_data(src=src_res)
+    await EducationData.degree_id.set()
 
 
 

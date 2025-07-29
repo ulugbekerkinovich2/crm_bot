@@ -11,7 +11,11 @@ from data.config import  origin, crm_django_domain, username, password
 from data.config import domain_name as host
 from utils.logs import log_to_json
 import aiohttp
+# <<<<<<< added_functions
 ic(origin, 'oldin')
+# =======
+ic(origin, 'shu')
+# >>>>>>> aifu_bot
 # origin = 'admission.uess.uz'
 # origin = 'admission.tiiu.uz'
 # ic(origin, 'keyingi')
