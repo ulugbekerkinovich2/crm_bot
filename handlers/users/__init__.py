@@ -3,6 +3,7 @@ from . import register_ru
 from . import register
 from . import manualdata
 from . import manualdataru
+from . import advertiser_commands
 from . import menu
 from . import update_application
 from . import about

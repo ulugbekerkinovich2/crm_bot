@@ -9,7 +9,7 @@ from keyboards.default import registerKeyBoardButton
 from icecream import ic
 from utils import send_req
 from data.config import username as USERNAME
-from data.config import password as PASSWORD
+from data.config import password as PASSWORD, BOT_TOKEN
 from data.config import university_id as UNIVERSITY_ID
 from aiogram.dispatcher.filters import Command, Text
 # @dp.message_handler(CommandStart(), state='*')
@@ -123,20 +123,73 @@ from aiogram.dispatcher.filters import Command, Text
 #             parse_mode='HTML',
 #             reply_markup=registerKeyBoardButton.language
 #         )
+# @dp.message_handler(CommandStart(), state='*')
+# async def bot_start(message: types.Message, state: FSMContext):
+#     ic('started...')
+#     all_data_state = await state.get_data()
+#     token = all_data_state.get('token', None)
+#     start_count = all_data_state.get('start_count', 0) + 1
+#     date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+#     username = message.from_user.username or message.from_user.full_name
+#     await state.update_data(start_count=start_count)
+#     language_uz = all_data_state.get('language_uz', False)
+
+#     if (1 < start_count < 3 or start_count > 8) and language_uz:
+#         await message.answer(f"@{username} start tugmasini qayta qayta bosish shart emas😅")
+#         return
+#     ic(140, token)
+#     if token:
+#         user_info = await send_req.application_forms_me(token=token)
+#         have_application_form = user_info.get('haveApplicationForm', False)
+#         have_applied = user_info.get('haveApplied', False)
+#         have_education = user_info.get('haveEducation', False)
+#         have_previous_education = user_info.get('havePreviousEducation', False)
+
+#         if have_application_form and have_applied and (have_education or have_previous_education):
+#             await handle_authenticated_user(message, state, token, date, username)
+#         else:
+#             await handle_new_user(message, state, date, username)
+#     else:
+#         await handle_new_user(message, state, date, username)
 @dp.message_handler(CommandStart(), state='*')
 async def bot_start(message: types.Message, state: FSMContext):
     ic('started...')
+    firstname = message.from_user.first_name
+    lastname = message.from_user.last_name
+    username = message.from_user.username or message.from_user.full_name
+    chat_id = message.from_user.id
+    date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Foydalanuvchilar va botlar ro‘yxatini olish
+    all_bots = send_req.get_all_bots()
+    all_users = send_req.get_all_users()
+    ic(all_users)
+    ic(all_bots)
+
+    # Foydalanuvchi bazada yo‘q bo‘lsa saqlash
+    if chat_id not in all_users:
+        ic('user not found, saving...')
+        for bot in all_bots:
+            if bot["api_key"] == BOT_TOKEN:
+                bot_id = bot["id"]
+                ic('matched bot, saving user...')
+                send_req.save_chat_id(chat_id, firstname, lastname, bot_id, username, 'active')
+        # await message.answer(f"Salom, {message.from_user.full_name}! {chat_id}")
+    else:
+        await message.answer(f"Siz ro'yxatdan o'tgansiz, {message.from_user.full_name}!")
+
+    # FSM holatini olish va yangilash
     all_data_state = await state.get_data()
     token = all_data_state.get('token', None)
     start_count = all_data_state.get('start_count', 0) + 1
-    date = message.date.strftime("%Y-%m-%d %H:%M:%S")
-    username = message.from_user.username or message.from_user.full_name
-    await state.update_data(start_count=start_count)
     language_uz = all_data_state.get('language_uz', False)
+    await state.update_data(start_count=start_count)
 
+    # Agar start tugmasini juda ko‘p bosgan bo‘lsa
     if (1 < start_count < 3 or start_count > 8) and language_uz:
         await message.answer(f"@{username} start tugmasini qayta qayta bosish shart emas😅")
         return
+
     ic(140, token)
     if token:
         user_info = await send_req.application_forms_me(token=token)
@@ -151,6 +204,7 @@ async def bot_start(message: types.Message, state: FSMContext):
             await handle_new_user(message, state, date, username)
     else:
         await handle_new_user(message, state, date, username)
+
 
 
 async def handle_authenticated_user(message, state, token, date, username):

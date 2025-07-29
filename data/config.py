@@ -34,3 +34,8 @@ university_site_url=env.str("university_site_url")
 # exam_link=env.str("exam_link")
 exam_link='imtihon.aifu-university.uz'
 print(35505050, exam_link)
+
+
+admins_str = env.str("ADMINS", "")
+# Split the string by comma and convert each part to an integer
+admin_ids = [int(admin_id) for admin_id in admins_str.split(",") if admin_id.strip()]
