@@ -16,7 +16,7 @@ import pytz
 import json
 from data.config import username as USERNAME
 from data.config import password as PASSWORD
-from data.config import university_id as UNIVERSITY_ID
+from data.config import university_id as UNIVERSITY_ID,exam_link
 from handlers.users import upload,collect_data
 from datetime import datetime, timedelta
 from handlers.users.register import saved_message,select_region,type_your_edu_name,example_diploma_message,wait_file_is_loading,select_type_certificate,example_certification_message,not_found_country,search_university,select_one
@@ -66,51 +66,244 @@ async def my_menu(message: Message, state: FSMContext):
     await message.answer("Quyidagi amallarni bajarishingiz mumkin", reply_markup=update_personal_info)
 
 
+# @dp.message_handler(Text(equals="📄Shaxsiy ma'lumotlarni ko'rish"), state="*")
+# async def my_menu(message: Message, state: FSMContext):
+#     try:
+#         data = await state.get_data()
+#         ic(66)
+#         token = data.get('token')
+#         ic(token)
+#         ic(74)
+#         if token:
+#             ic('token mavjud, shaxsiy ma\'lumotlarni ko\'rish', token)
+#             personal_info = await send_req.application_forms_me(token)
+#             ic(personal_info)
+#             photo = "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small_2x/default-avatar-profile-icon-of-social-media-user-vector.jpg"
+#             if personal_info['photo']:
+#                 photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
+            
+#             else:
+#                 photo = "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small_2x/default-avatar-profile-icon-of-social-media-user-vector.jpg"
+#             first_name = personal_info['first_name'] if personal_info['first_name'] else 'ism topilmadi'
+#             last_name = personal_info['last_name'] if personal_info['last_name'] else 'familiya topilmadi'
+#             third_name = personal_info['third_name'] if personal_info['third_name'] else 'otasini ismi topilmadi'
+#             serial_number = personal_info['serial_number'] if personal_info['serial_number'] else 'seriya va raqami topilmadi'
+#             birth_date_str = personal_info['birth_date'] if personal_info['birth_date'] else 'tugilgan sanasi topilmadi'
+#             birth_date = send_req.convert_time_new(birth_date_str) if birth_date_str != 'tugilgan sanasi topilmadi' else birth_date_str
+#             pin = personal_info['pin'] if personal_info['pin'] else "JSHSHR topilmadi"
+#             gender = 'erkak' if personal_info.get('gender') == 'male' else 'ayol' if personal_info.get('gender') == 'female' else 'jins topilmadi'
+
+#             citizenship = personal_info['citizenship'] if personal_info['citizenship'] else "O'zbekiston Respublikasi"
+#             birth_place = personal_info['birth_place'] if personal_info['birth_place'] else 'tug\'ilgan joyi topilmadi'
+#             phone = personal_info['phone'] if personal_info['phone'] else 'telefon raqami topilmadi'
+#             extra_phone = personal_info['extra_phone'].replace(" ", "") if personal_info['extra_phone'] else 'qo\'shimcha telefon raqami topilmadi'
+#             ic(type(birth_date))
+#             # if isinstance(birth_date, datetime):
+#             #     # Add 5 hours
+#             #     birth_date += timedelta(hours=5)
+#             #     ic('-----------------------***********>', birth_date)
+#             #     birth_date_str = birth_date.strftime('%Y-%m-%d %H:%M:%S')
+#             # else:
+#             #     birth_date_str = birth_date
+#             if isinstance(birth_date, str):
+#                 # Add 5 hours
+#                 birth_date += timedelta(hours=5)
+#                 birth_date_str = birth_date.strftime('%Y-%m-%d %H:%M:%S')
+#             else:
+#                 birth_date_str = birth_date
+
+#             ic('-----------------------***********>', birth_date_str)
+#             date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#             try:
+#                 data = send_req.update_user_profile(
+#                                     university_id=UNIVERSITY_ID, 
+#                                     chat_id=message.from_user.id,
+#                                     phone=phone, 
+#                                     pin=pin,
+#                                     first_name=first_name,
+#                                     last_name=last_name,
+#                                     username=message.from_user.username,
+#                                     date=date_now)
+#                 ic(data)
+#             except Exception as e:
+#                 ic(e)
+#                 # pass
+#             info_message = (
+#             "<b>Shaxsiy Ma'lumotlar:</b>\n\n"
+#             f"• <b>Ism:</b> {first_name}\n"
+#             f"• <b>Familiya:</b> {last_name}\n"
+#             f"• <b>Otasi ismi:</b> {third_name}\n"
+#             f"• <b>Seriya va raqami:</b> {serial_number}\n"
+#             f"• <b>Tug'ilgan sanasi:</b> {birth_date_str}\n"
+#             f"• <b>JSHSHR:</b> {pin}\n"
+#             f"• <b>Jins:</b> {gender}\n"
+#             f"• <b>Fuqarolik:</b> {citizenship}\n"
+#             f"• <b>Tug'ilgan joyi:</b> {birth_place}\n"
+#             f"• <b>Telefon raqami:</b> {phone}\n"
+#             f"• <b>Qo'shimcha telefon raqami:</b> {extra_phone}\n"
+#             )
+
+#             check_exam = await send_req.my_applications(token)
+#             ic(check_exam)
+#             if check_exam != '':
+#                 exam = check_exam.get('exam', None)
+#                 exam_result = None
+#                 if exam != {}:
+#                     ic(exam, 111)
+#                     exam_result = exam['exam_result']
+
+#                 if exam_result is not None:
+#                     await message.answer_photo(photo, caption=info_message, reply_markup=menu_full, parse_mode="HTML")
+#                 else:
+#                     await message.answer_photo(photo, caption=info_message, reply_markup=menu, parse_mode="HTML")
+#         else:
+#             data = await state.get_data()
+#             refreshToken = data.get('refreshToken')
+#             new_token = await send_req.return_token_use_refresh(refreshToken)
+#             token = new_token.get('token')
+#             ic('bu yangi token')
+#             if token:
+#                 ic('token mavjud, shaxsiy ma\'lumotlarni ko\'rish', token)
+#                 personal_info = await send_req.application_forms_me(token)
+#                 ic(personal_info)
+#                 photo = "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small_2x/default-avatar-profile-icon-of-social-media-user-vector.jpg"
+#                 if personal_info['photo']:
+#                     photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
+                
+#                 else:
+#                     photo = "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small_2x/default-avatar-profile-icon-of-social-media-user-vector.jpg"
+#                 first_name = personal_info['first_name'] if personal_info['first_name'] else 'ism topilmadi'
+#                 last_name = personal_info['last_name'] if personal_info['last_name'] else 'familiya topilmadi'
+#                 third_name = personal_info['third_name'] if personal_info['third_name'] else 'otasini ismi topilmadi'
+#                 serial_number = personal_info['serial_number'] if personal_info['serial_number'] else 'seriya va raqami topilmadi'
+#                 birth_date_str = personal_info['birth_date'] if personal_info['birth_date'] else 'tugilgan sanasi topilmadi'
+#                 birth_date = send_req.convert_time_new(birth_date_str) if birth_date_str != 'tugilgan sanasi topilmadi' else birth_date_str
+#                 pin = personal_info['pin'] if personal_info['pin'] else "JSHSHR topilmadi"
+#                 gender = 'erkak' if personal_info.get('gender') == 'male' else 'ayol' if personal_info.get('gender') == 'female' else 'jins topilmadi'
+
+#                 citizenship = personal_info['citizenship'] if personal_info['citizenship'] else "O'zbekiston Respublikasi"
+#                 birth_place = personal_info['birth_place'] if personal_info['birth_place'] else 'tug\'ilgan joyi topilmadi'
+#                 phone = personal_info['phone'] if personal_info['phone'] else 'telefon raqami topilmadi'
+#                 extra_phone = personal_info['extra_phone'].replace(" ", "") if personal_info['extra_phone'] else 'qo\'shimcha telefon raqami topilmadi'
+#                 ic(type(birth_date))
+#                 # if isinstance(birth_date, datetime):
+#                 #     # Add 5 hours
+#                 #     birth_date += timedelta(hours=5)
+#                 #     ic('-----------------------***********>', birth_date)
+#                 #     birth_date_str = birth_date.strftime('%Y-%m-%d %H:%M:%S')
+#                 # else:
+#                 #     birth_date_str = birth_date
+#                 if isinstance(birth_date, str):
+#                     # Add 5 hours
+#                     birth_date += timedelta(hours=5)
+#                     birth_date_str = birth_date.strftime('%Y-%m-%d %H:%M:%S')
+#                 else:
+#                     birth_date_str = birth_date
+
+#                 ic('-----------------------***********>', birth_date_str)
+#                 date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#                 try:
+#                     data = send_req.update_user_profile(
+#                                         university_id=UNIVERSITY_ID, 
+#                                         chat_id=message.from_user.id,
+#                                         phone=phone, 
+#                                         pin=pin,
+#                                         first_name=first_name,
+#                                         last_name=last_name,
+#                                         username=message.from_user.username,
+#                                         date=date_now)
+#                     ic(data)
+#                 except Exception as e:
+#                     ic(e)
+#                     # pass
+#                 info_message = (
+#                 "<b>Shaxsiy Ma'lumotlar:</b>\n\n"
+#                 f"• <b>Ism:</b> {first_name}\n"
+#                 f"• <b>Familiya:</b> {last_name}\n"
+#                 f"• <b>Otasi ismi:</b> {third_name}\n"
+#                 f"• <b>Seriya va raqami:</b> {serial_number}\n"
+#                 f"• <b>Tug'ilgan sanasi:</b> {birth_date_str}\n"
+#                 f"• <b>JSHSHR:</b> {pin}\n"
+#                 f"• <b>Jins:</b> {gender}\n"
+#                 f"• <b>Fuqarolik:</b> {citizenship}\n"
+#                 f"• <b>Tug'ilgan joyi:</b> {birth_place}\n"
+#                 f"• <b>Telefon raqami:</b> {phone}\n"
+#                 f"• <b>Qo'shimcha telefon raqami:</b> {extra_phone}\n"
+#                 )
+
+#                 check_exam = await send_req.my_applications(token)
+#                 ic(check_exam)
+#                 if check_exam != '':
+#                     exam = check_exam.get('exam', None)
+#                     exam_result = None
+#                     if exam != {}:
+#                         ic(exam, 111)
+#                         exam_result = exam['exam_result']
+
+#                     if exam_result is not None:
+#                         await message.answer_photo(photo, caption=info_message, reply_markup=menu_full, parse_mode="HTML")
+#                     else:
+#                         await message.answer_photo(photo, caption=info_message, reply_markup=menu, parse_mode="HTML")
+#     except:
+#         await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
+
+
 @dp.message_handler(Text(equals="📄Shaxsiy ma'lumotlarni ko'rish"), state="*")
 async def my_menu(message: Message, state: FSMContext):
-    data = await state.get_data()
-    ic(66)
-    token = data.get('token')
-    ic(token)
-    ic(74)
-    if token:
-        ic('token mavjud, shaxsiy ma\'lumotlarni ko\'rish', token)
-        personal_info = await send_req.application_forms_me(token)
-        
-        photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
-        ic(photo)
-        
-        first_name = personal_info['first_name'] if personal_info['first_name'] else 'ism topilmadi'
-        last_name = personal_info['last_name'] if personal_info['last_name'] else 'familiya topilmadi'
-        third_name = personal_info['third_name'] if personal_info['third_name'] else 'otasini ismi topilmadi'
-        serial_number = personal_info['serial_number'] if personal_info['serial_number'] else 'seriya va raqami topilmadi'
-        birth_date_str = personal_info['birth_date'] if personal_info['birth_date'] else 'tugilgan sanasi topilmadi'
-        birth_date = send_req.convert_time_new(birth_date_str) if birth_date_str != 'tugilgan sanasi topilmadi' else birth_date_str
-        pin = personal_info['pin'] if personal_info['pin'] else "JSHSHR topilmadi"
-        gender = 'erkak' if personal_info.get('gender') == 'male' else 'ayol' if personal_info.get('gender') == 'female' else 'jins topilmadi'
+    try:
+        data = await state.get_data()
+        print(255, data)
+        token = data.get('token')
+        print(256, token)
+        if not token:
+            refreshToken = data.get('refreshToken')
+            new_token = await send_req.return_token_use_refresh(refreshToken)
+            ic("bu yangi token1")
+            token = new_token.get('token')
+        print(262, token)
+        if token:
+            personal_info = await send_req.application_forms_me(token)
+            print(265, personal_info)
+            info_message, photo = format_personal_info(personal_info)
+            await update_user_profile(message, personal_info, token)
 
-        citizenship = personal_info['citizenship'] if personal_info['citizenship'] else "O'zbekiston Respublikasi"
-        birth_place = personal_info['birth_place'] if personal_info['birth_place'] else 'tug\'ilgan joyi topilmadi'
-        phone = personal_info['phone'] if personal_info['phone'] else 'telefon raqami topilmadi'
-        extra_phone = personal_info['extra_phone'].replace(" ", "") if personal_info['extra_phone'] else 'qo\'shimcha telefon raqami topilmadi'
-        ic(type(birth_date))
-        # if isinstance(birth_date, datetime):
-        #     # Add 5 hours
-        #     birth_date += timedelta(hours=5)
-        #     ic('-----------------------***********>', birth_date)
-        #     birth_date_str = birth_date.strftime('%Y-%m-%d %H:%M:%S')
-        # else:
-        #     birth_date_str = birth_date
-        if isinstance(birth_date, str):
-            # Add 5 hours
-            birth_date += timedelta(hours=5)
-            birth_date_str = birth_date.strftime('%Y-%m-%d %H:%M:%S')
+            check_exam = await send_req.my_applications(token)
+            exam = check_exam.get('exam', None) if check_exam else None
+            exam_result = exam.get('exam_result') if exam else None
+
+            if exam_result is not None:
+                await message.answer_photo(photo, caption=info_message, reply_markup=menu_full, parse_mode="HTML")
+            else:
+                await message.answer_photo(photo, caption=info_message, reply_markup=menu, parse_mode="HTML")
         else:
-            birth_date_str = birth_date
+            await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
-        ic('-----------------------***********>', birth_date_str)
+    except Exception as e:
+        ic(280, e)
+        await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
-        info_message = (
+def format_personal_info(personal_info):
+    photo = "https://static.vecteezy.com/system/resources/thumbnails/009/734/564/small_2x/default-avatar-profile-icon-of-social-media-user-vector.jpg"
+    if personal_info['photo']:
+        photo = f"https://{domain_name}/{personal_info['photo']}" if f"https://{domain_name}/{personal_info['photo']}" else 'rasm topilmadi'
+    
+    first_name = personal_info.get('first_name', 'ism topilmadi')
+    last_name = personal_info.get('last_name', 'familiya topilmadi')
+    third_name = personal_info.get('third_name', 'otasini ismi topilmadi')
+    serial_number = personal_info.get('serial_number', 'seriya va raqami topilmadi')
+    birth_date_str = personal_info.get('birth_date', 'tugilgan sanasi topilmadi')
+    birth_date = send_req.convert_time_new(birth_date_str) if birth_date_str != 'tugilgan sanasi topilmadi' else birth_date_str
+    if isinstance(birth_date, str):
+        birth_date += timedelta(hours=5)
+        birth_date_str = birth_date.strftime('%Y-%m-%d %H:%M:%S')
+    pin = personal_info.get('pin', "JSHSHR topilmadi")
+    gender = 'erkak' if personal_info.get('gender') == 'male' else 'ayol' if personal_info.get('gender') == 'female' else 'jins topilmadi'
+    citizenship = personal_info.get('citizenship', "O'zbekiston Respublikasi")
+    birth_place = personal_info.get('birth_place', 'tug\'ilgan joyi topilmadi')
+    phone = personal_info.get('phone', 'telefon raqami topilmadi')
+    extra_phone = personal_info.get('extra_phone', 'qo\'shimcha telefon raqami topilmadi')
+
+    info_message = (
         "<b>Shaxsiy Ma'lumotlar:</b>\n\n"
         f"• <b>Ism:</b> {first_name}\n"
         f"• <b>Familiya:</b> {last_name}\n"
@@ -123,20 +316,24 @@ async def my_menu(message: Message, state: FSMContext):
         f"• <b>Tug'ilgan joyi:</b> {birth_place}\n"
         f"• <b>Telefon raqami:</b> {phone}\n"
         f"• <b>Qo'shimcha telefon raqami:</b> {extra_phone}\n"
+    )
+    return info_message, photo
+
+async def update_user_profile(message, personal_info, token):
+    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        await send_req.update_user_profile(
+            university_id=UNIVERSITY_ID,
+            chat_id=message.from_user.id,
+            phone=personal_info.get('phone', 'telefon raqami topilmadi'),
+            pin=personal_info.get('pin', "JSHSHR topilmadi"),
+            first_name=personal_info.get('first_name', 'ism topilmadi'),
+            last_name=personal_info.get('last_name', 'familiya topilmadi'),
+            username=message.from_user.username,
+            date=date_now
         )
-
-        check_exam = await send_req.my_applications(token)
-        exam = check_exam.get('exam', None)
-        exam_result = None
-        if exam != {}:
-            ic(exam, 111)
-            exam_result = exam['exam_result']
-
-        if exam_result is not None:
-            await message.answer_photo(photo, caption=info_message, reply_markup=menu_full, parse_mode="HTML")
-        else:
-            await message.answer_photo(photo, caption=info_message, reply_markup=menu, parse_mode="HTML")
-    else:
+    except Exception as e:
+        ic(334, e)
         await message.answer('Profil ma\'lumotlari topilmadi\nStart tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
 @dp.message_handler(Text(equals="📝Shaxsiy ma'lumotlarni tahrirlash"), state="*")
@@ -151,13 +348,13 @@ async def my_menu(message: Message, state: FSMContext):
     ic(date)
     username = message.from_user.username or message.from_user.full_name
     ic(username)
-    save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+    save_chat_id = await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                         first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                         pin=1,date=date, username=username,
                                                         university_name=int(UNIVERSITY_ID))
     ic(save_chat_id)
 
-    get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+    get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
     ic(get_this_user)
     data = await state.get_data()
     token = data.get('token')
@@ -246,31 +443,74 @@ async def get_user_input(message: types.Message, state: FSMContext):
     await UpdateMenu.firstname.set()
 
 
+# @dp.message_handler(Text(equals="📚Ta'lim ma'lumotlarim"), state="*")
+# async def education_menu(message: Message, state: FSMContext):
+#     try:
+#         get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+#         access = get_djtoken.get('access')
+#         ic(access)
+#         await state.update_data(access=access)
+#         user_chat_id = message.from_user.id
+#         ic(user_chat_id)
+#         date = message.date.strftime("%Y-%m-%d %H:%M:%S")
+#         ic(date)
+#         username = message.from_user.username or message.from_user.full_name
+#         ic(username)
+#         save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+#                                                             first_name=message.from_user.first_name,                                                   
+#                                                             last_name=message.from_user.last_name, 
+#                                                             pin=1,date=date, username=username,
+#                                                             university_name=int(UNIVERSITY_ID))
+#         ic(save_chat_id)
+
+#         get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
+#         ic(get_this_user)
+#         await message.answer("Quyidagilardan birini tanlang", reply_markup=update_education_info)
+#     except Exception as err:
+#         ic(err)
+#         await message.answer('Start tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
+
 @dp.message_handler(Text(equals="📚Ta'lim ma'lumotlarim"), state="*")
 async def education_menu(message: Message, state: FSMContext):
     try:
-        get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
-        access = get_djtoken.get('access')
-        ic(access)
-        await state.update_data(access=access)
+        access = await get_access_token(state)
         user_chat_id = message.from_user.id
-        ic(user_chat_id)
         date = message.date.strftime("%Y-%m-%d %H:%M:%S")
-        ic(date)
         username = message.from_user.username or message.from_user.full_name
-        ic(username)
-        save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
-                                                            first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
-                                                            pin=1,date=date, username=username,
-                                                            university_name=int(UNIVERSITY_ID))
-        ic(save_chat_id)
 
-        get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
-        ic(get_this_user)
+        await create_or_update_user_profile(access, user_chat_id, message, date, username)
+        await message.answer("Quyidagilardan birini tanlang", reply_markup=update_education_info)
     except Exception as err:
         ic(err)
+        await message.answer('Start tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
-    await message.answer("Quyidagilardan birini tanlang", reply_markup=update_education_info)
+async def get_access_token(state):
+    get_djtoken = await send_req.djtoken(username=USERNAME, password=PASSWORD)
+    access = get_djtoken.get('access')
+    ic(access)
+    await state.update_data(access=access)
+    return access
+
+async def create_or_update_user_profile(access, user_chat_id, message, date, username):
+    ic(user_chat_id)
+    ic(date)
+    ic(username)
+    save_chat_id = await send_req.create_user_profile(
+        token=access,
+        chat_id=user_chat_id, 
+        first_name=message.from_user.first_name,
+        last_name=message.from_user.last_name, 
+        pin=1,
+        date=date,
+        username=username,
+        university_name=int(UNIVERSITY_ID)
+    )
+    ic(save_chat_id)
+
+    get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=UNIVERSITY_ID)
+    ic(get_this_user)
+
+    
 
 @dp.message_handler(Text(equals="📝 Ta'lim ma'lumotlarni tahrirlash"), state="*")
 async def edit_education_menu(message: Message, state: FSMContext):
@@ -531,7 +771,7 @@ async def handle_education_options(message: types.Message, state: FSMContext):
     #     await message.answer("📝 Ta'lim ma'lumotlarni tahrirlash", reply_markup=)
     # await state.reset_state() 
 
-@dp.message_handler(Text(equals=["📁Arizam","📁arizam"]), state=PersonalData.country_search)
+@dp.message_handler(Text(equals=["📄Arizani ko'rish","📄Arizani ko'rish"]), state=PersonalData.country_search)
 async def my_application(message: Message, state: FSMContext):
     data = await state.get_data()
     token = data.get('token')
@@ -609,14 +849,13 @@ async def my_application(message: Message, state: FSMContext):
         f" {color} Izoh: {comment}"
     )
     ic(response_message, 549)
-    await message.answer(response_message, parse_mode='HTML')
+    await message.answer(response_message, parse_mode='HTML', reply_markup=menu)
 
 @dp.message_handler(state=PersonalData.country_search)
 async def process_country_search(message: types.Message, state: FSMContext):
     ic("keldi 268")
     user_query = message.text.lower()
-    if user_query in ["📚 Ta'lim ma'lumotlarni ko'rish", "📝 Ta'lim ma'lumotlarni tahrirlash","📁arizam",
-                      "📁Arizam"]:
+    if user_query in ["📚 Ta'lim ma'lumotlarni ko'rish", "📝 Ta'lim ma'lumotlarni tahrirlash","📄Arizani ko'rish"]:
         await PersonalData.country_search.set()
         return
     ic('user_query', user_query)
@@ -862,7 +1101,7 @@ async def upload_file(message: types.Message, state: FSMContext):
         await state.update_data(file_diploma_transkript=path)
         
     except Exception as e:
-        ic(e)
+        ic(1102,e)
         await message.answer(e)
         return e
     await PersonalData.country_search.set()
@@ -1093,7 +1332,15 @@ async def update_education_name(callback_query: types.CallbackQuery, state: FSMC
 
 @dp.callback_query_handler(lambda mycallbackdata: mycallbackdata.data == 'diploma', state=UpdateEducation.education_id)
 async def update_diploma(callback_query: types.CallbackQuery, state: FSMContext):
-    await callback_query.message.answer(example_diploma_message)
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
+    # await callback_query.message.answer(example_diploma_message)
+    await bot.send_photo(chat_id=callback_query.message.chat.id,
+                             photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                             caption=example_diploma_message, 
+                             parse_mode="Markdown")
     await UpdateEducation.file_diploma.set()
 
 @dp.message_handler(content_types=['document'], state=UpdateEducation.file_diploma)
@@ -1330,179 +1577,460 @@ async def update_institution_name(message: types.Message, state: FSMContext):
 
     await UpdateEducation.next()
 
+# @dp.message_handler(Text(equals="📚 Ta'lim ma'lumotlarni ko'rish"), state="*")
+# async def education_menu(message: Message, state: FSMContext):
+
+#     try:
+#         data = await state.get_data()
+#         ic('keldi700', data)
+#         token = data.get('token')
+#         refreshToken = data.get('refreshToken')
+#         haveApplicationForm = data.get('haveApplicationForm')
+#         haveApplied = data.get('haveApplied')
+#         # haveEducation = data.get('haveEducation')
+#         # havePreviousEducation = data.get('havePreviousEducation')
+#         register_user = data.get('register_user')
+#         transfer_user = data.get('transfer_user')
+#         education_info = await send_req.application_forms_me(token)
+#         ic(education_info)
+#         haveEducation = education_info.get('haveEducation')
+#         havePreviousEducation = education_info.get('havePreviousEducation')
+#         ic('shu keldi:', haveEducation)
+#         if token and haveEducation:
+#             education_info = await send_req.application_forms_me(token)
+#             ic(education_info)
+#             user_education = education_info.get('user_education', {})
+#             certifications = education_info.get('certifications', [])
+#             # if certifications:
+#             #     if len(certifications) >= 2:
+#             #         certifications = certifications[-1]
+                
+#             pinfl_user_education = education_info.get('pinfl_user_education', {})
+#             # ic(education_info)
+#             # ic(certifications)
+#             # ic(pinfl_user_education)
+#             # ic(user_education)
+#             # Constructing the education message
+#             education_message = "<b>📚 Ta'lim Ma'lumotlarim:</b>\n\n"
+#             if user_education.get('education_type_uz', None) is not None:
+#                 education_message += (
+#                     f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
+#                     f"• <b>Viloyat:</b> {user_education.get('region_name_uz', 'Viloyat topilmadi')}\n"
+#                     f"• <b>Tuman:</b> {user_education.get('district_name_uz', 'Tuman topilmadi')}\n"
+#                     f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+#                 )
+#             elif pinfl_user_education['institution_name'] is not None:
+#                 ic('keldi1398')
+#                 institution_type = pinfl_user_education.get('institution_type', 'Talim turi topilmadi')
+#                 if institution_type == 'school':
+#                     institution_type = 'Maktab'
+#                 education_message += (
+#                     # f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
+#                     # f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
+#                     # f"• <b> Mamlakat:</b> {pinfl_user_education.get('country', 'Shahar topilmadi')}\n"
+#                     f"• <b>Shahar:</b> {pinfl_user_education.get('region', 'Shahar nomi topilmadi')}\n"
+#                     f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
+#                     f"• <b>Ta'lim turi:</b> {institution_type}\n"
+#                     f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+#                 )
+
+
+#             check_exam = await send_req.my_applications(token)
+#             exam = check_exam.get('exam', None)
+            
+#             if exam != {}:
+#                 exam_result = None
+#                 exam_result = exam['exam_result']
+#                 if exam_result is not None:
+#                     await message.answer(education_message, parse_mode="HTML", reply_markup=menu_full)
+#             else:
+#                 await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
+
+#             diploma_file = user_education.get('file')
+#             if diploma_file is not None:
+#                 try:
+#                     await message.answer_document(f"https://{domain_name}/{diploma_file[0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+#                 except Exception as e:
+#                     print(f"Failed to send diploma file: {e}")
+#             elif pinfl_user_education:
+#                 try:
+#                     await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+#                 except Exception as e:
+#                     print(f"Failed to send diploma file: {e}")
+                
+#             # Sending certification files if available
+
+#             ic(124)
+#             ic(certifications)
+#             for certification in certifications:
+#                 if certification.get('file'):
+#                     ic(127)
+#                     certification_type = certification.get('certification_type', 'Sertifikat turi topilmadi')
+#                     try:
+#                         await message.answer_document(f"https://{domain_name}/{certification['file']}", caption=f"Sertifikat nusxasi: {certification_type.upper()}")
+#                     except Exception as e:
+#                         print(f"Failed to send certification file: {e}", 1387)   
+#                         await message.answer(text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang")
+#         elif havePreviousEducation or haveEducation:
+#             ic('mytoken', token)
+#             education_info = await send_req.application_forms_me(token)
+#             ic(education_info)
+#             user_education = education_info.get('user_previous_education', None)
+#             pinfl_user_education = education_info.get('pinfl_user_education', {})
+
+#             certifications = education_info.get('certifications', [])
+#             if user_education is not None:
+#                 education_message = "<b>📚 Ta'lim Ma'lumotlari:</b>\n\n"
+#                 education_message += (
+#                     f"• <b>Mamlakat:</b> {user_education.get('country_name_uz', 'Viloyat topilmadi')}\n"
+#                     f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+#                     f"""• <b>Yo'nalish:</b> {user_education.get('direction_name', "Yonalish topilmadi")}\n"""
+#                     f"• <b>Kurs:</b> {user_education.get('which_course_now', 'Daraja topilmadi')}-chi kurs\n"
+#                 )
+                
+#                 if pinfl_user_education is not None:
+#                     if pinfl_user_education['pinfl_region_id'] is not None:
+#                         education_message += (
+#                             f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
+#                             f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
+#                             f"• <b> Mamlakat:</b> {pinfl_user_education.get('country', 'Shahar topilmadi')}\n"
+#                             f"• <b>Shahar:</b> {pinfl_user_education.get('region', 'Shahar nomi topilmadi')}\n"
+#                             f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
+#                             f"• <b>Ta'lim turi:</b> {pinfl_user_education.get('institution_type', 'Talim turi topilmadi')}\n"
+#                             f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+#                     )
+
+#                 check_exam = await send_req.my_applications(token)
+#                 exam = check_exam.get('exam', None)
+
+#                 if exam != {}:
+#                     exam_result = None
+#                     exam_result = exam['exam_result']
+
+#                 if exam_result is not None:
+#                     await message.answer(education_message, parse_mode="HTML", reply_markup=menu_full)
+#                 else:
+#                     await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
+
+#                 transcript_file = user_education.get('transcript_file')
+#                 if transcript_file:
+#                     try:
+#                         await message.answer_document(f"https://{domain_name}/{transcript_file}", caption="Transkript nusxasi fayli")
+#                     except Exception as e:
+#                         print(f"Failed to send diploma file: {e}")
+#                 elif pinfl_user_education:
+#                     try:
+#                         await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+#                     except Exception as e:
+#                         print(f"Failed to send diploma file: {e}")
+                    
+#                 # Sending certification files if available
+
+#                 ic(124)
+#                 if certifications is not None and certifications:
+#                     for certification in certifications:
+#                         if certification.get('file'):
+#                             ic(127)
+#                             certification_type = certification.get('certification_type', 'Sertifikat turi topilmadi')
+#                             try:
+#                                 await message.answer_document(f"https://{domain_name}/{certification['file']}", caption=f"Sertifikat nusxasi: {certification_type.upper()}")
+#                             except Exception as e:
+#                                 print(f"Failed to send certification file: {e}", 1453)
+#                                 await message.answer(text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang") 
+#         else:
+
+#             check_exam = await send_req.my_applications(token=token)
+#             try:
+#                 exam = check_exam.get('exam', None)
+#                 exam_result = None
+#                 if exam != {}:
+#                     exam_result = exam['exam_result']
+#                 if exam_result is not None:
+#                     await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu_full)
+#                 else: 
+#                     await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu)
+#             except:
+#                 await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos,akkuntdan chiqib tizimga qayta kiring.", reply_markup=menu)
+
+#     except:
+#         data = await state.get_data()
+#         myrefreshToken = data.get('refreshToken')
+#         new_token = await send_req.return_token_use_refresh(myrefreshToken)
+#         token = new_token.get('token')
+#         education_info = await send_req.application_forms_me(token)
+#         ic(education_info)
+#         haveEducation = education_info.get('haveEducation')
+#         havePreviousEducation = education_info.get('havePreviousEducation')
+#         ic('shu keldi:', haveEducation)
+#         if token and haveEducation:
+#             education_info = await send_req.application_forms_me(token)
+#             ic(education_info)
+#             user_education = education_info.get('user_education', {})
+#             certifications = education_info.get('certifications', [])
+#             # if certifications:
+#             #     if len(certifications) >= 2:
+#             #         certifications = certifications[-1]
+                
+#             pinfl_user_education = education_info.get('pinfl_user_education', {})
+#             # ic(education_info)
+#             # ic(certifications)
+#             # ic(pinfl_user_education)
+#             # ic(user_education)
+#             # Constructing the education message
+#             education_message = "<b>📚 Ta'lim Ma'lumotlarim:</b>\n\n"
+#             if user_education.get('education_type_uz', None) is not None:
+#                 education_message += (
+#                     f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
+#                     f"• <b>Viloyat:</b> {user_education.get('region_name_uz', 'Viloyat topilmadi')}\n"
+#                     f"• <b>Tuman:</b> {user_education.get('district_name_uz', 'Tuman topilmadi')}\n"
+#                     f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+#                 )
+#             elif pinfl_user_education['institution_name'] is not None:
+#                 ic('keldi1398')
+#                 institution_type = pinfl_user_education.get('institution_type', 'Talim turi topilmadi')
+#                 if institution_type == 'school':
+#                     institution_type = 'Maktab'
+#                 education_message += (
+#                     # f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
+#                     # f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
+#                     # f"• <b> Mamlakat:</b> {pinfl_user_education.get('country', 'Shahar topilmadi')}\n"
+#                     f"• <b>Shahar:</b> {pinfl_user_education.get('region', 'Shahar nomi topilmadi')}\n"
+#                     f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
+#                     f"• <b>Ta'lim turi:</b> {institution_type}\n"
+#                     f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+#                 )
+
+
+#             check_exam = await send_req.my_applications(token)
+#             exam = check_exam.get('exam', None)
+            
+#             if exam != {}:
+#                 exam_result = None
+#                 exam_result = exam['exam_result']
+#                 if exam_result is not None:
+#                     await message.answer(education_message, parse_mode="HTML", reply_markup=menu_full)
+#             else:
+#                 await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
+
+#             diploma_file = user_education.get('file')
+#             if diploma_file is not None:
+#                 try:
+#                     await message.answer_document(f"https://{domain_name}/{diploma_file[0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+#                 except Exception as e:
+#                     print(f"Failed to send diploma file: {e}")
+#             elif pinfl_user_education:
+#                 try:
+#                     await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+#                 except Exception as e:
+#                     print(f"Failed to send diploma file: {e}")
+                
+#             # Sending certification files if available
+
+#             ic(124)
+#             ic(certifications)
+#             for certification in certifications:
+#                 if certification.get('file'):
+#                     ic(127)
+#                     certification_type = certification.get('certification_type', 'Sertifikat turi topilmadi')
+#                     try:
+#                         await message.answer_document(f"https://{domain_name}/{certification['file']}", caption=f"Sertifikat nusxasi: {certification_type.upper()}")
+#                     except Exception as e:
+#                         print(f"Failed to send certification file: {e}", 1387)   
+#                         await message.answer(text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang")
+#         elif havePreviousEducation or haveEducation:
+#             ic('mytoken', token)
+#             education_info = await send_req.application_forms_me(token)
+#             ic(education_info)
+#             user_education = education_info.get('user_previous_education', None)
+#             pinfl_user_education = education_info.get('pinfl_user_education', {})
+
+#             certifications = education_info.get('certifications', [])
+#             if user_education is not None:
+#                 education_message = "<b>📚 Ta'lim Ma'lumotlari:</b>\n\n"
+#                 education_message += (
+#                     f"• <b>Mamlakat:</b> {user_education.get('country_name_uz', 'Viloyat topilmadi')}\n"
+#                     f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+#                     f"""• <b>Yo'nalish:</b> {user_education.get('direction_name', "Yonalish topilmadi")}\n"""
+#                     f"• <b>Kurs:</b> {user_education.get('which_course_now', 'Daraja topilmadi')}-chi kurs\n"
+#                 )
+                
+#                 if pinfl_user_education is not None:
+#                     if pinfl_user_education['pinfl_region_id'] is not None:
+#                         education_message += (
+#                             f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
+#                             f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
+#                             f"• <b> Mamlakat:</b> {pinfl_user_education.get('country', 'Shahar topilmadi')}\n"
+#                             f"• <b>Shahar:</b> {pinfl_user_education.get('region', 'Shahar nomi topilmadi')}\n"
+#                             f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
+#                             f"• <b>Ta'lim turi:</b> {pinfl_user_education.get('institution_type', 'Talim turi topilmadi')}\n"
+#                             f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+#                     )
+
+#                 check_exam = await send_req.my_applications(token)
+#                 exam = check_exam.get('exam', None)
+
+#                 if exam != {}:
+#                     exam_result = None
+#                     exam_result = exam['exam_result']
+
+#                 if exam_result is not None:
+#                     await message.answer(education_message, parse_mode="HTML", reply_markup=menu_full)
+#                 else:
+#                     await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
+
+#                 transcript_file = user_education.get('transcript_file')
+#                 if transcript_file:
+#                     try:
+#                         await message.answer_document(f"https://{domain_name}/{transcript_file}", caption="Transkript nusxasi fayli")
+#                     except Exception as e:
+#                         print(f"Failed to send diploma file: {e}")
+#                 elif pinfl_user_education:
+#                     try:
+#                         await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+#                     except Exception as e:
+#                         print(f"Failed to send diploma file: {e}")
+                    
+#                 # Sending certification files if available
+
+#                 ic(124)
+#                 if certifications is not None and certifications:
+#                     for certification in certifications:
+#                         if certification.get('file'):
+#                             ic(127)
+#                             certification_type = certification.get('certification_type', 'Sertifikat turi topilmadi')
+#                             try:
+#                                 await message.answer_document(f"https://{domain_name}/{certification['file']}", caption=f"Sertifikat nusxasi: {certification_type.upper()}")
+#                             except Exception as e:
+#                                 print(f"Failed to send certification file: {e}", 1453)
+#                                 await message.answer(text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang") 
+#         else:
+
+#             check_exam = await send_req.my_applications(token=token)
+#             try:
+#                 exam = check_exam.get('exam', None)
+#                 exam_result = None
+#                 if exam != {}:
+#                     exam_result = exam['exam_result']
+#                 if exam_result is not None:
+#                     await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu_full)
+#                 else: 
+#                     await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu)
+#             except:
+#                 await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos,akkuntdan chiqib tizimga qayta kiring.", reply_markup=menu)
 @dp.message_handler(Text(equals="📚 Ta'lim ma'lumotlarni ko'rish"), state="*")
 async def education_menu(message: Message, state: FSMContext):
+    try:
+        data = await state.get_data()
+        token = data.get('token')
+        refreshToken = data.get('refreshToken')
 
-    data = await state.get_data()
-    ic('keldi700', data)
-    token = data.get('token')
-    haveApplicationForm = data.get('haveApplicationForm')
-    haveApplied = data.get('haveApplied')
-    # haveEducation = data.get('haveEducation')
-    # havePreviousEducation = data.get('havePreviousEducation')
-    register_user = data.get('register_user')
-    transfer_user = data.get('transfer_user')
-    education_info = await send_req.application_forms_me(token)
-    ic(education_info)
-    haveEducation = education_info.get('haveEducation')
-    havePreviousEducation = education_info.get('havePreviousEducation')
-    ic('shu keldi:', haveEducation)
-    if token and haveEducation:
+        if not token:
+            token = await refresh_token(state, refreshToken)
+
         education_info = await send_req.application_forms_me(token)
-        ic(education_info)
-        user_education = education_info.get('user_education', {})
-        certifications = education_info.get('certifications', [])
-        # if certifications:
-        #     if len(certifications) >= 2:
-        #         certifications = certifications[-1]
-            
-        pinfl_user_education = education_info.get('pinfl_user_education', {})
-        # ic(education_info)
-        # ic(certifications)
-        # ic(pinfl_user_education)
-        # ic(user_education)
-        # Constructing the education message
-        education_message = "<b>📚 Ta'lim Ma'lumotlari:</b>\n\n"
-        if user_education.get('education_type_uz', None) is not None:
-            education_message += (
-                f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
-                f"• <b>Viloyat:</b> {user_education.get('region_name_uz', 'Viloyat topilmadi')}\n"
-                f"• <b>Tuman:</b> {user_education.get('district_name_uz', 'Tuman topilmadi')}\n"
-                f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
-            )
-        elif pinfl_user_education['institution_name'] is not None:
-            institution_type = pinfl_user_education.get('institution_type', 'Talim turi topilmadi')
-            if institution_type == 'school':
-                institution_type = 'Maktab'
-            education_message += (
-                # f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
-                # f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
-                # f"• <b> Mamlakat:</b> {pinfl_user_education.get('country', 'Shahar topilmadi')}\n"
-                f"• <b>Shahar:</b> {pinfl_user_education.get('region', 'Shahar nomi topilmadi')}\n"
-                f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
-                f"• <b>Ta'lim turi:</b> {institution_type}\n"
-                f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
-            )
+        haveEducation = education_info.get('haveEducation')
+        havePreviousEducation = education_info.get('havePreviousEducation')
 
-
-        check_exam = await send_req.my_applications(token)
-        exam = check_exam.get('exam', None)
-        
-        if exam != {}:
-            exam_result = None
-            exam_result = exam['exam_result']
-            if exam_result is not None:
-                await message.answer(education_message, parse_mode="HTML", reply_markup=menu_full)
+        if token and (haveEducation or havePreviousEducation):
+            await handle_education_info(message, token, education_info, haveEducation, havePreviousEducation)
         else:
-            await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
+            await handle_exam_info(message, token)
+    except Exception as err:
+        ic(err)
+        await message.answer('Start tugmasini bosib qaytadan tizimga kiring', reply_markup=start_keyboard)
 
-        diploma_file = user_education.get('file')
-        if diploma_file is not None:
-            try:
-                await message.answer_document(f"https://{domain_name}/{diploma_file[0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
-            except Exception as e:
-                print(f"Failed to send diploma file: {e}")
-        elif pinfl_user_education:
-            try:
-                await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
-            except Exception as e:
-                print(f"Failed to send diploma file: {e}")
-            
-        # Sending certification files if available
+async def refresh_token(state, refreshToken):
+    new_token = await send_req.return_token_use_refresh(refreshToken)
+    token = new_token.get('token')
+    await state.update_data(token=token)
+    return token
 
-        ic(124)
-        ic(certifications)
-        for certification in certifications:
-            if certification.get('file'):
-                ic(127)
-                certification_type = certification.get('certification_type', 'Sertifikat turi topilmadi')
-                try:
-                    await message.answer_document(f"https://{domain_name}/{certification['file']}", caption=f"Sertifikat nusxasi: {certification_type.upper()}")
-                except Exception as e:
-                    print(f"Failed to send certification file: {e}", 1387)   
-                    await message.answer(text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang")
-    elif havePreviousEducation:
-        ic('mytoken', token)
-        education_info = await send_req.application_forms_me(token)
-        ic(education_info)
-        user_education = education_info.get('user_previous_education', None)
-        pinfl_user_education = education_info.get('pinfl_user_education', {})
+async def handle_education_info(message, token, education_info, haveEducation, havePreviousEducation):
+    user_education, pinfl_user_education, certifications = extract_education_info(education_info, haveEducation)
+    
+    education_message = construct_education_message(user_education, pinfl_user_education)
+    await send_education_message(message, token, education_message)
 
-        certifications = education_info.get('certifications', [])
-        if user_education is not None:
-            education_message = "<b>📚 Ta'lim Ma'lumotlari:</b>\n\n"
-            education_message += (
-                f"• <b>Mamlakat:</b> {user_education.get('country_name_uz', 'Viloyat topilmadi')}\n"
-                f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
-                f"""• <b>Yo'nalish:</b> {user_education.get('direction_name', "Yonalish topilmadi")}\n"""
-                f"• <b>Kurs:</b> {user_education.get('which_course_now', 'Daraja topilmadi')}-chi kurs\n"
-            )
-            
-            if pinfl_user_education is not None:
-                if pinfl_user_education['pinfl_region_id'] is not None:
-                    education_message += (
-                        f"• <b>Daraja:</b> {pinfl_user_education.get('degree_name_uz', 'Daraja topilmadi')}\n"
-                        f"• <b>Tamomlagan yil:</b> {pinfl_user_education.get('pinfl_graduation_year', 'Tamomlagan yil topilmadi')}\n"
-                        f"• <b> Mamlakat:</b> {pinfl_user_education.get('country', 'Shahar topilmadi')}\n"
-                        f"• <b>Shahar:</b> {pinfl_user_education.get('region', 'Shahar nomi topilmadi')}\n"
-                        f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
-                        f"• <b>Ta'lim turi:</b> {pinfl_user_education.get('institution_type', 'Talim turi topilmadi')}\n"
-                        f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
-                )
+    await send_education_files(message, user_education, pinfl_user_education, certifications)
 
-            check_exam = await send_req.my_applications(token)
-            exam = check_exam.get('exam', None)
+async def handle_exam_info(message, token):
+    check_exam = await send_req.my_applications(token=token)
+    exam = check_exam.get('exam', None)
+    exam_result = exam.get('exam_result') if exam else None
 
-            if exam != {}:
-                exam_result = None
-                exam_result = exam['exam_result']
-
-            if exam_result is not None:
-                await message.answer(education_message, parse_mode="HTML", reply_markup=menu_full)
-            else:
-                await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
-
-            transcript_file = user_education.get('transcript_file')
-            if transcript_file:
-                try:
-                    await message.answer_document(f"https://{domain_name}/{transcript_file}", caption="Transkript nusxasi fayli")
-                except Exception as e:
-                    print(f"Failed to send diploma file: {e}")
-            elif pinfl_user_education:
-                try:
-                    await message.answer_document(f"https://{domain_name}/{pinfl_user_education['file'][0]}", caption="Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
-                except Exception as e:
-                    print(f"Failed to send diploma file: {e}")
-                
-            # Sending certification files if available
-
-            ic(124)
-            if certifications is not None and certifications:
-                for certification in certifications:
-                    if certification.get('file'):
-                        ic(127)
-                        certification_type = certification.get('certification_type', 'Sertifikat turi topilmadi')
-                        try:
-                            await message.answer_document(f"https://{domain_name}/{certification['file']}", caption=f"Sertifikat nusxasi: {certification_type.upper()}")
-                        except Exception as e:
-                            print(f"Failed to send certification file: {e}", 1453)
-                            await message.answer(text="Sertifikat nusxasi fayli topilmadi, Qayta yuklang") 
+    if exam_result is not None:
+        await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu_full)
     else:
+        await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu)
 
-        check_exam = send_req.my_applications(token=token)
-        exam = check_exam.get('exam', None)
-        exam_result = None
-        if exam != {}:
-            exam_result = exam['exam_result']
-        if exam_result is not None:
-            await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu_full)
-        else: 
-            await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos, akkauntdan chiqib tizimga qayta kiring.", reply_markup=menu)
-        # await message.answer("Kechirasiz, sizning ma'lumotlaringizni olish imkoni bo'lmadi. Iltimos,akkuntdan chiqib tizimga qayta kiring.", reply_markup=menu)
+def extract_education_info(education_info, haveEducation):
+    if haveEducation:
+        user_education = education_info.get('user_education', {})
+    else:
+        user_education = education_info.get('user_previous_education', {})
+
+    pinfl_user_education = education_info.get('pinfl_user_education', {})
+    certifications = education_info.get('certifications', [])
+    return user_education, pinfl_user_education, certifications
+
+def construct_education_message(user_education, pinfl_user_education):
+    education_message = "<b>📚 Ta'lim Ma'lumotlarim:</b>\n\n"
+
+    if user_education.get('education_type_uz', None) is not None:
+        education_message += (
+            f"• <b>Ta'lim turi:</b> {user_education.get('education_type_uz', 'Talim turi topilmadi')}\n"
+            f"• <b>Viloyat:</b> {user_education.get('region_name_uz', 'Viloyat topilmadi')}\n"
+            f"• <b>Tuman:</b> {user_education.get('district_name_uz', 'Tuman topilmadi')}\n"
+            f"• <b>O'quv muassasasi nomi:</b> {user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+        )
+    elif pinfl_user_education.get('institution_name', None) is not None:
+        institution_type = pinfl_user_education.get('institution_type', 'Talim turi topilmadi')
+        if institution_type == 'school':
+            institution_type = 'Maktab'
+        education_message += (
+            f"• <b>Shahar:</b> {pinfl_user_education.get('region', 'Shahar nomi topilmadi')}\n"
+            f"• <b>Tuman:</b> {pinfl_user_education.get('district', 'Tuman nomi topilmadi')}\n"
+            f"• <b>Ta'lim turi:</b> {institution_type}\n"
+            f"• <b>O'quv muassasasi nomi:</b> {pinfl_user_education.get('institution_name', 'Institut nomi topilmadi')}\n"
+        )
+    return education_message
+
+async def send_education_message(message, token, education_message):
+    check_exam = await send_req.my_applications(token)
+    exam = check_exam.get('exam', None)
+    exam_result = exam.get('exam_result') if exam else None
+
+    if exam_result is not None:
+        await message.answer(education_message, parse_mode="HTML", reply_markup=menu_full)
+    else:
+        await message.answer(education_message, parse_mode="HTML", reply_markup=menu)
+
+async def send_education_files(message, user_education, pinfl_user_education, certifications):
+    diploma_file = user_education.get('file')
+    if diploma_file is not None:
+        await send_document(message, diploma_file, "Diplom, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+
+    # if pinfl_user_education:
+    #     await send_document(message, pinfl_user_education.get('file', []), "Diplom1, shahodatnoma yoki ma’lumotnoma nusxasi fayli")
+
+    for certification in certifications:
+        if certification.get('file'):
+            certification_type = certification.get('certification_type', 'Sertifikat turi topilmadi')
+            await send_document(message, certification['file'], f"Sertifikat nusxasi: {certification_type.upper()}")
+
+async def send_document(message, file_urls, caption):
+    if isinstance(file_urls, str):
+        file_urls = [file_urls]
+    
+    for file_url in file_urls:
+        try:
+            await message.answer_document(f"https://{domain_name}/{file_url}", caption=caption)
+        except Exception as e:
+            print(f"Failed to send document: {e}")
 
 
 #TODO arizam
-@dp.message_handler(Text(equals=["📁Arizam","📁arizam"]), state=PersonalData.country_search)
+@dp.message_handler(Text(equals=["📄Arizani ko'rish"]), state=PersonalData.country_search)
 async def my_application(message: Message, state: FSMContext):
     data = await state.get_data()
     token = data.get('token')
@@ -1581,7 +2109,7 @@ async def my_application(message: Message, state: FSMContext):
         f"Izoh vaqti {send_req.convert_time(comment_time)}"
         f" {color} Izoh: {escape_markdown(comment)}\n"
     )
-    await message.answer(response_message, parse_mode='HTML')
+    await message.answer(response_message, parse_mode='HTML', reply_markup=menu)
 
 @dp.message_handler(Text(equals=["📃Imtihon natijalari"]), state="*")
 async def my_application_exam(message: Message, state: FSMContext):
@@ -1604,9 +2132,12 @@ async def my_application_exam(message: Message, state: FSMContext):
     comments = my_app.get('comment', [])
     exam = my_app.get('exam', None)
     ic(exam, 1547)
-    if exam is not None:
-        exam_result = exam.get('exam_result', None)
-        first_subject_name = exam_result.get('first_subject_name', None)
+    if exam != {}:
+        exam_result = exam['exam_result']
+        # exam_result = exam.get('exam_result', None)
+        exam_result = exam_result[0]
+        first_subject_name = exam_result['first_subject_name']
+        # first_subject_name = exam_result.get('first_subject_name', None)
         first_name_uz = first_subject_name['name_uz'] if first_subject_name['name_uz'] else None
         first_subject_score = exam_result.get('first_subject_score', 0)
         first_subject_mark = exam_result.get('first_subject_mark', 0)
@@ -1618,10 +2149,10 @@ async def my_application_exam(message: Message, state: FSMContext):
         second_subject_score = exam_result.get('second_subject_score', 0)
         second_subject_mark = exam_result.get('second_subject_mark', 0)
 
-        third_subject_name = exam_result.get('third_subject_name', None)
-        third_name_uz = third_subject_name['name_uz'] if third_subject_name['name_uz'] else None
-        third_subject_score = exam_result.get('third_subject_score', 0)
-        third_subject_mark = exam_result.get('third_subject_mark', 0)
+        # third_subject_name = exam_result.get('third_subject_name', None)
+        # third_name_uz = third_subject_name['name_uz'] if third_subject_name['name_uz'] else None
+        # third_subject_score = exam_result.get('third_subject_score', 0)
+        # third_subject_mark = exam_result.get('third_subject_mark', 0)
 
         total_mark = exam_result.get('total_mark', 0)
         when_started = exam_result.get('when_started', None)
@@ -1631,7 +2162,8 @@ async def my_application_exam(message: Message, state: FSMContext):
             time_when_started = when_started
     ic(exam)
     online_exam_link = exam.get('online_exam_link', 'Link topilmadi')
-    ic(online_exam_link)
+    ic(2165, online_exam_link)
+    ic(2166, exam_link)
     date_obj = datetime.fromisoformat(created_at.rstrip("Z"))
     utc_timezone = pytz.timezone('UTC')
     desired_timezone = pytz.timezone('Asia/Tashkent')  # Replace 'Asia/Tashkent' with your desired timezone
@@ -1663,39 +2195,39 @@ async def my_application_exam(message: Message, state: FSMContext):
     if status == "came-exam":
         status_name = "Imtihonga chaqirilgan"
 
-    if (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/")  and exam is not None and contract_id is not None:
+    if exam != {}:
         ic(1562, 'ok')
         
         response_exam = (
-            f"*Imtihon natijasi*\n"
-                f"Imtihonga chaqirilgan\n"
-                f"Imtihon sanasi: {send_req.convert_time(time_when_started)}\n\n"
-                f"*Imtihon fanlari*\n"
-                f"{escape_markdown(first_name_uz)} - {first_subject_score}/20 -  {first_subject_mark} ball\n"
-                f"{escape_markdown(second_name_uz)} - {second_subject_score}/20 - {second_subject_mark} ball\n"
-                f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball\n\n"
-                f"Jami ball: {total_mark} ball\n\n"
-                "Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
-                "           Aloqa markazi: +99878 113 17 17\n"
-                f"[Shartnomani yuklab olish]({Shartnoma})"
-            )
+            f"📝 *Imtihon natijasi*\n"
+            f"✉️ Imtihonga chaqirilgan\n"
+            f"📅 Imtihon sanasi: {send_req.convert_time(time_when_started)}\n\n"
+            f"📚 *Imtihon fanlari*\n"
+            f"{escape_markdown(first_name_uz)} - {first_subject_score}/20 -  {first_subject_mark} ball 📊\n"
+            f"{escape_markdown(second_name_uz)} - {second_subject_score}/20 - {second_subject_mark} ball 📊\n"
+            # f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball 📊\n\n"
+            f"🏆 Jami ball: {total_mark} ball\n\n"
+            f"📞 Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
+            f"🔗 Aloqa markazi: +998781131717\n"
+            # f"[📄 Shartnomani yuklab olish]({Shartnoma})"
+        )
         await message.answer(response_exam, parse_mode='Markdown')
-    if (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam is not None and contract_id is None:
+    if (online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/") and exam is not None and contract_id is None:
         response_exam = (
-            f"*Imtihon natijasi*\n"
-                f"Imtihonga chaqirilgan\n"
-                f"Imtihon sanasi: {send_req.convert_time(time_when_started)}\n\n"
-                f"*Imtihon fanlari*\n"
+            f"📝 *Imtihon natijasi*\n"
+                f"✉️ Imtihonga chaqirilgan\n"
+                f"📅 Imtihon sanasi: {send_req.convert_time(time_when_started)}\n\n"
+                f"📚 *Imtihon fanlari*\n"
                 f"{escape_markdown(first_name_uz)} - {first_subject_score}/20 -  {first_subject_mark} ball\n"
                 f"{escape_markdown(second_name_uz)} - {second_subject_score}/20 - {second_subject_mark} ball\n"
-                f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball\n\n"
-                f"Jami ball: {total_mark} ball\n\n"
-                "Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
-                "           Aloqa markazi: +99878 113 17 17\n"
+                # f"{escape_markdown(third_name_uz)} - {third_subject_score}/20 - {third_subject_mark} ball\n\n"
+                f"🏆 Jami ball: {total_mark} ball\n\n"
+                "📞 Tez orada universitet hodimlari siz bilan aloqaga chiqadi.\n"
+                "🔗         Aloqa markazi: +998781131717\n"
             )
         await message.answer(response_exam, parse_mode='Markdown')
 
-@dp.message_handler(Text(equals="📁Arizam"), state="*")
+@dp.message_handler(Text(equals="📄Arizani ko'rish"), state="*")
 async def my_application(message: Message, state: FSMContext):
     data = await state.get_data()
     token = data.get('token')
@@ -1714,6 +2246,7 @@ async def my_application(message: Message, state: FSMContext):
     education_language_name_uz = my_app.get('education_language_name_uz', 'Talim tili topilmadi')
     tuition_fee = my_app.get('tuition_fee', 'Narxi topilmadi')
     comments = my_app.get('comment', [])
+    branch = my_app.get('branch', 'branch not found')
     # try:
     exam = my_app.get('exam', None)
     exam_result = exam.get('exam_result', None)
@@ -1804,81 +2337,102 @@ async def my_application(message: Message, state: FSMContext):
     elif color == 'red':
         color = "🔴" 
     ic('------>', online_exam_link)
-    
-    response_message = ""
-    if (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam_result is None:
-        online_exam_link = f"https://exam.tiiu.uz/test-start?{token}"
+    ic('---------------------------->', online_exam_link, exam_link)
+    response_message = "ma'lumot topilmadi"
+    if (branch or
+        online_exam_link == f"https://{exam_link}" or \
+        online_exam_link == f"https://{exam_link}/" or \
+            online_exam_link == f"https://{exam_link}/" or \
+                online_exam_link == f"https://{exam_link}") and exam_result == []:
+        
+        online_exam_link = f"https://{exam_link}/test-start?{token}"
         ic('*************--->', online_exam_link, 1552)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {convert_time(comment_time)}\n"
-            f"{color} *Izoh:* {escape_markdown(comment)}\n"
-            f"*Online imtihon topshirish:* [Online imtihon topshirish]({(online_exam_link)})"
+        f"📄 *Ariza Tafsilotlari:*\n"
+        f"🕒 Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
+        f"📊 Holati: *{escape_markdown(status_name)}*\n"
+        f"🔀 Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
+        f"🎓 Darajasi: {escape_markdown(degree_name_uz)}\n"
+        f"🏫 Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
+        f"🗣️ Ta'lim tili: {escape_markdown(education_language_name_uz)}\n"
+        f"💵 Ta'lim narxi: {formatted_fee} so'm\n\n"
+        f"⏰ Izoh vaqti: {convert_time(comment_time)}\n"
+        f"{color} *Izoh:* {escape_markdown(comment)}\n"
+        f"🖥️ *Online imtihon topshirish:* [Online imtihon topshirish]({online_exam_link})"
         )
-        ic(response_message)
-    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam_result is not None:
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu_full)
+
+        ic(response_message, 1852)
+    elif (branch or
+        online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam_result is not None:
         ic(1765)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {convert_time(comment_time)}\n"
-            f"{color} *Izoh:* {escape_markdown(comment)}\n"
+        f"📝 *Ariza Tafsilotlari:*\n"
+        f"🕗 Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
+        f"📌 Holati: *{escape_markdown(status_name)}*\n"
+        f"🧭 Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
+        f"🎓 Darajasi: {escape_markdown(degree_name_uz)}\n"
+        f"🏫 Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
+        f"🗣️ Ta'lim tili: {escape_markdown(education_language_name_uz)}\n"
+        f"💰 Ta'lim narxi: {formatted_fee} so'm\n\n"
+        f"⏳ Izoh vaqti: {convert_time(comment_time)}\n"
+        f"{color} *Izoh:* {escape_markdown(comment)}\n"
         )
-        ic(response_message)
-    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam == {}:
+
+        ic(response_message, 1867)
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
+    elif (branch or
+        online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam == {}:
         ic(1805)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {send_req.convert_time(comment_time)}\n"
+            f"📝 *Ariza Tafsilotlari:*\n"
+            f"🕗 Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
+            f"📌 Holati: *{escape_markdown(status_name)}*\n"
+            f"🧭 Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
+            f"🎓 Darajasi: {escape_markdown(degree_name_uz)}\n"
+            f"🏫 Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
+            f"🗣️ Ta'lim tili: {escape_markdown(education_language_name_uz)}\n"
+            f"💰 Ta'lim narxi: {formatted_fee} so'm\n\n"
+            f"⏰ Izoh vaqti: {send_req.convert_time(comment_time)}\n"
             f"{color} *Izoh:* {escape_markdown(comment)}\n"
         )
-    elif (online_exam_link == "https://exam.tiiu.uz" or online_exam_link == "https://exam.tiiu.uz/") and exam != {}:
+
+        ic(response_message, 1882)
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
+    elif (branch or
+        online_exam_link == f"https://{exam_link}" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}/" or online_exam_link == f"https://{exam_link}") and exam != {}:
         ic(1792)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {send_req.convert_time(comment_time)}\n"
-            f"{color} *Izoh:* {escape_markdown(comment)}\n"
+            "📄 *Ariza Tafsilotlari:*\n"
+            f"🕒 Yaratilgan vaqti: `{send_req.convert_time(human_readable_date)}`\n"
+            f"📌 Holati: *{escape_markdown(status_name)}*\n"
+            f"🧭 Yo'nalishi: `{escape_markdown(direction_name_uz)}`\n"
+            f"🎓 Darajasi: `{escape_markdown(degree_name_uz)}`\n"
+            f"🏫 Ta'lim turi: `{escape_markdown(education_type_name_uz)}`\n"
+            f"🗣️ Ta'lim tili: `{escape_markdown(education_language_name_uz)}`\n"
+            f"💰 Ta'lim narxi: `{formatted_fee} so'm`\n\n"
+            f"⏰ Izoh vaqti: `{send_req.convert_time(comment_time)}`\n"
+            f"{color} *Izoh:* `{escape_markdown(comment)}`\n"
         )
+
+        ic(response_message, 1896)
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
     elif  exam == {}:
         ic(1832)
         response_message = (
-            f"*Ariza Tafsilotlari:*\n"
-            f"Yaratilgan vaqti: {send_req.convert_time(human_readable_date)}\n"
-            f"Holati:   *{escape_markdown(status_name)}*\n"
-            f"Yo'nalishi: {escape_markdown(direction_name_uz)}\n"
-            f"Darajasi: {escape_markdown(degree_name_uz)}\n"
-            f"Ta'lim turi: {escape_markdown(education_type_name_uz)}\n"
-            f"Ta'lim til: {escape_markdown(education_language_name_uz)}\n"
-            f"Ta'lim narxi: {formatted_fee} so'm\n\n"
-            f"Izoh vaqti: {send_req.convert_time(comment_time)}\n"
-            f"{color} *Izoh:* {escape_markdown(comment)}\n"
+            "📝 *Ariza Tafsilotlari:*\n"
+            f"🕒 Yaratilgan vaqti: `{send_req.convert_time(human_readable_date)}`\n"
+            f"📊 Holati: *{escape_markdown(status_name)}*\n"
+            f"🧭 Yo'nalishi: `{escape_markdown(direction_name_uz)}`\n"
+            f"🎓 Darajasi: `{escape_markdown(degree_name_uz)}`\n"
+            f"🏫 Ta'lim turi: `{escape_markdown(education_type_name_uz)}`\n"
+            f"🗣️ Ta'lim tili: `{escape_markdown(education_language_name_uz)}`\n"
+            f"💵 Ta'lim narxi: `{formatted_fee} so'm`\n\n"
+            f"⏰ Izoh vaqti: `{send_req.convert_time(comment_time)}`\n"
+            f"{color} *Izoh:* `{escape_markdown(comment)}`\n"
         )
+
         ic(response_message, 1558)
-    await message.answer(response_message, parse_mode='Markdown')
+        await message.answer(response_message, parse_mode='Markdown', reply_markup=menu)
+
+

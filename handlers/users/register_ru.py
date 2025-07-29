@@ -3,6 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command,Text
 from utils import send_req
 from loader import dp
+import traceback
 from states.personalData import PersonalDataRU, EducationDataRU
 from states.personalData import ManualPersonalInfoRU
 from aiogram.utils.exceptions import Throttled
@@ -74,7 +75,7 @@ select_type_certificate_ru = "Выберите тип сертификата:"
 # select_country = "Ta’lim dargohi joylashgan davlatni tanlang:"
 select_country_ru = "Выберите страну, в которой находится учебное заведение:"
 # type_your_edu_name = "Ta'lim dargohi nomini kiriting:\nNamuna: 12-maktab"
-type_your_edu_name_ru = "Введите название школы:\nПример: 12-я школа."
+type_your_edu_name_ru = "Введите название учебного заведения:\nПример: 12-я школа."
 # wait_file_is_loading = "<b>Kuting, fayl yuklanmoqda.</b>"
 wait_file_is_loading_ru = "<b>Подождите, файл загружается.</b>"
 # retype_secret_code = "Tasdiqlash kodini qayta kiriting"
@@ -292,6 +293,13 @@ async def phone_contact_received(message: types.Message, state: FSMContext):
                     else:
                         # await message.answer("935920479","severda xatolik 107")
                         await message.answer("Вы должны зарегистрироваться")
+                        await state.update_data(phone=f"+{custom_phone}")
+                        user_register = await send_req.user_register(f"+{custom_phone}")
+                        ic('user_register', user_register)
+                        if user_register.get('status') == 200:
+                            await message.answer(accepted_phone_ru, reply_markup=ReplyKeyboardRemove())
+                            # await message.answer("Telefon raqamingizga yuborilgan kodni yuboring")
+                            await PersonalDataRU.secret_code.set()
 
                 elif str(check_user) == 'false':
                     await state.update_data(phone=custom_phone)
@@ -353,16 +361,17 @@ async def secret_code(message: types.Message, state: FSMContext):
                 ic(date)
                 username = message.from_user.username or message.from_user.full_name
                 ic(username)
-                save_chat_id = send_req.create_user_profile(token=access, chat_id=user_chat_id, 
+                save_chat_id = await send_req.create_user_profile(token=access, chat_id=user_chat_id, 
                                                                     first_name=message.from_user.first_name,                                                    last_name=message.from_user.last_name, 
                                                                     pin=1,date=date, username=username,
                                                                     university_name=int(UNIVERSITY_ID))
                 ic(save_chat_id)
 
-                get_this_user = send_req.get_user_profile(chat_id=user_chat_id)
+                get_this_user = send_req.get_user_profile(chat_id=user_chat_id, university_id=int(UNIVERSITY_ID))
                 ic(get_this_user)
             except Exception as err:
                 ic(err)
+                traceback.print_exc()
             if haveApplicationForm is False and (haveEducation is False and  havePreviousEducation is False) and haveApplied is False:
                 await message.answer(example_document_ru, reply_markup=ReplyKeyboardRemove())
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
@@ -372,13 +381,13 @@ async def secret_code(message: types.Message, state: FSMContext):
                 await message.answer("<i>- ✅Вы зарегистрированы.\n🔴Вам необходимо заполнить информацию о своем образовании</i>",reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=False,havePreviousEducation=False,haveApplied=False)
                 ic('002')
-                await PersonalDataRU.education_id.set()
+                await EducationDataRU.education_id.set()
 
             elif haveApplicationForm is True and (haveEducation is True and havePreviousEducation is False) and haveApplied is False:
                 await message.answer("<i>- ✅ Вы зарегистрированы.\n- ✅ Также заполнена информация о вашем образовании.\n\nВы можете подать заявление в университет</i>", reply_markup=enter_button)
                 await state.update_data(haveApplicationForm=True,haveEducation=True,havePreviousEducation=False,haveApplied=False)
                 ic('keldi 003')
-                await PersonalDataRU.degree_id.set()
+                await EducationDataRU.degree_id.set()
 
             elif haveApplicationForm is True and (haveEducation is False and havePreviousEducation is True) and haveApplied is False:
                 await message.answer("<i>- ✅ Вы зарегистрированы.\n- ✅ Также заполнена информация о вашем образовании.\n\nВы можете подать заявление в университет</i>", reply_markup=enter_button)
@@ -439,6 +448,11 @@ async def document(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=PersonalDataRU.birth_date)
 async def birth_date(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    import logging, asyncio
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
     ic('birth date')
     birth_date = message.text.strip()
     # Check if the birth date format is valid
@@ -457,25 +471,68 @@ async def birth_date(message: types.Message, state: FSMContext):
     # print(day, month, year)
     if not (1 <= day <= 31 and 1 <= month <= 12 and 2024 > year > 1990):
         await message.answer(error_date_ru)
-        return
-    
-
+        return    
     data_state = await state.get_data()
     token = data_state.get('token')
     document = data_state.get('document')
-    ic('birth_date', birth_date)
-    ic("document", document)
+    birth_date = data_state.get('birth_date')
+
+    logging.info(f'birth_date: {birth_date}')
+    logging.info(f'document: {document}')
+
+    # Inform the user that the bot is processing their request
+    await message.answer("<b>Просмотр вашей информации из базы данных может занять до 90 секунд.</b>", parse_mode="HTML")
+    msg = await message.reply("пожалуйста, подождите...")
+
+    # Perform the data check concurrently with the timer
+    check_is_not_duplicate_future = asyncio.create_task(send_req.application_form_info(birth_date, document, token))
+
+    # Start 90-second timer
+    for i in range(90, 0, -1):
+        await asyncio.sleep(1)
+        
+        # Check if the data check is complete and its status code
+        if check_is_not_duplicate_future.done():
+            check_is_not_duplicate = await check_is_not_duplicate_future
+            if check_is_not_duplicate.get('status_code') == 200:
+                await bot.edit_message_text("Данные найдены!", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="HTML")
+                check_is_not_duplicate_future.done()
+                check_is_not_duplicate = await check_is_not_duplicate_future
+                break
+            elif check_is_not_duplicate.get('status_code') in [500, 404, 400, 406, 408]:
+                break
+
+        # Update the message with the remaining time
+        try:
+            await bot.edit_message_text(f"<i>Оставшееся время: {i} секунды</i>", chat_id=msg.chat.id, message_id=msg.message_id, parse_mode="HTML")
+        except Exception as e:
+            logging.error(f"Произошла ошибка: {e}")
+
+    # Notify user when timer is done
+    await bot.edit_message_text("Время вышло!", chat_id=msg.chat.id, message_id=msg.message_id)
+
+    # Retrieve the result of the data check if not already done
+    if not check_is_not_duplicate_future.done():
+        check_is_not_duplicate = await check_is_not_duplicate_future
+
     
-    check_is_not_duplicate = await send_req.application_form_info(birth_date, document, token)
+    
     ic(check_is_not_duplicate)
 
-    if check_is_not_duplicate.get('status_code') in [500,404,400]:
-        await message.answer(server_error_ru, reply_markup=enter_button_ru)
-        await ManualPersonalInfo.personal_info.set()
-    elif check_is_not_duplicate.get('status_code') == 409:
+    ic(check_is_not_duplicate.get('status_code'), type(check_is_not_duplicate.get('status_code')))
+    status_code_ = check_is_not_duplicate.get('status_code')
+    ic(473)
+    if status_code_ in [500,404,400,504]:
+        await message.answer(server_error_ru, reply_markup=enter_button)
+        await ManualPersonalInfoRU.personal_info.set()
+    elif status_code_ == 409:
         error_mes = check_is_not_duplicate.get('data')
+        start_button = KeyboardButton('/start')  # The text on the button
+        start_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(start_button)
         
-        await message.answer(f"🔴 {error_mes.get('message')}")
+        await message.answer(f"🔴 {error_mes.get('message')}",reply_markup=start_keyboard)
+        await state.finish()
+
     # data_res = check_is_not_duplicate['data']
     # ic(check_is_not_duplicate)
     # if check_is_not_duplicate.get('status_code') == 409 or check_is_not_duplicate.get('status_code') == 401 or check_is_not_duplicate.get('status_code') == 400:
@@ -650,7 +707,7 @@ async def info(message: types.Message, state: FSMContext):
 
         await message.answer("Нажмите «Продолжить», чтобы заполнить информацию об обучении.", reply_markup=enter_button_ru)
         ic('davom etish bosildi', 540)
-        get_current_user = send_req.get_user_profile(chat_id=message.chat.id)
+        get_current_user = send_req.get_user_profile(chat_id=message.chat.id, university_id=UNIVERSITY_ID)
         chat_id_user = get_current_user['chat_id_user']
         id_user = get_current_user['id']
         await state.update_data(chat_id_user=chat_id_user, id_user=id_user)
@@ -659,7 +716,16 @@ async def info(message: types.Message, state: FSMContext):
         ic('django')
         ic(id_user, phone, chat_id_user,first_name, last_name)
         try:
-            update_user_profile_response = send_req.update_user_profile(id=message.chat.id, chat_id=chat_id_user, phone=phone, first_name=first_name, last_name=last_name, pin=pin)
+            update_user_profile_response = await send_req.update_user_profile(
+                university_id=UNIVERSITY_ID, 
+                chat_id=chat_id_user, 
+                phone=phone, 
+                first_name=first_name, 
+                last_name=last_name, 
+                pin=pin,
+                username=message.chat.username,
+                date=message.date.strftime("%Y-%m-%d %H:%M:%S")
+                )
             ic(update_user_profile_response)
         except Exception as e:
             ic(490,'my_dj_error', e)
@@ -714,6 +780,11 @@ async def education_id_handler(message: types.Message, state: FSMContext, page: 
 @dp.message_handler(state=EducationDataRU.country_search)
 async def process_country_search(message: types.Message, state: FSMContext):
     user_query = message.text.lower()
+    variants = {'zbekiston', 'zbekistan', 'Узбекистан', 'uzbekiston', 'Узбекистан'}
+
+    if any(variant.lower() in user_query.lower() for variant in variants):
+        user_query = 'O`zbekiston'
+
     token = (await state.get_data()).get('token')
     all_countries = await send_req.countries(token)  # Ensure this is an async call to your backend/API
 
@@ -770,12 +841,22 @@ async def transfer_direction_name_handler(message: types.Message, state: FSMCont
 
 @dp.callback_query_handler(lambda c: c.data.isdigit(), state=EducationDataRU.transfer_direction_name)  # Ensures that only digit callback_data is processed here
 async def handle_callback_query_dir(callback_query: types.CallbackQuery, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot)
     selected_course = callback_query.data
     ic(selected_course)
     await callback_query.answer()
     await state.update_data(selected_course=selected_course)
-    await callback_query.message.answer(example_transkript_message_ru, reply_markup=ReplyKeyboardRemove())
+    await bot.send_photo(chat_id=callback_query.message.chat.id,
+                            photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                            caption=example_transkript_message_ru, 
+                            parse_mode="Markdown",
+                            reply_markup=ReplyKeyboardRemove())
+    
     await EducationDataRU.file_diploma_transkript.set()
+    # await callback_query.message.answer(example_transkript_message_ru, reply_markup=ReplyKeyboardRemove())
     # await callback_query.message.answer()
 
 @dp.message_handler(content_types=['document'], state=EducationDataRU.file_diploma_transkript)
@@ -949,6 +1030,10 @@ async def district_selection_handler(callback_query: types.CallbackQuery, state:
 
 @dp.message_handler(state=EducationDataRU.institution_name)
 async def type_institution_name_handler(message: types.Message, state: FSMContext):
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
     institution_name = message.text.strip()
 
     if institution_name.lower() != 'Продолжить':
@@ -958,63 +1043,97 @@ async def type_institution_name_handler(message: types.Message, state: FSMContex
         # Example to conclude:
         data = await state.get_data()
         institution_name = data.get('institution_name', 'Не указан')
-        await message.answer(example_diploma_message_ru, parse_mode="Markdown")
+        await bot.send_photo(chat_id=message.chat.id,
+                        photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                        caption=example_diploma_message_ru, 
+                        parse_mode="Markdown")
+        # await message.answer(example_diploma_message_ru, parse_mode="Markdown")12312323
         await EducationDataRU.file_diploma.set() 
     else:
         # If the user sends 'Davom etish', prompt them again for the institution name.
         await message.answer(error_type_edu_name_ru, reply_markup=enter_button_ru)
 
-@dp.message_handler(content_types=['document'], state=EducationDataRU.file_diploma)
+@dp.message_handler(content_types=['document','photo'], state=EducationDataRU.file_diploma)
 async def upload_file(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
     from data.config import BOT_TOKEN 
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(bot) 
+    if message.photo:
+        try:
+            data = await state.get_data()
+            token_ = data['token'] if data['token'] else None
+            largest_photo = message.photo[-1] 
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            download_dir = 'diploma_files'
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(1290, data1)
+                await state.update_data(file_diploma=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Произошла ошибка: {str(e)}")
+            await message.reply("Изображение принято")
+            src_ = 'src' 
+            src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+            if src_res is not None or src_res is not False:
+                await state.update_data(src=src_res)
+        except Exception as e:
+            await message.reply("Отправить изображение повторно")
+    if not message.photo:
+        data = await state.get_data()
+        token_ = data['token'] if data['token'] else None
 
-    data = await state.get_data()
-    token_ = data['token'] if data['token'] else None
+        document = message.document
+        file_path = await bot.get_file(document.file_id)
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+        # ic(file_url)
+        # await message.answer(file_url)
+        download_dir = 'diploma_files'
+        await aiofiles.os.makedirs(download_dir, exist_ok=True)
 
-    document = message.document
-    file_path = await bot.get_file(document.file_id)
-    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
-    # ic(file_url)
-    # await message.answer(file_url)
-    download_dir = 'diploma_files'
-    await aiofiles.os.makedirs(download_dir, exist_ok=True)
+        local_file_path = os.path.join(download_dir, document.file_name)
+        # print(local_file_path)
+        await send_req.download_file(file_url, local_file_path)
+        await message.answer(wait_file_is_loading_ru, parse_mode='HTML')
+        # ic(local_file_path)
 
-    local_file_path = os.path.join(download_dir, document.file_name)
-    # print(local_file_path)
-    await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading_ru, parse_mode='HTML')
-    # ic(local_file_path)
-
-    res_file = upload.upload_new_file(token=token_, filename=local_file_path)
-    # if file_size != 'File not found':
-    try:
-        file_size = os.path.getsize(local_file_path)
-        file_size_kb = file_size / 1024
-        file_size_mb = file_size_kb / 1024
-        # print(f'size: {file_size_mb:.2f}')
-    except: 
-        return 'Файл не найден'
-    await state.update_data(file_size=file_size)
-    await message.answer("Файл загружен.")
+        res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+        # if file_size != 'File not found':
+        try:
+            file_size = os.path.getsize(local_file_path)
+            file_size_kb = file_size / 1024
+            file_size_mb = file_size_kb / 1024
+            # print(f'size: {file_size_mb:.2f}')
+        except: 
+            return 'файл не найден'
+        await state.update_data(file_size=file_size)
+        await message.answer("Файл загружен.")
     
     # ic(all_state)
     # print(res_file.status_code)
     # print(res_file)
-    try:
-        data1 = res_file.json()
-        ic(data1['path'])
-        await state.update_data(file_diploma=data1['path'])
-    except Exception as e:
-        return e
+        try:
+            data1 = res_file.json()
+            ic(data1['path'])
+            await state.update_data(file_diploma=data1['path'])
+        except Exception as e:
+            return e
     
 
-    src_ = 'src' 
-    src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
-    if src_res is not None or src_res is not False:
-        await state.update_data(src=src_res)
+        src_ = 'src' 
+        src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+        if src_res is not None or src_res is not False:
+            await state.update_data(src=src_res)
     
 
 
@@ -1037,14 +1156,17 @@ async def upload_file(message: types.Message, state: FSMContext):
                                                     src
                                                     )
     await state.update_data(me_data=res_data_app_forms_for_edu.json())
-    await message.answer("<b>Есть ли у вас сертификат по иностранному языку?</b>", parse_mode='HTML', reply_markup=yes_no_ru)
+    await message.answer("<b>Есть ли у вас сертификат иностранного языка??</b>", parse_mode='HTML', reply_markup=yes_no_ru)
     # ic(res_data_app_forms_for_edu.json())
 
     await EducationDataRU.has_sertificate.set()
 
 @dp.message_handler(state=EducationDataRU.has_sertificate)
 async def has_sertificate(message: types.Message, state: FSMContext):
-
+    from aiogram import Bot, Dispatcher
+    from data.config import BOT_TOKEN 
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher(bot) 
     text = message.text
     if text == "Да, есть":
         cert_types = [
@@ -1059,8 +1181,12 @@ async def has_sertificate(message: types.Message, state: FSMContext):
         buttons = [[InlineKeyboardButton(text=item['type'], 
                                         callback_data=f"type_{item['id']}") for item in cert_types]]
         certTypeMenu = InlineKeyboardMarkup(inline_keyboard=buttons)
-
-        await message.answer(select_type_certificate_ru, reply_markup=certTypeMenu)
+        await message.bot.send_photo(chat_id=message.chat.id,
+                                photo='https://user-images.githubusercontent.com/529864/106505688-67e04880-64a7-11eb-96e1-683d95d19929.png', 
+                                caption=select_type_certificate_ru, 
+                                parse_mode="Markdown",
+                                reply_markup=certTypeMenu)
+        # await message.answer(select_type_certificate_ru, reply_markup=certTypeMenu)
         await EducationDataRU.certificate_type.set()
 
 
@@ -1068,7 +1194,10 @@ async def has_sertificate(message: types.Message, state: FSMContext):
         await message.answer("Если вы хотите заполнить образовательную информацию, нажмите кнопку «Продолжить».", reply_markup=enter_button_ru)
 
         await EducationDataRU.degree_id.set()
-        
+    elif text == 'Отмена':
+        await message.answer("Загрузка файла отменена", reply_markup=enter_button_ru)
+
+        await EducationDataRU.degree_id.set()
     
 
 @dp.callback_query_handler(lambda c: c.data.startswith('type_'), state=EducationDataRU.certificate_type)
@@ -1095,68 +1224,108 @@ async def region_selection_handler(callback_query: types.CallbackQuery, state: F
     await callback_query.message.answer(saved_message_ru, parse_mode="HTML")
     await callback_query.message.answer(example_certification_message_ru, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
+@dp.message_handler(Text(equals="Отмена"), state='*')
+async def cancel_upload(message: types.Message, state: FSMContext):
+    await message.answer("Загрузка файла отменена.", reply_markup=enter_button)
+    await EducationDataRU.get_certificate.set()
+    
 # await message.answer(example_certification_message) 
-@dp.message_handler(content_types=['document'], state=EducationDataRU.get_certificate)
+@dp.message_handler(content_types=['document','photo'], state=EducationDataRU.get_certificate)
 async def get_sertificate(message: types.Message, state: FSMContext):
     from aiogram import Bot, Dispatcher
-    from data.config import BOT_TOKEN
+    from data.config import BOT_TOKEN 
     bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher(bot)
-    
-    data = await state.get_data()
-    token_ = data['token'] if data['token'] else None
+    dp = Dispatcher(bot) 
+    if message.photo:
+        try:
+            data = await state.get_data()
+            token_ = data['token'] if data['token'] else None
+            largest_photo = message.photo[-1] 
+            ic(largest_photo)
+            file_id = largest_photo.file_id
+            file_info = await bot.get_file(file_id)
+            file_path = file_info.file_path
+            ic(file_path)
+            file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+            # await message.answer(file_url)
+            download_dir = 'diploma_files'
+            local_file_path = os.path.join(download_dir, file_path) 
+            await bot.download_file(file_path, local_file_path)
+            try:
+                res_file = upload.upload_new_file(token=token_, filename=local_file_path)
+                data1 = res_file.json()
+                ic(1290, data1)
+                await state.update_data(file_size_sertificate=data1['path'])
+            except Exception as e:
+                ic(e)
+                await message.reply(f"Произошла ошибка: {str(e)}")
+            await message.reply("Изображение принято")
+            src_ = 'src' 
+            src_res = await collect_data.collect_me_data(token=token_, field_name=src_)
+            if src_res is not None or src_res is not False:
+                await state.update_data(src=src_res)
+        except Exception as e:
+            await message.reply("Отправить изображение повторно")
+    if not message.photo:
+        from aiogram import Bot, Dispatcher
+        from data.config import BOT_TOKEN
+        bot = Bot(token=BOT_TOKEN)
+        dp = Dispatcher(bot)
+        
+        data = await state.get_data()
+        token_ = data['token'] if data['token'] else None
 
-    document = message.document
-    file_path = await bot.get_file(document.file_id)
-    ic(file_path)
-    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
-    download_dir = 'sertificate_files'
-    # await message.answer(file_url)
-    await aiofiles.os.makedirs(download_dir, exist_ok=True)
+        document = message.document
+        file_path = await bot.get_file(document.file_id)
+        ic(file_path)
+        file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path.file_path}"
+        download_dir = 'sertificate_files'
+        # await message.answer(file_url)
+        await aiofiles.os.makedirs(download_dir, exist_ok=True)
 
-    local_file_path = os.path.join(download_dir, document.file_name)
-    ic(local_file_path)
-    await send_req.download_file(file_url, local_file_path)
-    await message.answer(wait_file_is_loading_ru, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
-    # ic(local_file_path)
+        local_file_path = os.path.join(download_dir, document.file_name)
+        ic(local_file_path)
+        await send_req.download_file(file_url, local_file_path)
+        await message.answer(wait_file_is_loading_ru, parse_mode='HTML', reply_markup=ReplyKeyboardRemove())
+        # ic(local_file_path)
 
-    res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
-    ic(731, res_file)
-    try:
-        file_size = os.path.getsize(local_file_path)
-        file_size_kb = file_size / 1024
-        file_size_mb = file_size_kb / 1024
-        ic(f'size: {file_size_mb:.2f}')
-    except:
-        return 'Файл не найден'
-    await state.update_data(file_size_sertificate=file_size)
-    # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
-    # await EducationDataRU.has_application.set()
-    # ic(all_state)
-    ic(res_file.status_code)
-    ic(res_file)
-    data_user = await state.get_data()
-    certificate_type = data_user['certificate_type']
-    ic(certificate_type)
-    data1 = res_file.json()
-    ic(747, data1)
-    await state.update_data(file_sertificate=data1['path'])
-    ic(token_)
-    ic(data1['path'])
-    try:
-        res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
-        ic(751, res)
-    except Exception as e:
-        await message.answer(f"Ошибка: {e}")
-        return
+        res_file = upload.upload_new_file_sertificate(token=token_, filename=local_file_path)
+        ic(731, res_file)
+        try:
+            file_size = os.path.getsize(local_file_path)
+            file_size_kb = file_size / 1024
+            file_size_mb = file_size_kb / 1024
+            ic(f'size: {file_size_mb:.2f}')
+        except:
+            return 'Файл не найден'
+        await state.update_data(file_size_sertificate=file_size)
+        # await message.answer("Fayl yuklandi.", reply_markup=ReplyKeyboardRemove())
+        # await EducationData.has_application.set()
+        # ic(all_state)
+        ic(res_file.status_code)
+        ic(res_file)
+        data_user = await state.get_data()
+        certificate_type = data_user['certificate_type']
+        ic(certificate_type)
+        data1 = res_file.json()
+        ic(747, data1)
+        await state.update_data(file_sertificate=data1['path'])
+        ic(token_)
+        ic(data1['path'])
+        try:
+            res = send_req.upload_sertificate(token=token_, filename=data1['path'], f_type=certificate_type)
+            ic(751, res)
+        except Exception as e:
+            await message.answer(f"Ошибка: {e}")
+            return
 
-    await message.answer("Файл загружен.")
+        await message.answer("Файл загружен.")
     ic('boshlandi1')
     await EducationDataRU.degree_id.set()
     ic('yakunlandi')
     await message.answer("<b>Подача заявления в университет</b>", parse_mode="HTML")
     ic('started')
-    my_degree = {1: 'Бакалавр',2: 'Магистратура',3: 'Докторантура'}
+    my_degree = {1: 'Бакалавр',2: 'Mагистратура',3: 'Докторантура'}
     data = await state.get_data()
     token = data['token']
     directions_response = await send_req.directions(token)
@@ -1465,7 +1634,8 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
         f"✅ <b>Цена выбранного направления</b>\n"
         f"--------------------------------\n"
         f"💵 <i>Цена:</i> <b>{all_state_data['tuition_fee']}</b> сум\n",
-        parse_mode='HTML'
+        parse_mode='HTML',
+        reply_markup=menu_ru
     )
     new_state_data = await state.get_data()
     ic(all_state_data.get('degree_id'), new_state_data.get('direction_id'), all_state_data.get('education_type'), new_state_data.get('education_lang_id'))
@@ -1475,9 +1645,20 @@ async def after_select_lang(callback_query: types.CallbackQuery, state: FSMConte
     education_language_id = int(new_state_data.get('education_lang_id'))
     education_type_id = int(new_state_data.get('education_type'))
     token_ = new_state_data.get('token')
-
-    applicant = await send_req.applicants(token_, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None)
-    # ic(applicant)
+    chat_id_user = new_state_data.get('chat_id_user', None)
+    is_second_specialty = False
+    ic(chat_id_user)
+    applicant = await send_req.applicants(token_,is_second_specialty,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None)
+    if (education_type_id == 2):
+        applicant_status = await send_req.applicants(token_,
+                                                    transfer_user,
+                                                    chat_id_user, 
+                                                    degree_id, 
+                                                    direction_id,
+                                                education_language_id, 
+                                                education_type_id,
+                                                file_work_experience)
+        # from aiogram import Bot, Dispatcher
     
     if applicant is not None:
         await callback_query.message.answer(application_submited_ru, reply_markup=menu_ru)

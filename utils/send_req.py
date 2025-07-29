@@ -9,23 +9,29 @@ import pytz
 import random
 from data.config import  origin, crm_django_domain, username, password
 from data.config import domain_name as host
+from utils.logs import log_to_json
 import aiohttp
+# <<<<<<< added_functions
+ic(origin, 'oldin')
+# =======
 ic(origin, 'shu')
+# >>>>>>> aifu_bot
 # origin = 'admission.uess.uz'
 # origin = 'admission.tiiu.uz'
-# ic(origin)
-# host = 'crmapi.mentalaba.uz'
-
+# ic(origin, 'keyingi')
+host = 'crmapi.mentalaba.uz'
+origin = 'qabul.aifu.uz'
 # username = 'ulugbek'
-# crm_django_domain = 'alfa.misterdev.uz'
+crm_django_domain = 'global.misterdev.uz'
 # password = '998359015a@'
-
+# ic.disable()
 default_header = {
         'accept': 'application/json', 
         'Content-Type': 'application/json',
         'Origin': f'{origin}', 
 }
 ic(origin)
+
 async def check_number(phone):
     url = f'https://{host}/v1/auth/check'
     data = {"phone": phone}
@@ -38,6 +44,7 @@ async def check_number(phone):
             else:
                 error_message = await response.json()
                 return {'error': f'Failed to check number, status_code: {response.status}, details: {error_message}'}
+
 
             
 # print(check_number('+998998359015').json())
@@ -52,11 +59,31 @@ async def user_register(number):
     # return response
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=body, headers=default_header) as response:
-            ic(response.status)
+            # ic(response.status)
             if response.status == 201:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_register',
+                #     'details': {
+                #         'phone': number,
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 json_data = await response.json()
                 return json_data
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_register',
+                #     'details': {
+                #         'phone': number,
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 error_message = await response.json()
                 return {'error': f'Failed to user register, status_code: {response.status}, details: {error_message}'}
 
@@ -68,17 +95,36 @@ async def user_verify(secret_code, phone):
         'phone': phone,
         "code": secret_code
     }
-    ic(body)
+    # ic(body)
     
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=body, headers=default_header) as response:
             data = await response.json()
-            ic(data)
+            # ic(data)
             if response.status == 200:
-                
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_verify',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 json_data = await response.json()  # This should be a dictionary
                 return {'data': json_data, 'status_code': response.status}  # Return a dictionary
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_verify',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': "Failed to verify", 'status_code': response.status}
 
 
@@ -90,16 +136,36 @@ async def user_login(phone):
     body = {
         'phone': phone
     }
-    ic(body)
+    # ic(body)
     # response = requests.post(url, json=body, headers=default_header)
     # print(response.json())
     # return response
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 200:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_login',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 json_data = await response.json() 
                 return {'data': json_data, 'status_code': response.status} 
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'user_login',
+                #     'details': {
+                #         'phone': phone,
+                #         'status_code': response.status,
+                #         'data': await response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': "Failed to verify", 'status_code': response.status}
             
 # user_login('+998998359015')
@@ -109,19 +175,22 @@ async def application_form_info(birth_date, document, token):
     default_header['Authorization'] = f'Bearer {token}'
     body = {
         'birth_date': str(birth_date),
-        'document': str(document)
+        'document': str(document),
+        'type': 'all'
     }
     ic(104, 'keldi')
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
+            ic(body)
             ic(response.status, 'info')
             ic(111, response)
-            json_data = await response.json() 
             if response.status == 200:
-                return {'data': json_data, 'status_code': response.status} 
+                json_data = await response.json() 
+                return {'data': json_data , 'status_code': response.status} 
             else:
-                return {'error': "Failed to verify", 'status_code': response.status, 'data': json_data}
+                error_data = await response.json()
+                return {'error': "Failed to verify", 'status_code': response.status, 'data': error_data}
                 # response = requests.post(url, json=body, headers=default_header)
     # pprint(response.json())
     # return response
@@ -130,26 +199,45 @@ async def application_form_info(birth_date, document, token):
 # ic(a)
 
 def application_form(token,birth_date,birth_place,citizenship,extra_phone,first_name,gender,last_name,phone,photo,pin,serial_number,src,third_name):
-    url = f"https://{host}/v1/application-forms"
-    default_header['Authorization'] = f'Bearer {token}'
-    body = {
-        'birth_date': birth_date,
-        'birth_place': birth_place,
-        'citizenship': citizenship,
-        'extra_phone': extra_phone,
-        'first_name': first_name,
-        'gender': gender,
-        'last_name': last_name,
-        'phone': phone,
-        'photo': photo,
-        'pin': pin,
-        'serial_number': serial_number,
-        'src': src,
-        'third_name': third_name
-    }
-    # print(body)
-    response = requests.post(url, headers=default_header, json=body)
-    return response
+    try:
+        url = f"https://{host}/v1/application-forms"
+        default_header['Authorization'] = f'Bearer {token}'
+        body = {
+            'birth_date': birth_date,
+            'birth_place': birth_place,
+            'citizenship': citizenship,
+            'extra_phone': extra_phone,
+            'first_name': first_name,
+            'gender': gender,
+            'last_name': last_name,
+            'phone': phone,
+            'photo': photo,
+            'pin': pin,
+            'serial_number': serial_number,
+            'src': src,
+            'third_name': third_name
+        }
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_form',
+        #     'details': {
+        #         'body': body
+        #     }
+        # }
+        # log_to_json(log_data)
+        response = requests.post(url, headers=default_header, json=body)
+        return response
+    except:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_form',
+        #     'details': {
+        #         'body': body
+        #     }
+        # }
+        # log_to_json(log_data)
+        response = requests.post(url, headers=default_header, json=body)
+        return response
 
 
 def application_form_manual(token,birth_date,birth_place,email,extra_phone,first_name,gender,last_name,phone,photo,pin,serial_number,src,third_name):
@@ -173,117 +261,203 @@ def application_form_manual(token,birth_date,birth_place,email,extra_phone,first
     (162, body)
     response = requests.post(url, headers=default_header, json=body)
     if response.status_code == 201:
-        data = response.json()  # Read and parse the JSON response
-        return {'data': data, 'status_code': response.status_code}  # Return the data
+        log_data = {
+            'time': datetime.utcnow().isoformat(),
+            'event': 'application_form_manual',
+            'details': {
+                'body': body
+            }
+        }
+        log_to_json(log_data)
+        data = response.json()
+        return {'data': data, 'status_code': response.status_code}
     else:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_form_manual',
+        #     'details': {
+        #         'body': body
+        #     }
+        # }
+        # log_to_json(log_data)
         data = response.json() 
-        # Handling errors by returning a simple error message or dict
         return {'data': data, 'error': 'Failed to fetch data', 'status_code': response.status_code}
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=default_header, json=body) as response:
-    #         if response.status == 201:
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 async def directions(token):
     url = f'https://{host}/v1/directions'
     default_header['Authorization'] = f'Bearer {token}'
-    # response = requests.get(url, headers=default_header)
-    # return response
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
-                data = await response.json()  # Read and parse the JSON response
+                data = await response.json()
                 return data
             else:
-                # Handling errors by returning a simple error message or dict
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-async def applicants(token, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None):
+async def applicants(token,is_transfer_student,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None,
+                     is_second_specialty=False, branch=None,is_master=None, referral_source='telegram'):
+
+    # print(token,is_transfer_student,chat_id_user,degree_id, direction_id, education_language_id, education_type_id, work_experience_document,branch,is_master,is_second_specialty, referral_source)
     url = f"https://{host}/v1/applicants"
     headers = default_header.copy()
     headers['Authorization'] = f'Bearer {token}'
     body = {
-        'degree_id': degree_id,
-        'direction_id': direction_id,
-        'education_language_id': education_language_id,
-        'education_type_id': education_type_id,
-        'work_experience_document': work_experience_document
+        'branch': branch,
+        'degree_id': int(degree_id),
+        'direction_id': int(direction_id),
+        'education_language_id': int(education_language_id),
+        'education_type_id': int(education_type_id),
+        # 'work_experience_document': str(work_experience_document),
+        'bot_user_id': str(chat_id_user),
+        'is_master': is_master,
+        'is_second_specialty': is_second_specialty,
+        'is_transfer_student': is_transfer_student,
+        'referral_source': referral_source
     }
-    # ic(body)
-    # response = requests.post(url, json=body, headers=default_header)
-    # return response
+    ic(body, headers)
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, json=body) as response:
-            # ic(173, response.status, response.)
+            # ic(173, response.status, response.text)
             if response.status == 201:
-                data = await response.json()  # Read and parse the JSON response
-                return data
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'applicants',
+                #     'details': {
+                #         'body': body,
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
+                return response.status
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'applicants',
+                #     'details': {
+                #         'body': body,
+                #         'status_code': response.status
+                #     }
+                # }
+                # log_to_json(log_data)
                 # Handling errors by returning a simple error message or dict
-                return {'error': 'Failed to fetch data', 'status_code': response.status}
+                return {'error': response.text, 'status_code': response.status}
 
 def update_applicant(token, degree_id, direction_id, education_language_id, education_type_id, applicant_id):
-    url = f"https://{host}/v1/applicants/{applicant_id}"  # Assuming you need to specify which applicant to update
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json'
-    }
-    body = {
-        'degree_id': degree_id,
-        'direction_id': direction_id,
-        'education_language_id': education_language_id,
-        'education_type_id': education_type_id
-    }
-    response = requests.patch(url, json=body, headers=headers)
-    return response.json()
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.patch(url, json=body, headers=headers) as response:
-    #         if response.status == 200:
-    #             data = await response
-    #             return data
-    #         else:
-    #             return {'error': 'Failed to update applicant', 'status_code': response.status}
+    try:
+        url = f"https://{host}/v1/applicants/{applicant_id}"
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        }
+        body = {
+            'degree_id': degree_id,
+            'direction_id': direction_id,
+            'education_language_id': education_language_id,
+            'education_type_id': education_type_id
+        }
+        response = requests.patch(url, json=body, headers=headers)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'update_applicant',
+        #     'details': {
+        #         'body': body,
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return response.json()
+    except:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'update_applicant',
+        #     'details': {
+        #         'body': body,
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 async def my_applications(token):
     url = f"https://{host}/v1/applicants/my-application"
     default_header['Authorization'] = f'Bearer {token}'
-    # response = requests.get(url, headers=default_header)
-    # return response
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
-                data = await response.json()  # Read and parse the JSON response
+                content_type = response.headers.get('Content-Type', '')
+                if 'application/json' in content_type:
+                    data = await response.json()
+                else:
+                    data = await response.text()
                 return data
             else:
-                # Handling errors by returning a simple error message or dict
-                return {'error': 'Failed to fetch data', 'status_code': response.status}    
+                return {'error': 'Failed to fetch data', 'status_code': response.status, 'details': await response.text()}
+ 
 
 def reset_password(phone, token):
-    url = f"https://{host}/v1/auth/resend-verify-code"
-    default_header['Authorization'] = f'Bearer {token}'
-    body = {
-        'phone': phone
-    }
-    response = requests.post(url, json=body, headers=default_header)
-    return response
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=default_header, json=body) as response:
-    #         if response.status == 201:
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
+    try:
+        url = f"https://{host}/v1/auth/resend-verify-code"
+        default_header['Authorization'] = f'Bearer {token}'
+        body = {
+            'phone': phone
+        }
+        response = requests.post(url, json=body, headers=default_header)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'reset_password',
+        #     'details': {
+        #         'body': body,
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return response
+    except:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'reset_password',
+        #     'details': {
+        #         'body': body,
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 def educations(token):
     url = f"https://{host}/v1/application-forms/educations/"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
-    return response
+    if response.status_code == 200:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'educations',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return response
+    else:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'educations',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return 
+
+
+
     # async with aiohttp.ClientSession() as session:
     #     async with session.get(url, headers=default_header) as response:
     #         if response.status == 200:
@@ -293,22 +467,34 @@ def educations(token):
     #             # Handling errors by returning a simple error message or dict
     #             return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-"""
-    {
-        "id": 1,
-        "name_uz": "Maktab",
-        "name_ru": "Школа",
-        "name_en": "School",
-        "created_at": "2024-02-28T15:08:51.352Z",
-        "updated_at": "2024-02-28T15:08:51.352Z"
-    },
-"""
 
 def regions(token):
     url = f"https://{host}/v1/application-forms/regions"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
-    return response
+    if response.status_code == 200:
+    #     log_data = {
+    #         'time': datetime.utcnow().isoformat(),
+    #         'event': 'regions',
+    #         'details': {
+    #             'status_code': response.status_code,
+    #             'data': response.json()
+    #         }
+    #     }
+    #     log_to_json(log_data)
+        return response
+    else:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'regions',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return 
+
     # async with aiohttp.ClientSession() as session:
     #     async with session.get(url, headers=default_header) as response:
     #         if response.status == 200:
@@ -323,7 +509,29 @@ def districts(token, district_id):
     url = f"https://{host}/v1/application-forms/districts/{district_id}"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
-    return response
+    if response.status_code == 200:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'districts',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return response
+    else:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'districts',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return 
+
     # async with aiohttp.ClientSession() as session:
     #     async with session.get(url, headers=default_header) as response:
     #         if response.status == 200:
@@ -361,6 +569,15 @@ def upload_file(token, file_name, associated_with, usage):
     #     'usage': (None, f'{usage}')
     #     }
         response = requests.post(url, headers=default_header, files=files)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'upload_file',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
     # file1.close()
     # print(response.json())
     # a = response.json()
@@ -399,9 +616,29 @@ async def application_forms(token,birth_date,birth_place,citizenship,extra_phone
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 201:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json(),
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 data = await response.json()
                 return data
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json(),
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
@@ -424,9 +661,29 @@ async def application_forms_transfer(token,country_id, direction_name,
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 201:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json(),
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 data = await response.json()
                 return data
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json(),
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
@@ -440,8 +697,27 @@ async def application_forms_me(token):
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
                 data = await response.json()
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms_me',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
+                data = await response.json()
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms_me',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 async def application_forms_me_new(token):
@@ -454,8 +730,26 @@ async def application_forms_me_new(token):
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
                 data = await response.json()
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms_me_new',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'data': data, 'status_code': response.status} #data
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'application_forms_me',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'token': token
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
@@ -472,9 +766,26 @@ async def delete_profile(token):
             if response.status == 200:
                 try:
                     # Attempt to decode JSON regardless of Content-Type header
-                    
+                    # log_data = {
+                    #     'time': datetime.utcnow().isoformat(),
+                    #     'event': 'delete_profile',
+                    #     'details': {
+                    #         'status_code': response.status,
+                    #         'data': response.json()
+                    #     }
+                    # }
+                    # log_to_json(log_data)
                     return response.status
                 except aiohttp.client_exceptions.ContentTypeError:
+                    # log_data = {
+                    #     'time': datetime.utcnow().isoformat(),
+                    #     'event': 'delete_profile',
+                    #     'details': {
+                    #         'status_code': response.status,
+                    #         'data': response.text
+                    #     }
+                    # }
+                    # log_to_json(log_data)
                     # Handle the case where JSON decoding fails
                     return {'error': 'Response content type is not application/json', 'status_code': response.status}
             else:
@@ -490,32 +801,72 @@ async def return_token_use_refresh(refreshToken):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, body=body, headers=default_header) as response:
             if response.status == 201:
-                data = await response
+                data = await response.json()
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'return_token_use_refresh',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
-                return {'error': 'Failed to refresh token', 'status_code': response.status}
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'return_token_use_refresh',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.text
+                #     }
+                # }
+                log_to_json(log_data)
+                return {'error': response.text, 'status_code': response.status}
 
 def upload_sertificate(token, filename, f_type):
-    url = f"https://{host}/v1/certifications/"
+    try:
+        url = f"https://{host}/v1/certifications/"
 
-    headers = {
-        'accept': 'multipart/form-data', 
-        'Authorization': f'Bearer {token}',
-        'Origin': f'{origin}',
-    }
-    body = {
-        'certification_type': f_type,
-        'file': filename
-    }
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=headers, data=body) as response:
-    #         if response.status == 201:
-    #             data = await response.json()
-    #             return data
-    #         else:
-    #             return {'error': 'Failed to upload sertificate', 'status_code': response.status}
-    response = requests.post(url, json=body, headers=headers)
-    return response.json()
+        headers = {
+            'accept': 'multipart/form-data', 
+            'Authorization': f'Bearer {token}',
+            'Origin': f'{origin}',
+        }
+        body = {
+            'certification_type': f_type,
+            'file': filename
+        }
+        # async with aiohttp.ClientSession() as session:
+        #     async with session.post(url, headers=headers, data=body) as response:
+        #         if response.status == 201:
+        #             data = await response.json()
+        #             return data
+        #         else:
+        #             return {'error': 'Failed to upload sertificate', 'status_code': response.status}
+        response = requests.post(url, json=body, headers=headers)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'upload_sertificate',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return response.json()
+
+    except:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'upload_sertificate',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return {'error': 'Failed to upload sertificate', 'status_code': 500}
 # u_s = upload_sertificate("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQ5LCJmaXJzdF9uYW1lIjoiVUxVR-KAmEJFSyIsImxhc3RfbmFtZSI6IkVSS0lOT1YiLCJiaXJ0aF9kYXRlIjpudWxsLCJwaG9uZSI6Iis5OTg5OTgzNTkwMTUiLCJyb2xlIjoidXNlciIsImF2YXRhciI6ImF2YXRhci9jMjU3MmI1NS02MzA3LTQ3YTEtOGYzNy03NjZjMGFiYTE3ZjIuanBnIiwiZW1haWwiOm51bGwsImlzX3ZlcmlmeSI6dHJ1ZSwiY3JlYXRlZF9hdCI6IjIwMjQtMDMtMTlUMDQ6NDA6NTMuMzkxWiIsInVwZGF0ZWRfYXQiOiIyMDI0LTAzLTE5VDA0OjQwOjUzLjM5MVoiLCJ1bml2ZXJzaXR5SWQiOjIsImlhdCI6MTcxMzAyMjI3OCwiZXhwIjoxNzEzMDQzODc4fQ.v5vh5-y6W8jjdVS8jcUpTW1PO5YUBTTRDzWvt9qOxHE",
 #                         'certificate/3b2167c7-28d2-4d0b-b69d-87da4d4db3c1.jpg',
 #                          'ielts' )
@@ -538,7 +889,29 @@ def application_forms_for_edu(token,  district_id, education_id, file_, institut
         }
     }
     response = requests.post(url, json=body, headers=default_header)
-    return response
+    if response.status_code == 201:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_forms_for_edu',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return response
+    else:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_forms_for_edu',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return {'error': 'Failed to create application', 'status_code': response.status}
+
     # async with aiohttp.ClientSession() as session:
     #     async with session.post(url, header=default_header, json=body) as response:
     #         if response.status == 201:
@@ -548,23 +921,44 @@ def application_forms_for_edu(token,  district_id, education_id, file_, institut
     #             return {'error': 'Failed to create application', 'status_code': response.status}
 
 def application_forms_for_personal_data(token,  birth_date, birth_place, citizenship, extra_phone, first_name,gender,last_name,phone,serial_number,third_name):
-    url = f"https://{host}/v1/application-forms"
-    default_header['Authorization'] = f"Bearer {token}"
-    body = {
-        'birth_date': birth_date,
-        'birth_place': birth_place,
-        'citizenship': citizenship,
-        'extra_phone': extra_phone,
-        'first_name': first_name,
-        'gender': gender,
-        'last_name': last_name,
-        'phone': phone,
-        'serial_number': serial_number,
-        'src': 'manually',
-        'third_name': third_name
-    }
-    response = requests.post(url, json=body, headers=default_header)
-    return response
+    try:
+        url = f"https://{host}/v1/application-forms"
+        default_header['Authorization'] = f"Bearer {token}"
+        body = {
+            'birth_date': birth_date,
+            'birth_place': birth_place,
+            'citizenship': citizenship,
+            'extra_phone': extra_phone,
+            'first_name': first_name,
+            'gender': gender,
+            'last_name': last_name,
+            'phone': phone,
+            'serial_number': serial_number,
+            'src': 'manually',
+            'third_name': third_name
+        }
+        response = requests.post(url, json=body, headers=default_header)
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_forms_for_personal_data',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return response
+    except:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'application_forms_for_personal_data',
+        #     'details': {
+        #         'status_code': response.status,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return {'error': 'Failed to create application', 'status_code': 500}
 
 
 async def djtoken(username, password):
@@ -578,17 +972,78 @@ async def djtoken(username, password):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=body) as response:
+            ic(response.status)
             if response.status == 200:
                 data = await response.json()
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'djtoken',
+                #     'details': {
+                #         'status_code': response.status,
+                #         # 'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'djtoken',
+                #     'details': {
+                #         'status_code': response.status,
+                #         # 'data': response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to get token', 'status_code': response.status}
 
-def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,university_name):
+# def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,university_name):
+#     url = f"https://{crm_django_domain}/create-user-profile/"
+#     header = {
+#         'Authorization': f'Bearer {token}'
+#     } 
+#     body = {
+#         'chat_id_user': chat_id,
+#         'first_name_user': first_name,
+#         'last_name_user': last_name,
+#         'pin': pin,
+#         'username': username,
+#         'date': date,
+#         "university_name": university_name
+#     }
+#     # ic(body)
+#     response = requests.post(url, json=body, headers=header)
+#     if response.status_code == 201:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'create_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         # 'data': response.json()
+#         #     }
+#         # }
+#         return response.json()
+#     else:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'create_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         # 'data': response.text
+#         #     }
+#         # }
+#         # log_to_json(log_data)
+#         return {'error': 'Failed to create user profile', 'status_code': response.status_code}
+
+import aiohttp
+import asyncio
+
+async def create_user_profile(token, chat_id, first_name, last_name, pin, date, username, university_name):
     url = f"https://{crm_django_domain}/create-user-profile/"
-    header = {
-        'Authorization': f'Bearer {token}'
-    } 
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
     body = {
         'chat_id_user': chat_id,
         'first_name_user': first_name,
@@ -596,25 +1051,94 @@ def create_user_profile(token,chat_id,first_name,last_name,pin,date,username,uni
         'pin': pin,
         'username': username,
         'date': date,
-        "university_name": university_name
+        'university_name': university_name
     }
-    ic(body)
-    response = requests.post(url, json=body, headers=header)
-    return response.json()
 
-def update_user_profile(id, chat_id, phone, first_name, last_name, pin):
-    url = f"https://{crm_django_domain}/user_profile/{chat_id}/update"
-    ic(url)
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=body, headers=headers, timeout=30) as response:
+                if response.status == 201:
+                    return await response.json()
+                else:
+                    return {
+                        'error': 'Failed to create user profile',
+                        'status_code': response.status,
+                        'detail': await response.text()
+                    }
+
+    except aiohttp.ClientError as e:
+        return {
+            'error': 'Request exception',
+            'detail': str(e)
+        }
+
+
+# def update_user_profile(university_id, chat_id, phone, first_name, last_name, pin, username,date):
+#     url = f"https://{crm_django_domain}/update-user-profile/{chat_id}/{university_id}/"
+#     # ic(url)
+#     body = {
+#         'chat_id_user': chat_id,
+#         'phone': phone,
+#         'first_name_user': first_name,
+#         'last_name_user': last_name if last_name else 'None',
+#         'pin': pin,
+#         'username': username,
+#         'date': date,
+#         'university_name': university_id
+#     }
+#     # ic(body)
+#     response = requests.put(url, json=body)
+#     if response.status_code == 200:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'update_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         'data': response.json()
+#         #     }
+#         # }
+#         return response.json()
+#     else:
+#         # log_data = {
+#         #     'time': datetime.utcnow().isoformat(),
+#         #     'event': 'update_user_profile',
+#         #     'details': {
+#         #         'status_code': response.status_code,
+#         #         'data': response.json()
+#         #     }
+#         # }
+#         # log_to_json(log_data)
+#         return response.json()
+
+import aiohttp
+import asyncio
+
+async def update_user_profile(university_id, chat_id, phone, first_name, last_name, pin, username, date):
+    url = f"https://{crm_django_domain}/update-user-profile/{chat_id}/{university_id}/"
+    headers = {
+        'Content-Type': 'application/json'
+    }
     body = {
         'chat_id_user': chat_id,
         'phone': phone,
         'first_name_user': first_name,
-        'last_name_user': last_name,
-        'pin': pin
+        'last_name_user': last_name if last_name else 'None',
+        'pin': pin,
+        'username': username,
+        'date': date,
+        'university_name': university_id
     }
-    ic(body)
-    response = requests.put(url, json=body)
-    return response.json()
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.put(url, json=body, headers=headers, timeout=20) as response:
+                response_data = await response.json()
+                return response_data
+    except aiohttp.ClientError as e:
+        return {
+            'error': 'Request exception',
+            'detail': str(e)
+        }
 
 # a = update_user_profile(3, "935920479", '998942559015', 'Erkinov', 'Abdulloh', '12341234')
 # ic(a)
@@ -628,15 +1152,55 @@ async def get_all_ser_profile(token):
         async with session.get(url, headers=header) as response:
             if response.status == 200:
                 data = await response.json()
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'get_all_ser_profile',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'get_all_ser_profile',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-def get_user_profile(chat_id):
-    url = f"https://{crm_django_domain}/user_profile/{int(chat_id)}/"
+def get_user_profile(chat_id,university_id):
+    url = f"https://{crm_django_domain}/detail-user-profile/{int(chat_id)}/{int(university_id)}/"
     response = requests.get(url)
     # ic(response.status_code, response.json())
-    return response.json()
+    if response.status_code == 200:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'get_user_profile',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return response.json()
+    else:
+        # log_data = {
+        #     'time': datetime.utcnow().isoformat(),
+        #     'event': 'get_user_profile',
+        #     'details': {
+        #         'status_code': response.status_code,
+        #         'data': response.json()
+        #     }
+        # }
+        # log_to_json(log_data)
+        return {'error': 'Failed to fetch data', 'status_code': response.status_code}
+    
 
 
 
@@ -653,8 +1217,26 @@ async def bot_usage(token, start_time, end_time):
         async with session.post(url, json=body, headers=header) as response:
             if response.status == 200:
                 data = await response.json()
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'bot_usage',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': data
+                #     }
+                # }
+                # log_to_json(log_data)
                 return data
             else:
+                # log_data = {
+                #     'time': datetime.utcnow().isoformat(),
+                #     'event': 'bot_usage',
+                #     'details': {
+                #         'status_code': response.status,
+                #         'data': response.json()
+                #     }
+                # }
+                # log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 
@@ -662,7 +1244,7 @@ async def download_file(file_url, dest):
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     async with aiohttp.ClientSession() as session:
         async with session.get(file_url) as resp:
-            print(resp.status)  # Using print for simplicity
+            # print(resp.status)  # Using print for simplicity
             if resp.status == 200:
                 # Use aiofiles for async file operations
                 async with aiofiles.open(dest, mode='wb') as f:
@@ -734,3 +1316,52 @@ def convert_time(timestamp):
 def escape_markdown2(text):
     escape_chars = r'\_*[]()~`>#+-=|{}.!'
     return ''.join(f'\\{char}' if char in escape_chars else char for char in text)
+
+
+
+import requests
+from icecream import ic
+
+
+def save_chat_id(chat_id,firstname, lastname,bot_id,username,status):
+    url = "https://ads.misterdev.uz/users/post"
+    data = {
+        "chat_id": chat_id,
+        "firstname": firstname if firstname else "firstname not found",
+        "lastname": lastname if lastname else "lastname not found",
+        "bot_id": bot_id,
+        "username": username if username else "username not found",
+        "status": status
+        }
+    ic(data)
+    response = requests.post(url, json=data)
+    
+    return response.json()
+
+def update_user(id, chat_id,firstname, lastname,bot_id,username,status,created_at):
+    url = f"https://ads.misterdev.uz/users/put/{id}"
+    data = {
+        "chat_id": chat_id,
+        "firstname": firstname if firstname else "firstname not found",
+        "lastname": lastname if lastname else "lastname not found",
+        "bot_id": bot_id,
+        "username": username if username else "username not found",
+        "status": status,
+        'created_at': created_at
+        }
+    ic(data)
+    response = requests.put(url, json=data)
+    return response.json()
+
+def get_all_bots():
+    url = "https://ads.misterdev.uz/bots/get"
+    response = requests.get(url)
+    return response.json()
+
+def get_all_users():
+    url = "https://ads.misterdev.uz/users/get"
+    response = requests.get(url)
+    
+    return response.json()
+
+

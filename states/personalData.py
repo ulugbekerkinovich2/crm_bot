@@ -58,6 +58,8 @@ class PersonalData(StatesGroup):
     transfer_direction_name = State()
     current_course = State()
     transcript = State()
+    birth_date_new = State()
+    document_new = State()
 
 class PersonalDataRU(StatesGroup):
     id_user = State()

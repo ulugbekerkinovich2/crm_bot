@@ -6,7 +6,7 @@ async def set_default_commands(dp):
         [
             types.BotCommand("start", "Start"),
             types.BotCommand("restart", "Restart"),
-            # types.BotCommand("register", "Register"),
-            # types.BotCommand("reset_password", "Kodni qayta yuborish"),
+            types.BotCommand("admin", "admin"),
+            types.BotCommand("about", "Universitet sahifasini ochish"),
         ]
     )

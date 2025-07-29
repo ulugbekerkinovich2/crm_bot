@@ -161,3 +161,21 @@ edit_user_education_transfer_inline_ru = InlineKeyboardMarkup(
         ]
     ]
 )
+
+
+update_application_inline = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Daraja", callback_data='degree'),
+        ],
+        [
+            InlineKeyboardButton(text="Yo'nalish yoki mutaxassislik", callback_data='direction'),
+        ],
+        [
+            InlineKeyboardButton(text="Ta'lim shakli", callback_data='education_type'),
+        ],
+        [
+            InlineKeyboardButton(text="Ta'lim tili", callback_data='education_language'),
+        ]
+    ]
+)

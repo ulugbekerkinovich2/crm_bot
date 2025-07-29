@@ -9,12 +9,38 @@ reset_password = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+branch_uz = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Toshkent shahar, Qorasaroy filiali'),
+            KeyboardButton(text='Toshkent viloyati, Chirchiq filiali'),
+        ],
+        [
+            KeyboardButton(text="📃Test natijasini bilish"),
+        ]
+    ],
+    resize_keyboard=True
+)
 
+
+branch_ru = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Город Ташкент, Карасарайский филиал'),
+            KeyboardButton(text='Ташкентская область, Чирчикский филиал'),
+        ],
+    ],
+    resize_keyboard=True
+)
 
 register = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="🧾Abiturient"),
+            KeyboardButton(text='🧑‍🎓 Bakalavriat'),
+            KeyboardButton(text='👨🏼‍🎓 Magistratura'),
+        ],
+        [
+            KeyboardButton(text="🧑‍🎓 Ikkinchi mutaxassislik"),
             KeyboardButton(text="🔄O'qishni ko'chirish"),
         ],
     ],
@@ -24,8 +50,12 @@ register = ReplyKeyboardMarkup(
 register_ru = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="🧾 Абитуриент"),
+            KeyboardButton(text='🧑‍🎓 Бакалавриат'),
+            KeyboardButton(text='👨🏼‍🎓 Магистратура'),
+        ],
+        [
             KeyboardButton(text="🔄Трансферное обучение"),
+            KeyboardButton(text="🧑‍🎓 Вторая специальность"),
         ],
     ],
     resize_keyboard=True
@@ -36,9 +66,9 @@ language = ReplyKeyboardMarkup(
         [
             KeyboardButton(text="🇺🇿O'zbek tili"),
         ],
-        [
-            KeyboardButton(text="🇷🇺Русский язык")
-        ]
+        # [
+        #     KeyboardButton(text="🇷🇺Русский язык")
+        # ]
     ],
     resize_keyboard=True
 )
@@ -55,6 +85,7 @@ menu = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Akkauntdan chiqish"),
+            KeyboardButton(text="Universitet sahifasini ochish"),
         ]
     ],
     resize_keyboard=True
@@ -72,6 +103,7 @@ menu_full = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Akkauntdan chiqish"),
+            KeyboardButton(text="Universitet sahifasini ochish"),
         ]
     ],
     resize_keyboard=True
@@ -88,6 +120,8 @@ menu_ru = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Выйти из аккаунта"),
+            KeyboardButton(text="Открыть страницу университета"),
+
         ]
     ],
     resize_keyboard=True
@@ -177,13 +211,14 @@ update_education_info_ru = ReplyKeyboardMarkup(
 
 update_application = ReplyKeyboardMarkup(
     keyboard=[
-        [
-        KeyboardButton(text="📝Arizani tahrirlash"),
-        ],
+        # [
+        # KeyboardButton(text="📝Arizani tahrirlash"),
+        # ],
         [
         KeyboardButton(text="📄Arizani ko'rish"),
         ]
-    ]
+    ],
+    resize_keyboard=True
 )
 update_application_ru = ReplyKeyboardMarkup(
     keyboard=[
@@ -253,9 +288,10 @@ yes_no = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='Ha, mavjud'),
+             KeyboardButton(text="Yo'q, mavjud emas"),
         ],
         [
-            KeyboardButton(text="Yo'q, mavjud emas"),
+            KeyboardButton(text="Bekor qilish"),
         ]
     ],
     resize_keyboard=True
@@ -264,9 +300,10 @@ yes_no_ru = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='Да, есть'),
+            KeyboardButton(text="Нет, не доступен")
         ],
         [
-            KeyboardButton(text="Нет, не доступен"),
+            KeyboardButton(text="Отмена"),
         ]
     ],
     resize_keyboard=True
