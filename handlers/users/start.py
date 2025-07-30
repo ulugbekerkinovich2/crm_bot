@@ -169,8 +169,7 @@ async def bot_start(message: types.Message, state: FSMContext):
     if chat_id in admin_ids:
         await message.answer(f"Admin Reklama paneliga xush kelibsiz, {message.from_user.full_name}!", reply_markup=adminMenuKeyBoardButton.adminMenu)
         return
-    # Foydalanuvchi bazada yo‘q bo‘lsa saqlash
-    if chat_id not in all_users:
+    elif chat_id not in all_users:
         ic('user not found, saving...')
         for bot in all_bots:
             if bot["api_key"] == BOT_TOKEN:

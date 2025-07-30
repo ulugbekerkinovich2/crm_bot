@@ -17,11 +17,11 @@ adminMenu = ReplyKeyboardMarkup(
 adsMenu = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text='📝 Matn yuborish'),
+            KeyboardButton(text='📹 Video yuborish'),
+            # KeyboardButton(text='📝 Matn yuborish'),
             KeyboardButton(text='🖼 Rasm yuborish'),
         ],
         [
-            KeyboardButton(text='📹 Video yuborish'),
             KeyboardButton(text='🔙 Orqaga*'),
         ],
     ],

@@ -41,4 +41,4 @@ async def admin_commandBack(message: types.Message, state: FSMContext):
 async def admin_commandAds(message: types.Message, state: FSMContext):
     await state.finish()
     ic('admin command')
-    await message.answer("🏠Asosiy sahifa", reply_markup=adminMenuKeyBoardButton.adsMenu)
+    await message.answer("Reklama paneli", reply_markup=adminMenuKeyBoardButton.adsMenu)

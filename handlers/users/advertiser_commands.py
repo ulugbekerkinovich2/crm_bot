@@ -8,17 +8,88 @@ import asyncio
 from states.advertiser_command import User
 from data.config import admin_ids
 from utils import send_req
-# from filters.custom import IsAdminFilter
 from icecream import ic
 import datetime
 from keyboards.default.adminMenuKeyBoardButton import adminConfirm, adminMenu
 from aiogram.types import ReplyKeyboardRemove
 
+from aiogram.types import Message, MessageEntity
+from collections import defaultdict
+
+def wrap_entity(text: str, types: list[str], url: str = None) -> str:
+    for t in reversed(types):
+        if t == "bold":
+            text = f"<b>{text}</b>"
+        elif t == "italic":
+            text = f"<i>{text}</i>"
+        elif t == "underline":
+            text = f"<u>{text}</u>"
+        elif t == "strikethrough":
+            text = f"<s>{text}</s>"
+        elif t == "code":
+            text = f"<code>{text}</code>"
+        elif t == "pre":
+            text = f"<pre>{text}</pre>"
+        elif t == "text_link" and url:
+            text = f"<a href='{url}'>{text}</a>"
+    return text
+
+
+def get_html_text_from_message(message: Message) -> str:
+    # text = message.caption or ""
+    text = message.text or message.caption or ""
+    entities = message.caption_entities or []
+
+    if not text or not entities:
+        return text
+
+    # Entity larni boshlanish joyi bo‘yicha guruhlaymiz
+    starts = defaultdict(list)
+    ends = defaultdict(list)
+
+    for entity in entities:
+        starts[entity.offset].append(entity)
+        ends[entity.offset + entity.length].append(entity)
+
+    result = ""
+    active_entities = []
+    i = 0
+
+    while i < len(text):
+        # Entity tugagan bo‘lsa, ro‘yxatdan o‘chiramiz
+        if i in ends:
+            for e in ends[i]:
+                if e in active_entities:
+                    active_entities.remove(e)
+
+        # Entity boshlansa, ro‘yxatga qo‘shamiz
+        if i in starts:
+            for e in starts[i]:
+                active_entities.append(e)
+
+        # Nechta harfni keyingi o‘zgarishgacha olish kerakligini aniqlaymiz
+        next_change = min(
+            [pos for pos in list(starts.keys()) + list(ends.keys()) if pos > i],
+            default=len(text)
+        )
+        chunk = text[i:next_change]
+
+        if active_entities:
+            types = [e.type for e in active_entities]
+            url = next((e.url for e in active_entities if e.type == "text_link"), None)
+            result += wrap_entity(chunk, types, url)
+        else:
+            result += chunk
+
+        i = next_change
+
+    return result
 
 
 #TODO for all users
 @dp.message_handler(text="📝 Matn yuborish")  # Assuming you have a function or logic to check if the user is an admin
-async def bot_starts(message: types.Message):
+async def bot_starts(message: types.Message, state: FSMContext):
+    await state.finish()
     chat_id = message.from_user.id
     if chat_id in admin_ids:
         await message.answer("Reklama xabarini yuboring, ushbu habar barcha user larga boradi!!!")
@@ -26,10 +97,17 @@ async def bot_starts(message: types.Message):
 
 @dp.message_handler(state=User.get_command)
 async def preview_advertisement(message: types.Message, state: FSMContext):
+    # ic(99, message)
     chat_id = message.from_user.id
     if chat_id in admin_ids:
         text = message.text
-
+        content_type = message.content_type
+        ic(103, content_type)
+        if content_type == types.ContentType.TEXT:
+            text = get_html_text_from_message(message)
+            ic(107, text)
+        else:
+            text = message.caption or message.text
         await state.update_data(reklama={"caption": text, "type": types.ContentType.TEXT})
         await message.answer(
             f"<b>Reklama ko'rinishi:</b>\n\n{text}\n\nQuyidagi tugmalar orqali tasdiqlang:",
@@ -41,10 +119,9 @@ async def preview_advertisement(message: types.Message, state: FSMContext):
 
 
 
-
-
 @dp.message_handler(text="🖼 Rasm yuborish")  
-async def bot_starts(message: types.Message):
+async def bot_starts(message: types.Message, state: FSMContext):
+    await state.finish()
     chat_id = message.from_user.id
     if chat_id in admin_ids:
         await message.answer("Reklama rasmini matni bilan yuboring, ushbu habar barcha userlarga boradi")
@@ -52,59 +129,29 @@ async def bot_starts(message: types.Message):
 
 @dp.message_handler(content_types=[types.ContentType.PHOTO, types.ContentType.TEXT], state=User.reklama_admin_image_all)
 async def handle_image_and_text(message: types.Message, state: FSMContext):
-    chat_id = message.from_user.id
-    if chat_id in admin_ids:
-        if message.content_type == types.ContentType.TEXT:
-            
-            # Handle text message
-            text = message.text
-            await process_text(message, text)
+    if message.from_user.id not in admin_ids:
+        return
 
-        elif message.content_type == types.ContentType.PHOTO:
-            # Handle image message
-            photo_file_id = message.photo[-1].file_id
-            caption = message.caption
-            await process_image(message, photo_file_id, caption, state)
+    # Faqat text kelsa ruxsat bermaymiz
+    if message.content_type == types.ContentType.TEXT:
+        await message.answer("Iltimos, rasm bilan birga caption yuboring.")
+        return
 
-async def process_image(message: types.Message, photo_file_id: str, caption: str, state: FSMContext):
-    # Process the image message
-    # print("Photo file ID:", photo_file_id)
-    # print("Caption:", caption)
-    chat_id = message.from_user.id
-    if chat_id in admin_ids:
-        all_users = send_req.get_all_users()  # Assuming you get all users from somewhere
-        failed = 0
-        count = 0
-        for user_info in all_users:
-            user_id = user_info.get('chat_id')
-            ic(11, user_id)
-            try:
-            # Parse the text as Markdown to make links clickable
-                await bot.send_photo(user_id, photo=photo_file_id, caption=caption, parse_mode="HTML")
-                
-                # Add a small delay to avoid being banned for spam
-                await asyncio.sleep(1.2)
-                
-                send_req.update_user(user_info['id'], user_info['chat_id'], user_info['firstname'], user_info['lastname'],user_info['bot_id'], user_info['username'], 'active', user_info['created_at'])
-                count += 1
-            except Exception as e:
-                failed += 1
-                send_req.update_user(int(user_info.get('id')), user_info['chat_id'], user_info['firstname'], user_info['lastname'],user_info['bot_id'], user_info['username'], 'blocked',user_info['created_at'])
-                print(f"Failed to send message to user {user_id}: {e}")
-        await message.reply(
-            f"📢 <b>Reklama tarqatish natijasi</b>\n\n"
-            f"✅ Yuborildi: <b>{count:,}</b> ta foydalanuvchiga\n"
-            f"❌ Yuborilmadi: <b>{failed:,}</b> ta foydalanuvchiga",
-            parse_mode="HTML",
-            reply_markup=adminMenu
-        )
-        await state.finish()
+    # Rasm va caption keldi
+    elif message.content_type == types.ContentType.PHOTO:
+        photo_file_id = message.photo[-1].file_id
+        caption = get_html_text_from_message(message)
 
+        # Saqlaymiz
+        await state.update_data(reklama={
+            'type': 'photo',
+            'file_id': photo_file_id,
+            'caption': caption
+        })
 
-
-
-
-
+        await message.answer_photo(photo=photo_file_id, caption=f"<b>Yuboriladigan rasm:</b>\n\n{caption}", parse_mode="HTML")
+        await message.answer("❓ Ushbu reklamani yuborishni tasdiqlaysizmi?", reply_markup=adminConfirm)
+        await User.confirm_reklama.set()
 
 
 
@@ -133,14 +180,9 @@ async def handle_image_and_text(message: types.Message, state: FSMContext):
             await process_image1(message, photo_file_id, caption, state)
 
 async def process_text(message: types.Message, text: str):
-    # Process the text message
-    # print("Text:", text)
     await message.answer(text)
 
 async def process_image1(message: types.Message, photo_file_id: str, caption: str, state: FSMContext):
-    # Process the image message
-    # print("Photo file ID:", photo_file_id)
-    # print("Caption:", caption)
     chat_id = message.from_user.id
     if chat_id in admin_ids:
         fail_count = 0
@@ -163,20 +205,16 @@ async def process_image1(message: types.Message, photo_file_id: str, caption: st
             f"📢 <b>Adminlarga reklama yuborish natijasi</b>\n\n"
             f"✅ Yuborildi: <b>{count:,}</b> ta admin\n"
             f"❌ Yuborilmadi: <b>{fail_count:,}</b> ta admin",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=adminMenu
         )
         await state.finish()
 
 
-
-
-
-
-
-
 #TODO video uchun
 @dp.message_handler(text="📹 Video yuborish")
-async def bot_starts(message: types.Message):
+async def bot_starts(message: types.Message, state: FSMContext):
+    await state.finish()
     await message.answer("Reklama videosini matni bilan yuboring, ushbu reklama hammaga boradi")
     await User.reklama_admin_video_or_image_all.set()
 
@@ -184,8 +222,12 @@ async def bot_starts(message: types.Message):
 @dp.message_handler(content_types=[types.ContentType.PHOTO, types.ContentType.VIDEO, types.ContentType.TEXT], state=User.reklama_admin_video_or_image_all)
 async def handle_media_and_text(message: types.Message, state: FSMContext):
     content_type = message.content_type
-    caption = message.caption if message.caption else message.text
-    print(315, caption)
+    content_type = message.content_type
+    if content_type == types.ContentType.VIDEO:
+        caption = get_html_text_from_message(message)
+    else:
+        caption = message.caption or message.text
+    ic(229, caption)
     data = {
         'type': content_type,
         'caption': caption
@@ -198,7 +240,7 @@ async def handle_media_and_text(message: types.Message, state: FSMContext):
         data['file_id'] = message.photo[-1].file_id
 
     await state.update_data(reklama=data)
-    # await message.answer(data)
+    ic(data)
     await message.answer("📨 Reklama quyidagicha yuboriladi. Tasdiqlaysizmi?", reply_markup=adminConfirm)
     await User.confirm_reklama.set()
 
@@ -239,7 +281,7 @@ async def confirm_sending(message: types.Message, state: FSMContext):
         await state.finish()
 
     elif message.text == '❌ Bekor qilish':
-        await message.answer("❌ Reklama yuborish bekor qilindi.", reply_markup=ReplyKeyboardRemove())
+        await message.answer("❌ Reklama yuborish bekor qilindi.", reply_markup=adminMenu)
         await state.finish()
 
     else:
@@ -247,7 +289,8 @@ async def confirm_sending(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(text="📊 Statistika")  # Assuming you have a function or logic to check if the user is an admin
-async def bot_starts(message: types.Message):
+async def bot_starts(message: types.Message, state: FSMContext):
+    await state.finish()
     time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     count_of_users = send_req.get_all_users()
     active = 0
