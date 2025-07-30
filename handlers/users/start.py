@@ -1,17 +1,18 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import CommandStart
-from data.config import university_name_uz, university_name_ru
+from data.config import admins_str, university_name_ru, university_name_uz, admin_ids
 from loader import dp
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton,ReplyKeyboardRemove
 # from states.personalData import PersonalData
-from keyboards.default import registerKeyBoardButton
+from keyboards.default import registerKeyBoardButton, adminMenuKeyBoardButton
 from icecream import ic
 from utils import send_req
 from data.config import username as USERNAME
 from data.config import password as PASSWORD, BOT_TOKEN
 from data.config import university_id as UNIVERSITY_ID
 from aiogram.dispatcher.filters import Command, Text
+
 # @dp.message_handler(CommandStart(), state='*')
 # async def bot_start(message: types.Message, state: FSMContext):
 #     # ic('start tanlandi')
@@ -165,7 +166,9 @@ async def bot_start(message: types.Message, state: FSMContext):
     all_users = send_req.get_all_users()
     ic(all_users)
     ic(all_bots)
-
+    if chat_id in admin_ids:
+        await message.answer(f"Admin Reklama paneliga xush kelibsiz, {message.from_user.full_name}!", reply_markup=adminMenuKeyBoardButton.adminMenu)
+        return
     # Foydalanuvchi bazada yo‘q bo‘lsa saqlash
     if chat_id not in all_users:
         ic('user not found, saving...')
@@ -174,6 +177,7 @@ async def bot_start(message: types.Message, state: FSMContext):
                 bot_id = bot["id"]
                 ic('matched bot, saving user...')
                 send_req.save_chat_id(chat_id, firstname, lastname, bot_id, username, 'active')
+                
         # await message.answer(f"Salom, {message.from_user.full_name}! {chat_id}")
     else:
         await message.answer(f"Siz ro'yxatdan o'tgansiz, {message.from_user.full_name}!")

@@ -11,3 +11,8 @@ class User(StatesGroup):
     reklama_admin_image_text_for_admins = State()
     reklama_admin_video_or_image_all = State()
     photo_broadcast = State()
+    confirm_reklama = State()
+
+# class User(StatesGroup):
+#     reklama_admin_video_or_image_all = State()
+#     confirm_reklama = State()

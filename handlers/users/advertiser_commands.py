@@ -1,70 +1,49 @@
 from aiogram import types, Bot
 from aiogram.dispatcher.filters import CommandStart
 from aiogram.dispatcher import FSMContext
-from loader import dp
+import aiogram.types
+import keyboards.default
+from loader import dp, bot
 import asyncio
 from states.advertiser_command import User
-from data.config import BOT_TOKEN,admin_ids
+from data.config import admin_ids
 from utils import send_req
 # from filters.custom import IsAdminFilter
 from icecream import ic
 import datetime
+from keyboards.default.adminMenuKeyBoardButton import adminConfirm, adminMenu
+from aiogram.types import ReplyKeyboardRemove
 
 
 
 #TODO for all users
-@dp.message_handler(text="/reklama_admin_text_for_all_users")  # Assuming you have a function or logic to check if the user is an admin
+@dp.message_handler(text="📝 Matn yuborish")  # Assuming you have a function or logic to check if the user is an admin
 async def bot_starts(message: types.Message):
     chat_id = message.from_user.id
     if chat_id in admin_ids:
         await message.answer("Reklama xabarini yuboring, ushbu habar barcha user larga boradi!!!")
         await User.get_command.set()
 
-
-
 @dp.message_handler(state=User.get_command)
-async def bot_echo(message: types.Message, state: FSMContext):
+async def preview_advertisement(message: types.Message, state: FSMContext):
     chat_id = message.from_user.id
     if chat_id in admin_ids:
-        text = message.text  # Renamed to 'text' to avoid overwriting the 'message' variable
-        ic(text)
-        bot = Bot(token=BOT_TOKEN)  # Assuming BOT_TOKEN is defined somewhere
-        all_users = send_req.get_all_users()  # Assuming you get all users from somewhere
-        ic(all_users) # Assuming
-        failed = 0
-        count = 0
-        for user_id in all_users:
-            ic(59, user_id)
-            try:
-                await bot.send_message(int(user_id['chat_id']), text, parse_mode=types.ParseMode.HTML)
-                # Add a small delay to avoid being banned for spam
-                await asyncio.sleep(1.2)
-                
-                send_req.update_user(user_id['id'], user_id['chat_id'], user_id['firstname'], user_id['lastname'],user_id['bot_id'], user_id['username'], 'active', user_id['created_at'])
-                count += 1
-            except Exception as e:
-                failed += 1
-                send_req.update_user(user_id['id'], user_id['chat_id'], user_id['firstname'], user_id['lastname'],user_id['bot_id'], user_id['username'], 'blocked', user_id['created_at'])
-                
-                print(f"Failed to send message to user {user_id}: {e}")
-        
-        await message.reply(
-            f"📢 Reklama xabari jo'natildi.\n\n"
-            f"✅ Yuborildi: {count} ta foydalanuvchiga\n"
-            f"❌ Yuborilmadi: {failed} ta foydalanuvchiga"
+        text = message.text
+
+        await state.update_data(reklama={"caption": text, "type": types.ContentType.TEXT})
+        await message.answer(
+            f"<b>Reklama ko'rinishi:</b>\n\n{text}\n\nQuyidagi tugmalar orqali tasdiqlang:",
+            parse_mode='HTML',
+            reply_markup=adminConfirm
         )
-        await state.finish()
-
-    
+        await User.confirm_reklama.set()
 
 
 
 
 
 
-
-
-@dp.message_handler(text="/reklama_admin_image_all")  
+@dp.message_handler(text="🖼 Rasm yuborish")  
 async def bot_starts(message: types.Message):
     chat_id = message.from_user.id
     if chat_id in admin_ids:
@@ -93,7 +72,6 @@ async def process_image(message: types.Message, photo_file_id: str, caption: str
     # print("Caption:", caption)
     chat_id = message.from_user.id
     if chat_id in admin_ids:
-        bot = Bot(token=BOT_TOKEN)  # Assuming BOT_TOKEN is defined somewhere
         all_users = send_req.get_all_users()  # Assuming you get all users from somewhere
         failed = 0
         count = 0
@@ -117,7 +95,8 @@ async def process_image(message: types.Message, photo_file_id: str, caption: str
             f"📢 <b>Reklama tarqatish natijasi</b>\n\n"
             f"✅ Yuborildi: <b>{count:,}</b> ta foydalanuvchiga\n"
             f"❌ Yuborilmadi: <b>{failed:,}</b> ta foydalanuvchiga",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=adminMenu
         )
         await state.finish()
 
@@ -153,10 +132,10 @@ async def handle_image_and_text(message: types.Message, state: FSMContext):
             caption = message.caption
             await process_image1(message, photo_file_id, caption, state)
 
-# async def process_text(message: types.Message, text: str):
-#     # Process the text message
-#     # print("Text:", text)
-#     await message.answer(text)
+async def process_text(message: types.Message, text: str):
+    # Process the text message
+    # print("Text:", text)
+    await message.answer(text)
 
 async def process_image1(message: types.Message, photo_file_id: str, caption: str, state: FSMContext):
     # Process the image message
@@ -164,7 +143,6 @@ async def process_image1(message: types.Message, photo_file_id: str, caption: st
     # print("Caption:", caption)
     chat_id = message.from_user.id
     if chat_id in admin_ids:
-        bot = Bot(token=BOT_TOKEN) # Assuming you get all users from somewhere
         fail_count = 0
         count = 0
         for user_id in admin_ids:
@@ -197,67 +175,78 @@ async def process_image1(message: types.Message, photo_file_id: str, caption: st
 
 
 #TODO video uchun
-@dp.message_handler(text="/reklama_admin_video_or_image_all")  # Assuming you have a function or logic to check if the user is an admin
+@dp.message_handler(text="📹 Video yuborish")
 async def bot_starts(message: types.Message):
-    await message.answer("Reklama videosini yuboring yoki rasmini matni, ushbu reklama hammaga boradi")
+    await message.answer("Reklama videosini matni bilan yuboring, ushbu reklama hammaga boradi")
     await User.reklama_admin_video_or_image_all.set()
+
 
 @dp.message_handler(content_types=[types.ContentType.PHOTO, types.ContentType.VIDEO, types.ContentType.TEXT], state=User.reklama_admin_video_or_image_all)
 async def handle_media_and_text(message: types.Message, state: FSMContext):
-    if message.content_type == types.ContentType.TEXT:
-        # Handle text message
-        text = message.text
-        await process_text(message, text)
+    content_type = message.content_type
+    caption = message.caption if message.caption else message.text
+    print(315, caption)
+    data = {
+        'type': content_type,
+        'caption': caption
+    }
 
-    elif message.content_type in [types.ContentType.PHOTO, types.ContentType.VIDEO]:
-        # Handle media message
-        media_file_id = message.video.file_id if message.content_type == types.ContentType.VIDEO else message.photo[-1].file_id
-        caption = message.caption
-        await process_media(message, media_file_id, caption, state)
+    if content_type == types.ContentType.VIDEO:
+        data['file_id'] = message.video.file_id
 
-async def process_text(message: types.Message, text: str):
-    # Process the text message
-    print("Text:", text)
-    await message.answer(text)
+    elif content_type == types.ContentType.PHOTO:
+        data['file_id'] = message.photo[-1].file_id
 
-async def process_media(message: types.Message, media_file_id: str, caption: str, state: FSMContext):
-    # Process the media message
-    # print("Media file ID:", media_file_id)
-    # print("Caption:", caption)
+    await state.update_data(reklama=data)
+    # await message.answer(data)
+    await message.answer("📨 Reklama quyidagicha yuboriladi. Tasdiqlaysizmi?", reply_markup=adminConfirm)
+    await User.confirm_reklama.set()
 
-    bot = Bot(token=BOT_TOKEN)  # Assuming BOT_TOKEN is defined somewhere
-    all_users = send_req.get_all_users()  # Assuming you get all users from somewhere
-    failed = 0
-    count = 0
-    for user_info in all_users:
-        ic(user_info)
-        user_id = user_info.get('chat_id')
-        try:
-            if message.content_type == types.ContentType.PHOTO:
-                await bot.send_photo(user_id, photo=media_file_id, caption=caption)
-            elif message.content_type == types.ContentType.VIDEO:
-                await bot.send_video(user_id, video=media_file_id, caption=caption)
-            # Add a small delay to avoid being banned for spam
-            await asyncio.sleep(1.2)
-            
-            send_req.update_user(user_info['id'], user_info['chat_id'], user_info['firstname'], user_info['lastname'],user_info['bot_id'], user_info['username'], 'active', user_info['created_at'])
-            
-            count += 1
-        except Exception as e:
-            failed += 1
-            send_req.update_user(int(user_info.get('id')), user_info['chat_id'], user_info['firstname'], user_info['lastname'],user_info['bot_id'], user_info['username'], 'blocked',user_info['created_at'])
-            print(f"Failed to send message to user {user_id}: {e}")
 
-    await message.reply(
-        f"📢 <b>Reklama natijasi</b>\n\n"
-        f"✅ Muvaffaqiyatli yuborildi: <b>{count:,}</b> ta foydalanuvchiga\n"
-        f"❌ Yuborilmadi (bloklangan yoki xato): <b>{failed:,}</b> ta foydalanuvchiga",
-        parse_mode="HTML"
-    )
 
-    await state.finish()
+@dp.message_handler(state=User.confirm_reklama)
+async def confirm_sending(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    ic(281, data)
+    reklama = data.get('reklama')
+    ic(282, reklama)
+    if message.text == '✅ Yuborish':
+        all_users = send_req.get_all_users()
+        count, failed = 0, 0
 
-@dp.message_handler(text="/reklama_admin_statistika")  # Assuming you have a function or logic to check if the user is an admin
+        for user in all_users:
+            try:
+                if reklama['type'] == types.ContentType.TEXT:
+                    await bot.send_message(user['chat_id'], reklama['caption'])
+                elif reklama['type'] == types.ContentType.PHOTO:
+                    await bot.send_photo(user['chat_id'], reklama['file_id'], caption=reklama['caption'])
+                elif reklama['type'] == types.ContentType.VIDEO:
+                    await bot.send_video(user['chat_id'], reklama['file_id'], caption=reklama['caption'])
+                await asyncio.sleep(1.2)
+                send_req.update_user(user['id'], user['chat_id'], user['firstname'], user['lastname'], user['bot_id'], user['username'], 'active', user['created_at'])
+                count += 1
+            except Exception as e:
+                failed += 1
+                send_req.update_user(user['id'], user['chat_id'], user['firstname'], user['lastname'], user['bot_id'], user['username'], 'blocked', user['created_at'])
+
+        await message.answer(
+            f"📢 <b>Reklama natijasi</b>\n\n"
+            f"✅ Yuborildi: <b>{count:,}</b> ta\n"
+            f"❌ Xatolik: <b>{failed:,}</b> ta",
+            parse_mode="HTML",
+            reply_markup=adminMenu
+        )
+        await state.finish()
+
+    elif message.text == '❌ Bekor qilish':
+        await message.answer("❌ Reklama yuborish bekor qilindi.", reply_markup=ReplyKeyboardRemove())
+        await state.finish()
+
+    else:
+        await message.reply("Iltimos, faqat quyidagi tugmalardan birini tanlang: ✅ Yuborish yoki ❌ Bekor qilish.")
+
+
+@dp.message_handler(text="📊 Statistika")  # Assuming you have a function or logic to check if the user is an admin
 async def bot_starts(message: types.Message):
     time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     count_of_users = send_req.get_all_users()

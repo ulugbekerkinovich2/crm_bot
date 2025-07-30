@@ -1,6 +1,7 @@
 from . import start
 from . import register_ru
 from . import register
+from . import admin
 from . import manualdata
 from . import manualdataru
 from . import advertiser_commands
