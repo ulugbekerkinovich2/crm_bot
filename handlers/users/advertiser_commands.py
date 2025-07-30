@@ -15,8 +15,8 @@ from aiogram.types import ReplyKeyboardRemove
 
 from aiogram.types import Message, MessageEntity
 from collections import defaultdict
-
-def wrap_entity(text: str, types: list[str], url: str = None) -> str:
+from typing import List
+def wrap_entity(text: str, types: List[str], url: str = None) -> str:
     for t in reversed(types):
         if t == "bold":
             text = f"<b>{text}</b>"
