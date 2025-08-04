@@ -175,7 +175,7 @@ async def bot_start(message: types.Message, state: FSMContext):
             if bot["api_key"] == BOT_TOKEN:
                 bot_id = bot["id"]
                 ic('matched bot, saving user...')
-                send_req.save_chat_id(chat_id, firstname, lastname, bot_id, username, 'active')
+                # send_req.save_chat_id(chat_id, firstname, lastname, bot_id, username, 'active')
                 
         # await message.answer(f"Salom, {message.from_user.full_name}! {chat_id}")
     else:

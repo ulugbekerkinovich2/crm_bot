@@ -265,11 +265,11 @@ async def confirm_sending(message: types.Message, state: FSMContext):
                 elif reklama['type'] == types.ContentType.VIDEO:
                     await bot.send_video(user['chat_id'], reklama['file_id'], caption=reklama['caption'])
                 await asyncio.sleep(1.2)
-                send_req.update_user(user['id'], user['chat_id'], user['firstname'], user['lastname'], user['bot_id'], user['username'], 'active', user['created_at'])
+                # send_req.update_user(user['id'], user['chat_id'], user['firstname'], user['lastname'], user['bot_id'], user['username'], 'active', user['created_at'])
                 count += 1
             except Exception as e:
                 failed += 1
-                send_req.update_user(user['id'], user['chat_id'], user['firstname'], user['lastname'], user['bot_id'], user['username'], 'blocked', user['created_at'])
+                # send_req.update_user(user['id'], user['chat_id'], user['firstname'], user['lastname'], user['bot_id'], user['username'], 'blocked', user['created_at'])
 
         await message.answer(
             f"📢 <b>Reklama natijasi</b>\n\n"
