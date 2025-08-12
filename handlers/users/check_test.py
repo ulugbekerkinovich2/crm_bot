@@ -138,61 +138,61 @@ def generate_filename(full_name):
     return f"{clean}_sertifikat"
 
 # 📱 User telefon raqamini yuborsa
-@dp.message_handler(lambda msg: msg.text.isdigit() and len(msg.text) >= 7)
-async def check_result(message: types.Message):
-    phone = message.text.strip()
+# @dp.message_handler(lambda msg: msg.text.isdigit() and len(msg.text) >= 7)
+# async def check_result(message: types.Message):
+#     phone = message.text.strip()
 
-    if not os.path.exists(DB_PATH):
-        return await message.answer("❌ Hali hech qanday natija mavjud emas.")
+#     if not os.path.exists(DB_PATH):
+#         return await message.answer("❌ Hali hech qanday natija mavjud emas.")
 
-    with open(DB_PATH, "r", encoding="utf-8") as f:
-        records = json.load(f)
+#     with open(DB_PATH, "r", encoding="utf-8") as f:
+#         records = json.load(f)
 
-    results = [r for r in records if str(r["phone"]).endswith(phone)]
+#     results = [r for r in records if str(r["phone"]).endswith(phone)]
 
-    if not results:
-        return await message.answer("❌ Siz kiritgan raqam bo‘yicha natija topilmadi.")
+#     if not results:
+#         return await message.answer("❌ Siz kiritgan raqam bo‘yicha natija topilmadi.")
 
-    for r in results:
-        # 🟢 Natija xabari
-        msg_text = (
-            f"📊 <b>Natijangiz</b>\n"
-            f"👤 <b>F.I.SH:</b> {r['full_name']}\n"
-            f"📚 <b>Yo’nalish:</b> {r['direction']}\n"
-            f"—" + "–" * 20 + "\n"
-            f"📘 <b>Ixtisoslik fanlari:</b>\n"
-            f"➊ {r['subject_1']} : {r['subject_1_corrects']}/30 = {r['subject_1_score']}/93\n"
-            f"➋ {r['subject_2']} : {r['subject_2_corrects']}/30 = {r['subject_2_score']}/63\n"
-            f"📙 <b>Majburiy fanlar:</b>\n"
-            f"📎 Ona tili, O'zbekiston Tarixi, Matematika : {r['mandatory_correct']}/30 = {r['mandatory_score']}/33\n"
-            f"—" + "–" * 20 + "\n"
-            f"🏁 <b>Umumiy natija:</b> {r['overall']}/189\n\n"
-            f"📢 <b>Rasman a'zo bo‘ling va yangiliklardan xabardor bo‘ling:</b>\n"
-            f"🌐 <a href='https://aifu.uz'>🌍 aifu.uz</a>\n"
-            f"📝 <a href='https://qabul.aifu.uz'>📥 qabul.aifu.uz</a>\n"
-            f"🤖 <a href='https://t.me/aifu_qabul_bot'>@aifu_qabul_bot</a>"
-        )
-        await message.answer(msg_text, parse_mode="HTML")
+#     for r in results:
+#         # 🟢 Natija xabari
+#         msg_text = (
+#             f"📊 <b>Natijangiz</b>\n"
+#             f"👤 <b>F.I.SH:</b> {r['full_name']}\n"
+#             f"📚 <b>Yo’nalish:</b> {r['direction']}\n"
+#             f"—" + "–" * 20 + "\n"
+#             f"📘 <b>Ixtisoslik fanlari:</b>\n"
+#             f"➊ {r['subject_1']} : {r['subject_1_corrects']}/30 = {r['subject_1_score']}/93\n"
+#             f"➋ {r['subject_2']} : {r['subject_2_corrects']}/30 = {r['subject_2_score']}/63\n"
+#             f"📙 <b>Majburiy fanlar:</b>\n"
+#             f"📎 Ona tili, O'zbekiston Tarixi, Matematika : {r['mandatory_correct']}/30 = {r['mandatory_score']}/33\n"
+#             f"—" + "–" * 20 + "\n"
+#             f"🏁 <b>Umumiy natija:</b> {r['overall']}/189\n\n"
+#             f"📢 <b>Rasman a'zo bo‘ling va yangiliklardan xabardor bo‘ling:</b>\n"
+#             f"🌐 <a href='https://aifu.uz'>🌍 aifu.uz</a>\n"
+#             f"📝 <a href='https://qabul.aifu.uz'>📥 qabul.aifu.uz</a>\n"
+#             f"🤖 <a href='https://t.me/aifu_qabul_bot'>@aifu_qabul_bot</a>"
+#         )
+#         await message.answer(msg_text, parse_mode="HTML")
 
-        # 🎓 Sertifikat faqat 70+ bo‘lganlar uchun
-        if float(r['overall']) >= 70:
-            await message.answer("🎉 Tabriklaymiz, sizga sertifikat taqdim etildi!")
+#         # 🎓 Sertifikat faqat 70+ bo‘lganlar uchun
+#         if float(r['overall']) >= 70:
+#             await message.answer("🎉 Tabriklaymiz, sizga sertifikat taqdim etildi!")
 
-            filename = generate_filename(r['full_name'])  # ex: Ulugbek_Erkinov_sertifikat
-            png_path = f"output/{filename}.png"
-            pdf_url = f"https://qr.misterdev.uz/media/files/{filename}.pdf"
+#             filename = generate_filename(r['full_name'])  # ex: Ulugbek_Erkinov_sertifikat
+#             png_path = f"output/{filename}.png"
+#             pdf_url = f"https://qr.misterdev.uz/media/files/{filename}.pdf"
 
-            # QR asosida sertifikat yaratish
-            generated_path = generate_certificate(r['full_name'], r['overall'], png_path, pdf_url)
-            if not generated_path:
-                return await message.answer("❌ Sertifikat yaratishda xatolik.")
+#             # QR asosida sertifikat yaratish
+#             generated_path = generate_certificate(r['full_name'], r['overall'], png_path, pdf_url)
+#             if not generated_path:
+#                 return await message.answer("❌ Sertifikat yaratishda xatolik.")
 
-            # Yuklash
-            upload_result = upload_certificate(png_path, filename)
-            if upload_result:
-                await message.answer_document(InputFile(upload_result["pdf_path"]))
-                # await message.answer(f"📎 QR havola: {upload_result['qr_url']}")
-            else:
-                await message.answer("❌ Yuklashda xatolik.")
+#             # Yuklash
+#             upload_result = upload_certificate(png_path, filename)
+#             if upload_result:
+#                 await message.answer_document(InputFile(upload_result["pdf_path"]))
+#                 # await message.answer(f"📎 QR havola: {upload_result['qr_url']}")
+#             else:
+#                 await message.answer("❌ Yuklashda xatolik.")
 
-        # JSONdan o‘chirish
+#         # JSONdan o‘chirish

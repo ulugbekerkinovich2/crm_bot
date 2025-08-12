@@ -15,8 +15,11 @@ branch_uz = ReplyKeyboardMarkup(
             KeyboardButton(text='Toshkent shahar, Qorasaroy filiali'),
             KeyboardButton(text='Toshkent viloyati, Chirchiq filiali'),
         ],
+        # [
+        #     KeyboardButton(text="📃Test natijasini bilish"),
+        # ],
         [
-            KeyboardButton(text="📃Test natijasini bilish"),
+            KeyboardButton(text="🎓 Grant uchun ro'yhatdan o'tish"),
         ]
     ],
     resize_keyboard=True

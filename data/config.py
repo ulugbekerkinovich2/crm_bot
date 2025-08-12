@@ -21,6 +21,8 @@ origin= env.str("origin")
 
 
 ic(origin)
+origin_grant = env.str("origin_grant")
+ic(origin_grant)
 university_name_uz = env.str("university_name_uz")
 university_name_ru = env.str("university_name_ru")
 crm_django_domain = env.str("crm_django_domain")

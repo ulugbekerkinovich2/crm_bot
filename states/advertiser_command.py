@@ -16,3 +16,9 @@ class User(StatesGroup):
 # class User(StatesGroup):
 #     reklama_admin_video_or_image_all = State()
 #     confirm_reklama = State()
+
+
+class GranState(StatesGroup):
+    direction = State()
+    after_lang = State()
+    language = State()

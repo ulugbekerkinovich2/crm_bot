@@ -23,24 +23,24 @@ async def bot_start(message: types.Message, state: FSMContext):
     date = message.date.strftime("%Y-%m-%d %H:%M:%S")
 
     # Foydalanuvchilar va botlar ro‘yxatini olish
-    # all_bots = send_req.get_all_bots()
-    # all_users = send_req.get_all_users()
-    # ic(all_users)
-    # ic(all_bots)
-    # if chat_id in admin_ids:
-    #     await message.answer(f"Admin Reklama paneliga xush kelibsiz, {message.from_user.full_name}!", reply_markup=adminMenuKeyBoardButton.adminMenu)
-    #     return
-    # elif chat_id not in all_users:
-    #     ic('user not found, saving...')
-    #     for bot in all_bots:
-    #         if bot["api_key"] == BOT_TOKEN:
-    #             bot_id = bot["id"]
-    #             ic('matched bot, saving user...')
-                # send_req.save_chat_id(chat_id, firstname, lastname, bot_id, username, 'active')
+    all_bots = send_req.get_all_bots()
+    all_users = send_req.get_all_users()
+    # ic(len(all_users))
+    # ic(len(all_bots))
+    if chat_id in admin_ids:
+        await message.answer(f"Admin Reklama paneliga xush kelibsiz, {message.from_user.full_name}!", reply_markup=adminMenuKeyBoardButton.adminMenu)
+        return
+    elif chat_id not in all_users:
+        ic('user not found, saving...')
+        for bot in all_bots:
+            if bot["api_key"] == BOT_TOKEN:
+                bot_id = bot["id"]
+                ic('matched bot, saving user...')
+                send_req.save_chat_id(chat_id, firstname, lastname, bot_id, username, 'active')
                 
         # await message.answer(f"Salom, {message.from_user.full_name}! {chat_id}")
-    # else:
-    #     await message.answer(f"Siz ro'yxatdan o'tgansiz, {message.from_user.full_name}!")
+    else:
+        await message.answer(f"Siz ro'yxatdan o'tgansiz, {message.from_user.full_name}!")
 
     # FSM holatini olish va yangilash
     all_data_state = await state.get_data()
@@ -140,9 +140,10 @@ async def handle_new_user(message, state, date, username):
 
     await message.answer(
         f"🇺🇿 <b>Assalomu aleykum, {message.from_user.full_name.capitalize()}!</b>\n"
-        f"Bu <i>{university_name_uz}</i> qabul boti. Tilni tanlang.\n\n"
-        f"🇷🇺 <b>Здравствуйте, {message.from_user.full_name.capitalize()}!</b>\n"
-        f"Это бот приемной комиссии <i>{university_name_ru}</i>. Выберите язык.",
+        f"Bu <i>{university_name_uz}</i> qabul boti.",
+        # "Tilni tanlang.\n\n",
+        # f"🇷🇺 <b>Здравствуйте, {message.from_user.full_name.capitalize()}!</b>\n"
+        # f"Это бот приемной комиссии <i>{university_name_ru}</i>. Выберите язык.",
         parse_mode='HTML',
         reply_markup=registerKeyBoardButton.branch_uz
         # reply_markup=registerKeyBoardButton.language

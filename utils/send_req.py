@@ -7,15 +7,22 @@ import aiofiles
 from datetime import datetime
 import pytz
 import random
-from data.config import  origin, crm_django_domain, username, password
+from data.config import  origin, crm_django_domain, username, password, origin_grant
 from data.config import domain_name as host
 from utils.logs import log_to_json
 import aiohttp
-# <<<<<<< added_functions
+
+import requests
+from icecream import ic
+import asyncio
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+# from utils.send_req import default_header
 ic(origin, 'oldin')
 # =======
 ic(origin, 'shu')
-# >>>>>>> aifu_bot
 # origin = 'admission.uess.uz'
 # origin = 'admission.tiiu.uz'
 # ic(origin, 'keyingi')
@@ -32,10 +39,11 @@ default_header = {
 }
 ic(origin)
 
-async def check_number(phone):
+async def check_number(phone, is_grant_origin=False):
     url = f'https://{host}/v1/auth/check'
     data = {"phone": phone}
-
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=data) as response:
             if response.status == 201:
@@ -50,127 +58,66 @@ async def check_number(phone):
 # print(check_number('+998998359015').json())
 
 
-async def user_register(number):
+async def user_register(number, is_grant_origin=False):
     url = f"https://{host}/v1/auth/register"
     body = {
         "phone": number
     }
-    # response = requests.post(url, json=body, headers=default_header)
-    # return response
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=body, headers=default_header) as response:
-            # ic(response.status)
             if response.status == 201:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'user_register',
-                #     'details': {
-                #         'phone': number,
-                #         'status_code': response.status,
-                #         'data': await response.json()
-                #     }
-                # }
-                # log_to_json(log_data)
                 json_data = await response.json()
                 return json_data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'user_register',
-                #     'details': {
-                #         'phone': number,
-                #         'status_code': response.status,
-                #         'data': await response.json()
-                #     }
-                # }
-                # log_to_json(log_data)
                 error_message = await response.json()
                 return {'error': f'Failed to user register, status_code: {response.status}, details: {error_message}'}
 
-# user_login('+998998359015')
 
-async def user_verify(secret_code, phone):
+
+async def user_verify(secret_code, phone, is_grant_origin=False):
     url = f"https://{host}/v1/auth/verify"
     body = {
         'phone': phone,
         "code": secret_code
     }
-    # ic(body)
+
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=body, headers=default_header) as response:
             data = await response.json()
-            # ic(data)
             if response.status == 200:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'user_verify',
-                #     'details': {
-                #         'phone': phone,
-                #         'status_code': response.status,
-                #         'data': data
-                #     }
-                # }
-                # log_to_json(log_data)
                 json_data = await response.json()  # This should be a dictionary
                 return {'data': json_data, 'status_code': response.status}  # Return a dictionary
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'user_verify',
-                #     'details': {
-                #         'phone': phone,
-                #         'status_code': response.status,
-                #         'data': data
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'error': "Failed to verify", 'status_code': response.status}
 
 
     
-# user_verify(175654, '+998998359015')
 
-async def user_login(phone):
+
+async def user_login(phone, is_grant_origin=False):
     url = f"https://{host}/v1/auth/login"
     body = {
         'phone': phone
     }
-    # ic(body)
-    # response = requests.post(url, json=body, headers=default_header)
-    # print(response.json())
-    # return response
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 200:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'user_login',
-                #     'details': {
-                #         'phone': phone,
-                #         'status_code': response.status,
-                #         'data': await response.json()
-                #     }
-                # }
-                # log_to_json(log_data)
                 json_data = await response.json() 
                 return {'data': json_data, 'status_code': response.status} 
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'user_login',
-                #     'details': {
-                #         'phone': phone,
-                #         'status_code': response.status,
-                #         'data': await response.json()
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'error': "Failed to verify", 'status_code': response.status}
             
-# user_login('+998998359015')
 
-async def application_form_info(birth_date, document, token):
+async def application_form_info(birth_date, document, token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f'https://{host}/v1/application-forms/info'
     default_header['Authorization'] = f'Bearer {token}'
     body = {
@@ -191,14 +138,11 @@ async def application_form_info(birth_date, document, token):
             else:
                 error_data = await response.json()
                 return {'error': "Failed to verify", 'status_code': response.status, 'data': error_data}
-                # response = requests.post(url, json=body, headers=default_header)
-    # pprint(response.json())
-    # return response
-# a = application_form_info('2002-04-28', 'AB9666486', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQ5LCJmaXJzdF9uYW1lIjoiVUxVR-KAmEJFSyIsImxhc3RfbmFtZSI6IkVSS0lOT1YiLCJiaXJ0aF9kYXRlIjpudWxsLCJwaG9uZSI6Iis5OTg5OTgzNTkwMTUiLCJyb2xlIjoidXNlciIsImF2YXRhciI6ImF2YXRhci9jNjg5MmQ0OC1mZjQ2LTQ1MjctYmVkMi05MTgzMGJkZDk1ZDcuanBnIiwiZW1haWwiOm51bGwsImlzX3ZlcmlmeSI6dHJ1ZSwiY3JlYXRlZF9hdCI6IjIwMjQtMDMtMTlUMDQ6NDA6NTMuMzkxWiIsInVwZGF0ZWRfYXQiOiIyMDI0LTAzLTE5VDA0OjQwOjUzLjM5MVoiLCJ1bml2ZXJzaXR5SWQiOjIsImlhdCI6MTcxMzA4NTcxMiwiZXhwIjoxNzEzMTA3MzEyfQ.lM2EPgio7D9WnDIWZh-HgJa1J0cu6iyk5gNed3x3puM')
 
-# ic(a)
-
-def application_form(token,birth_date,birth_place,citizenship,extra_phone,first_name,gender,last_name,phone,photo,pin,serial_number,src,third_name):
+def application_form(token,birth_date,birth_place,citizenship,extra_phone,first_name,gender,last_name,phone,photo,pin,serial_number,src,third_name,
+                      is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     try:
         url = f"https://{host}/v1/application-forms"
         default_header['Authorization'] = f'Bearer {token}'
@@ -217,30 +161,17 @@ def application_form(token,birth_date,birth_place,citizenship,extra_phone,first_
             'src': src,
             'third_name': third_name
         }
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'application_form',
-        #     'details': {
-        #         'body': body
-        #     }
-        # }
-        # log_to_json(log_data)
         response = requests.post(url, headers=default_header, json=body)
         return response
     except:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'application_form',
-        #     'details': {
-        #         'body': body
-        #     }
-        # }
-        # log_to_json(log_data)
         response = requests.post(url, headers=default_header, json=body)
         return response
 
 
-def application_form_manual(token,birth_date,birth_place,email,extra_phone,first_name,gender,last_name,phone,photo,pin,serial_number,src,third_name):
+def application_form_manual(token,birth_date,birth_place,email,extra_phone,first_name,gender,last_name,phone,photo,pin,serial_number,src,third_name,
+                            is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f'Bearer {token}'
     body = {
@@ -272,18 +203,12 @@ def application_form_manual(token,birth_date,birth_place,email,extra_phone,first
         data = response.json()
         return {'data': data, 'status_code': response.status_code}
     else:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'application_form_manual',
-        #     'details': {
-        #         'body': body
-        #     }
-        # }
-        # log_to_json(log_data)
         data = response.json() 
         return {'data': data, 'error': 'Failed to fetch data', 'status_code': response.status_code}
 
-async def directions(token):
+async def directions(token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f'https://{host}/v1/directions'
     default_header['Authorization'] = f'Bearer {token}'
     async with aiohttp.ClientSession() as session:
@@ -295,9 +220,9 @@ async def directions(token):
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 async def applicants(token,is_transfer_student,chat_id_user, degree_id, direction_id, education_language_id, education_type_id, work_experience_document=None,
-                     is_second_specialty=False, branch=None,is_master=None, referral_source='telegram'):
-
-    # print(token,is_transfer_student,chat_id_user,degree_id, direction_id, education_language_id, education_type_id, work_experience_document,branch,is_master,is_second_specialty, referral_source)
+                     is_second_specialty=False, branch=None,is_master=None, referral_source='telegram', is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/applicants"
     headers = default_header.copy()
     headers['Authorization'] = f'Bearer {token}'
@@ -319,29 +244,52 @@ async def applicants(token,is_transfer_student,chat_id_user, degree_id, directio
         async with session.post(url, headers=headers, json=body) as response:
             # ic(173, response.status, response.text)
             if response.status == 201:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'applicants',
-                #     'details': {
-                #         'body': body,
-                #         'status_code': response.status,
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 return response.status
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'applicants',
-                #     'details': {
-                #         'body': body,
-                #         'status_code': response.status
-                #     }
-                # }
-                # log_to_json(log_data)
-                # Handling errors by returning a simple error message or dict
                 return {'error': response.text, 'status_code': response.status}
+
+
+def grant_applicant(
+    token: str,
+    degree_id: int,
+    direction_id: int,
+    education_language_id: int,
+    education_type_id: int,
+    is_grant: bool = True
+) -> dict:
+    url = "https://crmapi.mentalaba.uz/v1/applicants"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Origin": origin_grant,
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "degree_id": degree_id,
+        "direction_id": int(direction_id),
+        "education_language_id": int(education_language_id),
+        "education_type_id": int(education_type_id),
+        "is_grant": is_grant
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+
+        if response.status_code == 200:
+            return response.json()
+        ic(response.text)
+        # Agar xato bo‘lsa
+        return {
+            "error": f"API {response.status_code} qaytardi",
+            "details": response.text
+        }
+
+    except requests.exceptions.RequestException as e:
+        return {
+            "error": "Tarmoq xatosi yoki API ulanmayapti",
+            "details": str(e)
+        }
+
 
 def update_applicant(token, degree_id, direction_id, education_language_id, education_type_id, applicant_id):
     try:
@@ -357,31 +305,13 @@ def update_applicant(token, degree_id, direction_id, education_language_id, educ
             'education_type_id': education_type_id
         }
         response = requests.patch(url, json=body, headers=headers)
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'update_applicant',
-        #     'details': {
-        #         'body': body,
-        #         'status_code': response.status,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return response.json()
     except:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'update_applicant',
-        #     'details': {
-        #         'body': body,
-        #         'status_code': response.status,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-async def my_applications(token):
+async def my_applications(token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/applicants/my-application"
     default_header['Authorization'] = f'Bearer {token}'
     async with aiohttp.ClientSession() as session:
@@ -397,7 +327,9 @@ async def my_applications(token):
                 return {'error': 'Failed to fetch data', 'status_code': response.status, 'details': await response.text()}
  
 
-def reset_password(phone, token):
+def reset_password(phone, token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     try:
         url = f"https://{host}/v1/auth/resend-verify-code"
         default_header['Authorization'] = f'Bearer {token}'
@@ -429,121 +361,43 @@ def reset_password(phone, token):
         # log_to_json(log_data)
         return {'error': 'Failed to fetch data', 'status_code': response.status}
 
-def educations(token):
+def educations(token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms/educations/"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     if response.status_code == 200:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'educations',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return response
     else:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'educations',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return 
 
-
-
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.get(url, headers=default_header) as response:
-    #         if response.status == 200:
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
-
-
-def regions(token):
+def regions(token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms/regions"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     if response.status_code == 200:
-    #     log_data = {
-    #         'time': datetime.utcnow().isoformat(),
-    #         'event': 'regions',
-    #         'details': {
-    #             'status_code': response.status_code,
-    #             'data': response.json()
-    #         }
-    #     }
-    #     log_to_json(log_data)
         return response
     else:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'regions',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return 
 
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.get(url, headers=default_header) as response:
-    #         if response.status == 200:
-    #             data = await response.json()  # Read and parse the JSON response
-    #             return data
-    #         else:
-    #             # Handling errors by returning a simple error message or dict
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
-
-
-def districts(token, district_id):
+def districts(token, district_id, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms/districts/{district_id}"
     default_header['Authorization'] = f'Bearer {token}'
     response = requests.get(url, headers=default_header)
     if response.status_code == 200:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'districts',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return response
     else:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'districts',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return 
 
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.get(url, headers=default_header) as response:
-    #         if response.status == 200:
-    #             data = await response.json()  # Asynchronously fetch the data
-    #             return data
-    #         else:
-    #             # It's a good practice to handle HTTP errors
-    #             return {'error': 'Failed to fetch data', 'status_code': response.status}
-
-
 #TODO bu ishlamidi
-def upload_file(token, file_name, associated_with, usage): 
+def upload_file(token, file_name, associated_with, usage, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant 
     # print('uuuu', file_name)
     url = f"https://{host}/v1/files/upload"
     script_directory_path = os.path.dirname(os.path.abspath(__file__))
@@ -561,28 +415,7 @@ def upload_file(token, file_name, associated_with, usage):
             'associated_with': (None, associated_with),
             'usage': (None, usage)
         }
-
-    # file1 = open(full_image_path, 'rb')
-    # files = {
-    #     'file': (full_image_path, file1, 'image/jpeg'),
-    #     'associated_with': (None, f'{associated_with}'),
-    #     'usage': (None, f'{usage}')
-    #     }
         response = requests.post(url, headers=default_header, files=files)
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'upload_file',
-        #     'details': {
-        #         'status_code': response.status,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
-    # file1.close()
-    # print(response.json())
-    # a = response.json()
-    # print(a.get('path', ''))
-    # ic(full_image_path)
     return response
 
 
@@ -593,7 +426,10 @@ def upload_file(token, file_name, associated_with, usage):
 
 
 async def application_forms(token,birth_date,birth_place,citizenship,extra_phone,
-                      first_name,last_name, gender,phone,photo,pin,serial_number,src,third_name):
+                      first_name,last_name, gender,phone,photo,pin,serial_number,src,third_name,
+                      is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f'Bearer {token}'
     body = {
@@ -611,39 +447,20 @@ async def application_forms(token,birth_date,birth_place,citizenship,extra_phone
         'src': src,
         'third_name': third_name
     }
-    # response = requests.post(url, headers=default_header, json=body)
-    # return response
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 201:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_forms',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': response.json(),
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 data = await response.json()
                 return data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_forms',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': response.json(),
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
 async def application_forms_transfer(token,country_id, direction_name,
-                                     institution_name, transcript_file, which_course_now):
+                                     institution_name, transcript_file, which_course_now,
+                                     is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f'Bearer {token}'
     body = {
@@ -655,109 +472,50 @@ async def application_forms_transfer(token,country_id, direction_name,
             'which_course_now': which_course_now
         }
     }
-    ic(body)
-    # response = requests.post(url, headers=default_header, json=body)
-    # return response
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=default_header, json=body) as response:
             if response.status == 201:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_forms',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': response.json(),
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 data = await response.json()
                 return data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_forms',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': response.json(),
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
-async def application_forms_me(token):
+async def application_forms_me(token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms/me"
     default_header['Authorization'] = f'Bearer {token}'
-    # response = requests.get(url, headers=default_header)
 
     # return response
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
                 data = await response.json()
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_forms_me',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 return data
             else:
                 data = await response.json()
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_forms_me',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
-async def application_forms_me_new(token):
+async def application_forms_me_new(token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms/me"
     default_header['Authorization'] = f'Bearer {token}'
-    # response = requests.get(url, headers=default_header)
 
     # return response
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=default_header) as response:
             if response.status == 200:
                 data = await response.json()
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_forms_me_new',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'data': data, 'status_code': response.status} #data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'application_forms_me',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'token': token
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'error': 'Failed to post request', 'status_code': response.status}
 
 
-# a =application_forms_me('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQ5LCJmaXJzdF9uYW1lIjoiVUxVR-KAmEJFSyIsImxhc3RfbmFtZSI6IkVSS0lOT1YiLCJiaXJ0aF9kYXRlIjpudWxsLCJwaG9uZSI6Iis5OTg5OTgzNTkwMTUiLCJyb2xlIjoidXNlciIsImF2YXRhciI6ImF2YXRhci9lM2Q0OWJmNi0zNGExLTRhNzktYjZlNS04MWU1OTg3MDRkNWIuanBnIiwiZW1haWwiOm51bGwsImlzX3ZlcmlmeSI6dHJ1ZSwiY3JlYXRlZF9hdCI6IjIwMjQtMDMtMTlUMDQ6NDA6NTMuMzkxWiIsInVwZGF0ZWRfYXQiOiIyMDI0LTAzLTE5VDA0OjQwOjUzLjM5MVoiLCJ1bml2ZXJzaXR5SWQiOjIsImlhdCI6MTcxMjA0OTY5OCwiZXhwIjoxNzEyMDcxMjk4fQ.TnhaeCx0OPYgMLwaonkFDWOt_cqZlkzpPieJWN5tL3g')
-# pprint(a.json())
-
-
-async def delete_profile(token):
+async def delete_profile(token, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms/delete-profile"
     headers = default_header.copy()
     headers['Authorization'] = f'Bearer {token}'
@@ -765,63 +523,25 @@ async def delete_profile(token):
         async with session.delete(url, headers=headers) as response:
             if response.status == 200:
                 try:
-                    # Attempt to decode JSON regardless of Content-Type header
-                    # log_data = {
-                    #     'time': datetime.utcnow().isoformat(),
-                    #     'event': 'delete_profile',
-                    #     'details': {
-                    #         'status_code': response.status,
-                    #         'data': response.json()
-                    #     }
-                    # }
-                    # log_to_json(log_data)
                     return response.status
                 except aiohttp.client_exceptions.ContentTypeError:
-                    # log_data = {
-                    #     'time': datetime.utcnow().isoformat(),
-                    #     'event': 'delete_profile',
-                    #     'details': {
-                    #         'status_code': response.status,
-                    #         'data': response.text
-                    #     }
-                    # }
-                    # log_to_json(log_data)
-                    # Handle the case where JSON decoding fails
                     return {'error': 'Response content type is not application/json', 'status_code': response.status}
             else:
                 return {'error': 'Failed to delete profile', 'status_code': response.status}
 
-async def return_token_use_refresh(refreshToken):
+async def return_token_use_refresh(refreshToken, is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/auth/refresh"
     body = {
         'refreshToken': refreshToken,
     }
-    # response = requests.post(url, json=body, headers=default_header)
-    # return response
     async with aiohttp.ClientSession() as session:
         async with session.post(url, body=body, headers=default_header) as response:
             if response.status == 201:
                 data = await response.json()
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'return_token_use_refresh',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': data
-                #     }
-                # }
-                # log_to_json(log_data)
                 return data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'return_token_use_refresh',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': response.text
-                #     }
-                # }
-                log_to_json(log_data)
                 return {'error': response.text, 'status_code': response.status}
 
 def upload_sertificate(token, filename, f_type):
@@ -837,35 +557,10 @@ def upload_sertificate(token, filename, f_type):
             'certification_type': f_type,
             'file': filename
         }
-        # async with aiohttp.ClientSession() as session:
-        #     async with session.post(url, headers=headers, data=body) as response:
-        #         if response.status == 201:
-        #             data = await response.json()
-        #             return data
-        #         else:
-        #             return {'error': 'Failed to upload sertificate', 'status_code': response.status}
         response = requests.post(url, json=body, headers=headers)
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'upload_sertificate',
-        #     'details': {
-        #         'status_code': response.status,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return response.json()
 
     except:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'upload_sertificate',
-        #     'details': {
-        #         'status_code': response.status,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return {'error': 'Failed to upload sertificate', 'status_code': 500}
 # u_s = upload_sertificate("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQ5LCJmaXJzdF9uYW1lIjoiVUxVR-KAmEJFSyIsImxhc3RfbmFtZSI6IkVSS0lOT1YiLCJiaXJ0aF9kYXRlIjpudWxsLCJwaG9uZSI6Iis5OTg5OTgzNTkwMTUiLCJyb2xlIjoidXNlciIsImF2YXRhciI6ImF2YXRhci9jMjU3MmI1NS02MzA3LTQ3YTEtOGYzNy03NjZjMGFiYTE3ZjIuanBnIiwiZW1haWwiOm51bGwsImlzX3ZlcmlmeSI6dHJ1ZSwiY3JlYXRlZF9hdCI6IjIwMjQtMDMtMTlUMDQ6NDA6NTMuMzkxWiIsInVwZGF0ZWRfYXQiOiIyMDI0LTAzLTE5VDA0OjQwOjUzLjM5MVoiLCJ1bml2ZXJzaXR5SWQiOjIsImlhdCI6MTcxMzAyMjI3OCwiZXhwIjoxNzEzMDQzODc4fQ.v5vh5-y6W8jjdVS8jcUpTW1PO5YUBTTRDzWvt9qOxHE",
 #                         'certificate/3b2167c7-28d2-4d0b-b69d-87da4d4db3c1.jpg',
@@ -874,7 +569,10 @@ def upload_sertificate(token, filename, f_type):
 
 
 
-def application_forms_for_edu(token,  district_id, education_id, file_, institution_name, region_id,src='manually'):
+def application_forms_for_edu(token,  district_id, education_id, file_, institution_name, region_id,src='manually',
+                              is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     url = f"https://{host}/v1/application-forms"
     default_header['Authorization'] = f"Bearer {token}"
     body = {
@@ -890,37 +588,14 @@ def application_forms_for_edu(token,  district_id, education_id, file_, institut
     }
     response = requests.post(url, json=body, headers=default_header)
     if response.status_code == 201:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'application_forms_for_edu',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return response
     else:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'application_forms_for_edu',
-        #     'details': {
-        #         'status_code': response.status_code,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return {'error': 'Failed to create application', 'status_code': response.status}
 
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, header=default_header, json=body) as response:
-    #         if response.status == 201:
-    #             data = await response
-    #             return data
-    #         else:
-    #             return {'error': 'Failed to create application', 'status_code': response.status}
-
-def application_forms_for_personal_data(token,  birth_date, birth_place, citizenship, extra_phone, first_name,gender,last_name,phone,serial_number,third_name):
+def application_forms_for_personal_data(token,  birth_date, birth_place, citizenship, extra_phone, first_name,gender,last_name,phone,serial_number,third_name,
+                                         is_grant_origin=False):
+    if is_grant_origin:
+        default_header['Origin'] = origin_grant
     try:
         url = f"https://{host}/v1/application-forms"
         default_header['Authorization'] = f"Bearer {token}"
@@ -938,27 +613,9 @@ def application_forms_for_personal_data(token,  birth_date, birth_place, citizen
             'third_name': third_name
         }
         response = requests.post(url, json=body, headers=default_header)
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'application_forms_for_personal_data',
-        #     'details': {
-        #         'status_code': response.status,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
         return response
-    except:
-        # log_data = {
-        #     'time': datetime.utcnow().isoformat(),
-        #     'event': 'application_forms_for_personal_data',
-        #     'details': {
-        #         'status_code': response.status,
-        #         'data': response.json()
-        #     }
-        # }
-        # log_to_json(log_data)
-        return {'error': 'Failed to create application', 'status_code': 500}
+    except Exception as e:
+        return {'error': f'Failed to create application: {e}', 'status_code': 500}
 
 
 async def djtoken(username, password):
@@ -1217,26 +874,8 @@ async def bot_usage(token, start_time, end_time):
         async with session.post(url, json=body, headers=header) as response:
             if response.status == 200:
                 data = await response.json()
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'bot_usage',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': data
-                #     }
-                # }
-                # log_to_json(log_data)
                 return data
             else:
-                # log_data = {
-                #     'time': datetime.utcnow().isoformat(),
-                #     'event': 'bot_usage',
-                #     'details': {
-                #         'status_code': response.status,
-                #         'data': response.json()
-                #     }
-                # }
-                # log_to_json(log_data)
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
 
 
@@ -1295,7 +934,87 @@ async def countries(token):
                 return data
             else:
                 return {'error': 'Failed to fetch data', 'status_code': response.status}
-            
+            import aiohttp
+
+
+
+
+async def grant_directions(token, degree_id=1, education_type_id=1, admission_status="active", education_language_id=1, timeout_sec=10):
+    BASE_URL = "https://crmapi.mentalaba.uz/v1/admissions/filter/select-box/directions"
+    params = {
+        "degree_id": degree_id,
+        "education_type_id": education_type_id,
+        "admission_status": admission_status,
+        "education_language_id": education_language_id
+    }
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    url = BASE_URL
+
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout_sec)) as session:
+            async with session.get(url, headers=headers, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    logger.info("Successfully fetched grant directions.")
+                    return data
+                else:
+                    logger.error(f"Failed to fetch data. Status: {response.status}")
+                    return {
+                        "error": "Failed to fetch data",
+                        "status_code": response.status
+                    }
+    except asyncio.TimeoutError:
+        logger.error("Request timed out.")
+        return {"error": "Request timed out"}
+    except aiohttp.ClientError as e:
+        logger.error(f"HTTP request failed: {e}")
+        return {"error": str(e)}
+    except Exception as e:
+        logger.exception("Unexpected error occurred.")
+        return {"error": f"Unexpected error: {str(e)}"}
+
+
+
+
+
+async def grant_languages(token, degree_id=1, education_type_id=1, admission_status="active", timeout_sec=10):
+    BASE_LANGUAGES_URL = "https://crmapi.mentalaba.uz/v1/admissions/filter/select-box/education_languages"
+    
+    params = {
+        "degree_id": degree_id,
+        "education_type_id": education_type_id,
+        "admission_status": admission_status
+    }
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout_sec)) as session:
+            async with session.get(BASE_LANGUAGES_URL, headers=headers, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    logger.info("Successfully fetched education languages.")
+                    return data
+                else:
+                    logger.error(f"Failed to fetch data. Status: {response.status}")
+                    return {
+                        "error": "Failed to fetch data",
+                        "status_code": response.status
+                    }
+    except asyncio.TimeoutError:
+        logger.error("Request timed out.")
+        return {"error": "Request timed out", "status_code": 408}
+    except aiohttp.ClientError as e:
+        logger.error(f"HTTP request failed: {e}")
+        return {"error": str(e), "status_code": 500}
+    except Exception as e:
+        logger.exception("Unexpected error occurred.")
+        return {"error": f"Unexpected error: {str(e)}", "status_code": 500}
+
+
 def return_secret_code():
     random_code = random.randint(100000, 999999)
     return random_code
@@ -1319,8 +1038,6 @@ def escape_markdown2(text):
 
 
 
-import requests
-from icecream import ic
 
 
 def save_chat_id(chat_id,firstname, lastname,bot_id,username,status):
