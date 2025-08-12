@@ -835,6 +835,7 @@ async def info(message: types.Message, state: FSMContext):
     ic('register_user', register_user, 'transfer_user', transfer_user)
     if grant_user:
         await GranState.language.set()
+        await message.answer("Davom etish uchun davom etish tugmasini bosing", reply_markup=enter_button)
     elif register_user:
         educations_response = send_req.educations(token, is_grant_origin=grant_user)
         educations = educations_response.json()
