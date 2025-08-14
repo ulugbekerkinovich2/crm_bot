@@ -501,7 +501,7 @@ async def document(message: types.Message, state: FSMContext):
         await message.answer(error_document)
         
         # Wait for a new user message as a response
-        new_document = await message.answer("Passport seriyasini namunadagidek kiriting\nNamuna: AB1234567:")
+        new_document = await message.answer("Passport seriyasini namunadagidek kiriting\nNamuna: AB1234567")
         document = (await dp.bot.wait_for("message")).text.strip().upper()
         document_serial = document[:2]
         document_number = document[2:]
