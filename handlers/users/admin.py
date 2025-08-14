@@ -122,7 +122,7 @@ async def direction_selected(call: types.CallbackQuery, state: FSMContext):
     res = grant_applicant(token, 1, direction_id, language_id, 1)
     ic(res)
 
-    payment_link = "https://my.click.uz/services/pay/7A3CC76D8DB2457F92D0FB0EE0753025"
+    payment_link = "https://my.click.uz/services/pay?service_id=77482&merchant_id=27574&amount=50000&transaction_param=CRM75145&return_url=https://grant.aifu.uz/profile/application-status"
     text = (
         "💳 <b>Imtihon uchun to'lov</b>\n"
         "💵 To'lov summasi: <b>50 000 UZS</b>\n\n"
