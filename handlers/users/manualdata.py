@@ -148,7 +148,7 @@ async def get_document(message: types.Message, state: FSMContext):
             await message.answer(error_document)
             
             # Wait for a new user message as a response
-            new_document = await message.answer("Iltimos, passport seriyasini namunadagidek kiriting\nNamuna: AB1234567:")
+            new_document = await message.answer("Iltimos, passport seriyasini namunadagidek kiriting\nNamuna: AB1234567")
             new_document = await dp.bot.wait_for("message", lambda msg: msg.chat.id == message.chat.id)
             document = new_document.text.strip().upper()
             document_serial = document[:2]
