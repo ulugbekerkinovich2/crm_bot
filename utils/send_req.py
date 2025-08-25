@@ -1077,21 +1077,21 @@ def get_all_bots():
 
 def get_all_users():
     url = "https://ads.misterdev.uz/users/get"
-    response = requests.get(url)
-    # response = [
-    # {
-    #     "id": 30927,
-    #     "firstname": "Ulugbek",
-    #     "lastname": "Erkinov",
-    #     "chat_id": "935920479",
-    #     "username": "@status_developer",
-    #     "created_at": None,
-    #     "status": "active",
-    #     "bot_id": 6
-    # }
-    # ]
-    # return response
-    return response.json()
+    # response = requests.get(url)
+    response = [
+    {
+        "id": 30927,
+        "firstname": "Ulugbek",
+        "lastname": "Erkinov",
+        "chat_id": "935920479",
+        "username": "@status_developer",
+        "created_at": None,
+        "status": "active",
+        "bot_id": 6
+    }
+    ]
+    return response
+    # return response.json()
 
 # data__ = get_all_users()
 # with open('user_bot.json', 'w', encoding='utf-8') as f:
