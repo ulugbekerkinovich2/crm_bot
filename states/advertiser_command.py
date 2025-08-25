@@ -22,3 +22,7 @@ class GranState(StatesGroup):
     direction = State()
     after_lang = State()
     language = State()
+
+class NewAdsState(StatesGroup):
+    post_url = State()
+    confirm_post = State()
